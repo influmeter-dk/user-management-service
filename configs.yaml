@@ -1,0 +1,2 @@
+db_address: todo_add_db_path_here
+db_credentials_path: ./secret/db.yaml
