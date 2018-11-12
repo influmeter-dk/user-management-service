@@ -12,11 +12,6 @@ import (
 // TODO: add methods interfacing database here - this is an abstraction layer to the DB
 
 func CreateUser(user User) (id string, err error) {
-	if len(user.Password) == 0 {
-		err = errors.New("password hash is missing")
-		return
-	}
-
 	_, err = FindUserByEmail(user.Email)
 	if err == nil {
 		err = errors.New("user already exists")

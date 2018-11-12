@@ -229,6 +229,7 @@
   analyzer-version = 1
   input-imports = [
     "github.com/gin-gonic/gin",
+    "github.com/mongodb/mongo-go-driver/bson",
     "github.com/mongodb/mongo-go-driver/bson/objectid",
     "github.com/mongodb/mongo-go-driver/mongo",
     "golang.org/x/crypto/bcrypt",
