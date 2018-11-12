@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"io/ioutil"
 	"log"
 
@@ -20,6 +22,7 @@ type dbCredentials struct {
 }
 
 var dbClient *mongo.Client
+var userCollection *mongo.Collection
 var conf config
 
 func readConfig() {
@@ -52,30 +55,75 @@ func dbInit() {
 		log.Fatal(err)
 	}
 
-	log.Println(dbCreds)
-	log.Println(conf.DbAddress)
+	// mongodb+srv://user-management-service:<PASSWORD>@influenzanettestdbcluster-pwvbz.mongodb.net/test?retryWrites=true
+	address := fmt.Sprintf(`mongodb+srv://%s:%s@%s`, dbCreds.Username, dbCreds.Password, conf.DbAddress)
 
-	/*
-		var err error
-		dbClient, err = mongo.NewClient("mongodb://testttt:bar@localhost:27017")
-		if err != nil {
-			log.Fatal(err)
-		}
+	dbClient, err = mongo.NewClient(address)
+	if err != nil {
+		log.Fatal(err)
+	}
 
-		context.Background()
-	*/
+	err = dbClient.Connect(context.Background())
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	userCollection = dbClient.Database("users").Collection("users")
 }
 
 func init() {
 	readConfig()
 	dbInit()
 	gin.SetMode(gin.ReleaseMode)
-
 }
 
 func main() {
-	log.Println(conf.DbCredentialsPath)
 	log.Println("Hello World")
+
+	currentUser := User{
+		Email:    "test2@test.com",
+		Password: HashPassword("testpassword"),
+		Roles:    []string{"participant"},
+	}
+	id, err := CreateUser(currentUser)
+	if err != nil {
+		log.Println(err)
+	}
+	log.Println(id)
+
+	user, _ := FindUserByEmail("test@test.com")
+
+	log.Println(ComparePasswordWithHash(user.Password, "testpassword2"))
+	log.Println(ComparePasswordWithHash(user.Password, "testpassword"))
+
+	FindUserByID("5be84fb1c6dcde996d940385")
+
+	nuser, err := FindUserByEmail("testuser2")
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Println(nuser)
+
+	/*
+		cur, err := collection.Find(context.Background(), nil)
+		if err != nil {
+			log.Fatal(err)
+		}
+		defer cur.Close(context.Background())
+		for cur.Next(context.Background()) {
+			elem := bson.NewDocument()
+			err := cur.Decode(elem)
+			if err != nil {
+				log.Fatal(err)
+			}
+
+			log.Println(elem)
+			// do something with elem....
+		}
+		if err := cur.Err(); err != nil {
+			log.Fatal(err)
+		}
+	*/
 	/*
 		router := gin.Default()
 
