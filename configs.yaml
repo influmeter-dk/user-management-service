@@ -1,2 +1,2 @@
-db_address: todo_add_db_path_here
+db_address: influenzanettestdbcluster-pwvbz.mongodb.net/test?retryWrites=true
 db_credentials_path: ./secret/db.yaml
