@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"log"
 
 	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/mongodb/mongo-go-driver/bson/objectid"
@@ -20,14 +19,24 @@ func CreateUser(user User) (id string, err error) {
 
 	res, err := userCollection.InsertOne(context.Background(), user)
 	if err != nil {
-		log.Fatal(err)
+		return
 	}
 	id = res.InsertedID.(objectid.ObjectID).Hex()
 	return
 }
 
-func UpdateUser() {
-	// userCollection.FindOneAndUpdate(context.Background())
+func UpdateUser(updatedUser User) error {
+	filter := bson.NewDocument(bson.EC.ObjectID("_id", updatedUser.ID))
+	res := userCollection.FindOneAndReplace(context.Background(), filter, updatedUser, nil)
+	newDoc := User{}
+	err := res.Decode(&newDoc)
+	if err != nil {
+		return err
+	}
+	if newDoc.ID != updatedUser.ID {
+		return errors.New("no document found or updated")
+	}
+	return nil
 }
 
 func FindUserByID(id string) (User, error) {
@@ -51,6 +60,9 @@ func FindUserByEmail(username string) (User, error) {
 	return elem, err
 }
 
-func DeleteUser() {
-
+func DeleteUser(id string) error {
+	_id, _ := objectid.FromHex(id)
+	filter := bson.NewDocument(bson.EC.ObjectID("_id", _id))
+	_, err := userCollection.DeleteOne(context.Background(), filter, nil)
+	return err
 }

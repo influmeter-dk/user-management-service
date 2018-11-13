@@ -75,18 +75,40 @@ func TestDbInterfaceMethods(t *testing.T) {
 	})
 
 	t.Run("Testing updating existing user's attributes", func(t *testing.T) {
-		t.Errorf("TEST MISSING")
+		testUser.EmailConfirmed = true
+		err := UpdateUser(testUser)
+		if err != nil {
+			t.Errorf(err.Error())
+			return
+		}
+
 	})
 
 	t.Run("Testing updating not existing user's attributes", func(t *testing.T) {
-		t.Errorf("TEST MISSING")
+		testUser.EmailConfirmed = false
+		currentUser := testUser
+		id, err := objectid.FromHex(testUser.ID.Hex() + "1")
+		currentUser.ID = id
+		err = UpdateUser(currentUser)
+		if err == nil {
+			t.Errorf("cannot update not existing user")
+			return
+		}
 	})
 
 	t.Run("Testing deleting existing user", func(t *testing.T) {
-		t.Errorf("TEST MISSING")
+		err := DeleteUser(testUser.ID.Hex())
+		if err != nil {
+			t.Errorf(err.Error())
+			return
+		}
 	})
 
 	t.Run("Testing deleting not existing user", func(t *testing.T) {
-		t.Errorf("TEST MISSING")
+		err := DeleteUser(testUser.ID.Hex() + "1")
+		if err != nil {
+			t.Errorf(err.Error())
+			return
+		}
 	})
 }
