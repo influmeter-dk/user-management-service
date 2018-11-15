@@ -4,7 +4,7 @@
 
 * **URL**
 
-  /v1/user/signup
+  /v1/signup
 
 * **Method:**
 

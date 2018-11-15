@@ -78,32 +78,33 @@ func init() {
 }
 
 func main() {
-	log.Println("Hello World")
+	/*
+		log.Println("Hello World")
 
-	currentUser := User{
-		Email:    "test2@test.com",
-		Password: HashPassword("testpassword"),
-		Roles:    []string{"participant"},
-	}
-	id, err := CreateUser(currentUser)
-	if err != nil {
-		log.Println(err)
-	}
-	log.Println(id)
+		currentUser := User{
+			Email:    "test2@test.com",
+			Password: HashPassword("testpassword"),
+			Roles:    []string{"participant"},
+		}
+		id, err := CreateUser(currentUser)
+		if err != nil {
+			log.Println(err)
+		}
+		log.Println(id)
 
-	user, _ := FindUserByEmail("test@test.com")
+		user, _ := FindUserByEmail("test@test.com")
 
-	log.Println(ComparePasswordWithHash(user.Password, "testpassword2"))
-	log.Println(ComparePasswordWithHash(user.Password, "testpassword"))
+		log.Println(ComparePasswordWithHash(user.Password, "testpassword2"))
+		log.Println(ComparePasswordWithHash(user.Password, "testpassword"))
 
-	FindUserByID("5be84fb1c6dcde996d940385")
+		FindUserByID("5be84fb1c6dcde996d940385")
 
-	nuser, err := FindUserByEmail("testuser2")
-	if err != nil {
-		log.Fatal(err)
-	}
-	log.Println(nuser)
-
+		nuser, err := FindUserByEmail("testuser2")
+		if err != nil {
+			log.Fatal(err)
+		}
+		log.Println(nuser)
+	*/
 	/*
 		cur, err := collection.Find(context.Background(), nil)
 		if err != nil {
@@ -124,15 +125,15 @@ func main() {
 			log.Fatal(err)
 		}
 	*/
-	/*
-		router := gin.Default()
 
-		v1 := router.Group("/v1")
-		{
-			v1.POST("/login", nil)
-			v1.POST("/signup", nil)
-		}
+	router := gin.Default()
 
-		log.Fatal(router.Run(":3100"))
-	*/
+	v1 := router.Group("/v1")
+	{
+		v1.POST("/login", loginHandl)
+		v1.POST("/signup", signupHandl)
+	}
+
+	log.Fatal(router.Run(":3100"))
+
 }

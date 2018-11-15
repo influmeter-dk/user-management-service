@@ -4,7 +4,7 @@
 
 * **URL**
 
-  /v1/user/login
+  /v1/login
 
 * **Method:**
 
