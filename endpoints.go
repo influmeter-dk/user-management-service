@@ -55,6 +55,7 @@ func signupHandl(c *gin.Context) {
 	}
 
 	user.Password = password
+	user.Roles = []string{"PARTICIPANT"}
 
 	id, err := CreateUser(user)
 
