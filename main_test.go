@@ -1,10 +1,133 @@
 package main
 
 import (
+	"bytes"
+	"encoding/json"
+	"net/http"
+	"net/http/httptest"
+	"os"
 	"testing"
 
+	"github.com/gin-gonic/gin"
 	"github.com/mongodb/mongo-go-driver/bson/objectid"
 )
+
+// Pre-Test Setup
+func TestMain(m *testing.M) {
+	gin.SetMode(gin.TestMode)
+
+	os.Exit(m.Run())
+}
+
+func performRequest(r http.Handler, req *http.Request) *httptest.ResponseRecorder {
+	w := httptest.NewRecorder()
+	r.ServeHTTP(w, req)
+	return w
+}
+
+// Test signup
+func TestSignup(t *testing.T) {
+	r := gin.Default()
+	r.POST("/v1/signup", bindUserFromBodyMiddleware(), signupHandl)
+
+	validUser := &User{
+		Email:    "test@test.com",
+		Password: "SuperSecurePassword",
+	}
+
+	t.Run("Testing without payload", func(t *testing.T) {
+		req, _ := http.NewRequest("POST", "/v1/signup", nil)
+		w := performRequest(r, req)
+
+		var response map[string]string
+		if err := json.Unmarshal([]byte(w.Body.String()), &response); err != nil {
+			t.Errorf("error parsing response body: %s", err.Error())
+		}
+
+		value, exists := response["error"]
+		if w.Code != http.StatusBadRequest || !exists || value != "payload missing" {
+			t.Errorf("status code: %d", w.Code)
+			t.Errorf("response content: %s", w.Body.String())
+			return
+		}
+	})
+
+	t.Run("Testing with missing fields", func(t *testing.T) {
+		emptyUser := &User{
+			Email:    "",
+			Password: "",
+		}
+
+		payload, _ := json.Marshal(emptyUser)
+
+		req, _ := http.NewRequest("POST", "/v1/signup", bytes.NewBuffer(payload))
+		req.Header.Add("Content-Type", "application/json")
+		w := performRequest(r, req)
+
+		var response map[string]string
+		if err := json.Unmarshal([]byte(w.Body.String()), &response); err != nil {
+			t.Errorf("error parsing response body: %s", err.Error())
+		}
+
+		_, exists := response["error"]
+		if w.Code != http.StatusBadRequest || !exists {
+			t.Errorf("status code: %d", w.Code)
+			t.Errorf("response content: %s", w.Body.String())
+			return
+		}
+	})
+
+	t.Run("Testing with invalid email field", func(t *testing.T) {
+		faultyUser := &User{
+			Email:    "asdffsadiidijlkfj.sdf",
+			Password: "SuperSecurePassword",
+		}
+
+		payload, _ := json.Marshal(faultyUser)
+
+		req, _ := http.NewRequest("POST", "/v1/signup", bytes.NewBuffer(payload))
+		req.Header.Add("Content-Type", "application/json")
+		w := performRequest(r, req)
+
+		var response map[string]string
+		if err := json.Unmarshal([]byte(w.Body.String()), &response); err != nil {
+			t.Errorf("error parsing response body: %s", err.Error())
+		}
+
+		_, exists := response["error"]
+		if w.Code != http.StatusBadRequest || !exists {
+			t.Errorf("status code: %d", w.Code)
+			t.Errorf("response content: %s", w.Body.String())
+			return
+		}
+	})
+
+	t.Run("Testing with valid fields", func(t *testing.T) {
+		payload, _ := json.Marshal(validUser)
+
+		req, _ := http.NewRequest("POST", "/v1/signup", bytes.NewBuffer(payload))
+		req.Header.Add("Content-Type", "application/json")
+		w := performRequest(r, req)
+
+		var response map[string]string
+		if err := json.Unmarshal([]byte(w.Body.String()), &response); err != nil {
+			t.Errorf("error parsing response body: %s", err.Error())
+		}
+
+		_, exists := response["error"]
+		if w.Code != http.StatusCreated || exists {
+			t.Errorf("status code: %d", w.Code)
+			t.Errorf("response content: %s", w.Body.String())
+			return
+		}
+	})
+
+}
+
+// Test login
+func TestLogin(t *testing.T) {
+
+}
 
 // Testing Database Interface methods
 func TestDbInterfaceMethods(t *testing.T) {
