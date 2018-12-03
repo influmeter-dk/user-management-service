@@ -9,4 +9,20 @@ type User struct {
 	EmailConfirmed bool              `bson:"email_confirmed" json:"email_confirmed"`
 	Password       string            `bson:"password" json:"password"`
 	Roles          []string          `bson:"roles" json:"roles"`
+	Role           string            `json:"role"`
+}
+
+// HasRole checks whether the user has a specified role
+func (u User) HasRole(role string) bool {
+	for _, v := range u.Roles {
+		if v == role {
+			return true
+		}
+	}
+	return false
+}
+
+type UserLoginResponse struct {
+	ID   string `json:"user_id"`
+	Role string `json:"role"`
 }
