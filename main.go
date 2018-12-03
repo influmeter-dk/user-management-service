@@ -130,8 +130,8 @@ func main() {
 
 	v1 := router.Group("/v1")
 	{
-		v1.POST("/login", loginHandl)
-		v1.POST("/signup", signupHandl)
+		v1.POST("/login", bindUserFromBodyMiddleware(), loginHandl)
+		v1.POST("/signup", bindUserFromBodyMiddleware(), signupHandl)
 	}
 
 	log.Fatal(router.Run(":3100"))
