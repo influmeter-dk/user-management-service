@@ -28,36 +28,55 @@ func checkEmailFormat(email string) bool {
 	return re.MatchString(email)
 }
 
-func loginHandl(context *gin.Context) {
+func loginHandl(c *gin.Context) {
 
-	// TODO: find user
-	// TODO: compare password
-	// TODO: check role
-	// TODO: return success
+	u := c.MustGet("user").(User)
 
-	context.JSON(http.StatusNotImplemented, gin.H{"error": "not implemented"})
+	user, err := FindUserByEmail(u.Email)
+
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid username and/or password"})
+		return
+	}
+
+	if comparePasswordWithHash(user.Password, u.Password) != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid username and/or password"})
+		return
+	}
+
+	if !user.HasRole(u.Role) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "missing required role"})
+		return
+	}
+
+	response := &UserLoginResponse{
+		ID:   user.ID.Hex(),
+		Role: u.Role,
+	}
+
+	c.JSON(http.StatusOK, response)
 }
 
 func signupHandl(c *gin.Context) {
 
-	user := c.MustGet("user").(User)
+	u := c.MustGet("user").(User)
 
-	if !checkEmailFormat(user.Email) {
+	if !checkEmailFormat(u.Email) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "email not valid"})
 		return
 	}
 
-	password := hashPassword(user.Password)
+	password := hashPassword(u.Password)
 
 	if password == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "password not valid"})
 		return
 	}
 
-	user.Password = password
-	user.Roles = []string{"PARTICIPANT"}
+	u.Password = password
+	u.Roles = []string{"PARTICIPANT"}
 
-	id, err := CreateUser(user)
+	id, err := CreateUser(u)
 
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -67,5 +86,10 @@ func signupHandl(c *gin.Context) {
 	// TODO: generate email confirmation token
 	// TODO: send email with confirmation request
 
-	c.JSON(http.StatusCreated, gin.H{"user_id": id})
+	response := &UserLoginResponse{
+		ID:   id,
+		Role: "PARTICIPANT",
+	}
+
+	c.JSON(http.StatusCreated, response)
 }
