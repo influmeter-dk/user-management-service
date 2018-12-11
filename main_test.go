@@ -10,7 +10,7 @@ import (
 	"testing"
 
 	"github.com/gin-gonic/gin"
-	"github.com/mongodb/mongo-go-driver/bson/objectid"
+	"github.com/mongodb/mongo-go-driver/bson/primitive"
 )
 
 // Pre-Test Setup
@@ -24,6 +24,113 @@ func performRequest(r http.Handler, req *http.Request) *httptest.ResponseRecorde
 	w := httptest.NewRecorder()
 	r.ServeHTTP(w, req)
 	return w
+}
+
+// Testing Database Interface methods
+func TestDbInterfaceMethods(t *testing.T) {
+	testUser := User{
+		Email:    "test@test.com",
+		Password: "testhashedpassword-youcantreadme",
+	}
+
+	t.Run("Testing create user", func(t *testing.T) {
+		id, err := CreateUser(testUser)
+		if err != nil {
+			t.Errorf(err.Error())
+			return
+		}
+		if len(id) == 0 {
+			t.Errorf("id is missing")
+			return
+		}
+		_id, _ := primitive.ObjectIDFromHex(id)
+		testUser.ID = _id
+	})
+
+	t.Run("Testing creating existing user", func(t *testing.T) {
+		_, err := CreateUser(testUser)
+		if err == nil {
+			t.Errorf("user already existed, but created again")
+		}
+	})
+
+	t.Run("Testing find existing user by id", func(t *testing.T) {
+		user, err := FindUserByID(testUser.ID.Hex())
+		if err != nil {
+			t.Errorf(err.Error())
+			return
+		}
+		if user.Email != testUser.Email {
+			t.Errorf("found user is not matching test user")
+			return
+		}
+	})
+
+	t.Run("Testing find not existing user by id", func(t *testing.T) {
+		_, err := FindUserByID(testUser.ID.Hex() + "1")
+		if err == nil {
+			t.Errorf("user should not be found")
+			return
+		}
+	})
+
+	t.Run("Testing find existing user by email", func(t *testing.T) {
+		user, err := FindUserByEmail(testUser.Email)
+		if err != nil {
+			t.Errorf(err.Error())
+			return
+		}
+		if user.Email != testUser.Email {
+			t.Errorf("found user is not matching test user")
+			return
+		}
+	})
+
+	t.Run("Testing find not existing user by email", func(t *testing.T) {
+		_, err := FindUserByEmail(testUser.Email + "1")
+		if err == nil {
+			t.Errorf("user should not be found")
+			return
+		}
+	})
+
+	t.Run("Testing updating existing user's attributes", func(t *testing.T) {
+		testUser.EmailConfirmed = true
+		err := UpdateUser(testUser)
+		if err != nil {
+			t.Errorf(err.Error())
+			return
+		}
+
+	})
+
+	t.Run("Testing updating not existing user's attributes", func(t *testing.T) {
+		testUser.EmailConfirmed = false
+		currentUser := testUser
+		id, err := primitive.ObjectIDFromHex(testUser.ID.Hex() + "1")
+		currentUser.ID = id
+		err = UpdateUser(currentUser)
+		if err == nil {
+			t.Errorf("cannot update not existing user")
+			return
+		}
+	})
+
+	t.Run("Testing deleting existing user", func(t *testing.T) {
+		err := DeleteUser(testUser.ID.Hex())
+		if err != nil {
+			t.Errorf(err.Error())
+			return
+		}
+	})
+
+	t.Run("Testing deleting not existing user", func(t *testing.T) {
+		err := DeleteUser(testUser.ID.Hex() + "1")
+		if err != nil {
+			t.Errorf(err.Error())
+			return
+		}
+	})
 }
 
 // Test middleware
@@ -147,6 +254,7 @@ func TestLogin(t *testing.T) {
 	// Convert the JSON response to a map
 	var response map[string]string
 	if err := json.Unmarshal([]byte(w.Body.String()), &response); err != nil {
+		log.Println("exited here")
 		log.Fatal(err.Error())
 	}
 
@@ -258,113 +366,6 @@ func TestLogin(t *testing.T) {
 		if w.Code != http.StatusOK || exists {
 			t.Errorf("status code: %d", w.Code)
 			t.Errorf("response content: %s", w.Body.String())
-			return
-		}
-	})
-}
-
-// Testing Database Interface methods
-func TestDbInterfaceMethods(t *testing.T) {
-	testUser := User{
-		Email:    "test@test.com",
-		Password: "testhashedpassword-youcantreadme",
-	}
-
-	t.Run("Testing create user", func(t *testing.T) {
-		id, err := CreateUser(testUser)
-		if err != nil {
-			t.Errorf(err.Error())
-			return
-		}
-		if len(id) == 0 {
-			t.Errorf("id is missing")
-			return
-		}
-		_id, _ := objectid.FromHex(id)
-		testUser.ID = _id
-	})
-
-	t.Run("Testing creating existing user", func(t *testing.T) {
-		_, err := CreateUser(testUser)
-		if err == nil {
-			t.Errorf("user already existed, but created again")
-		}
-	})
-
-	t.Run("Testing find existing user by id", func(t *testing.T) {
-		user, err := FindUserByID(testUser.ID.Hex())
-		if err != nil {
-			t.Errorf(err.Error())
-			return
-		}
-		if user.Email != testUser.Email {
-			t.Errorf("found user is not matching test user")
-			return
-		}
-	})
-
-	t.Run("Testing find not existing user by id", func(t *testing.T) {
-		_, err := FindUserByID(testUser.ID.Hex() + "1")
-		if err == nil {
-			t.Errorf("user should not be found")
-			return
-		}
-	})
-
-	t.Run("Testing find existing user by email", func(t *testing.T) {
-		user, err := FindUserByEmail(testUser.Email)
-		if err != nil {
-			t.Errorf(err.Error())
-			return
-		}
-		if user.Email != testUser.Email {
-			t.Errorf("found user is not matching test user")
-			return
-		}
-	})
-
-	t.Run("Testing find not existing user by email", func(t *testing.T) {
-		_, err := FindUserByEmail(testUser.Email + "1")
-		if err == nil {
-			t.Errorf("user should not be found")
-			return
-		}
-	})
-
-	t.Run("Testing updating existing user's attributes", func(t *testing.T) {
-		testUser.EmailConfirmed = true
-		err := UpdateUser(testUser)
-		if err != nil {
-			t.Errorf(err.Error())
-			return
-		}
-
-	})
-
-	t.Run("Testing updating not existing user's attributes", func(t *testing.T) {
-		testUser.EmailConfirmed = false
-		currentUser := testUser
-		id, err := objectid.FromHex(testUser.ID.Hex() + "1")
-		currentUser.ID = id
-		err = UpdateUser(currentUser)
-		if err == nil {
-			t.Errorf("cannot update not existing user")
-			return
-		}
-	})
-
-	t.Run("Testing deleting existing user", func(t *testing.T) {
-		err := DeleteUser(testUser.ID.Hex())
-		if err != nil {
-			t.Errorf(err.Error())
-			return
-		}
-	})
-
-	t.Run("Testing deleting not existing user", func(t *testing.T) {
-		err := DeleteUser(testUser.ID.Hex() + "1")
-		if err != nil {
-			t.Errorf(err.Error())
 			return
 		}
 	})

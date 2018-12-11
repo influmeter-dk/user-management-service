@@ -9,3 +9,5 @@ password: <db-password>
 ```
 
 After a successful connection to the running mongo instance is established, the service will assume the presence of the `users` database with a `users` collection.
+
+Timeout value in seconds for the database access is set with the value of `db_timeout` in the `configs.yaml`.

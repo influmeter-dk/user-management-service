@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/mongodb/mongo-go-driver/mongo"
@@ -14,6 +15,7 @@ import (
 type config struct {
 	DbCredentialsPath string `yaml:"db_credentials_path"`
 	DbAddress         string `yaml:"db_address"`
+	DbTimeout         int    `yaml:"db_timeout"`
 }
 
 type dbCredentials struct {
@@ -63,7 +65,10 @@ func dbInit() {
 		log.Fatal(err)
 	}
 
-	err = dbClient.Connect(context.Background())
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(conf.DbTimeout)*time.Second)
+	defer cancel()
+
+	err = dbClient.Connect(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}

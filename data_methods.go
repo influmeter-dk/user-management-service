@@ -3,13 +3,13 @@ package main
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/mongodb/mongo-go-driver/bson"
-	"github.com/mongodb/mongo-go-driver/bson/objectid"
+	"github.com/mongodb/mongo-go-driver/bson/primitive"
 )
 
 // TODO: add methods interfacing database here - this is an abstraction layer to the DB
-
 func CreateUser(user User) (id string, err error) {
 	_, err = FindUserByEmail(user.Email)
 	if err == nil {
@@ -17,19 +17,26 @@ func CreateUser(user User) (id string, err error) {
 		return
 	}
 
-	res, err := userCollection.InsertOne(context.Background(), user)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(conf.DbTimeout)*time.Second)
+	defer cancel()
+
+	res, err := userCollection.InsertOne(ctx, user)
 	if err != nil {
 		return
 	}
-	id = res.InsertedID.(objectid.ObjectID).Hex()
+	id = res.InsertedID.(primitive.ObjectID).Hex()
 	return
 }
 
 func UpdateUser(updatedUser User) error {
-	filter := bson.NewDocument(bson.EC.ObjectID("_id", updatedUser.ID))
-	res := userCollection.FindOneAndReplace(context.Background(), filter, updatedUser, nil)
+	filter := bson.M{"_id": updatedUser.ID}
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(conf.DbTimeout)*time.Second)
+	defer cancel()
+
 	newDoc := User{}
-	err := res.Decode(&newDoc)
+	err := userCollection.FindOneAndReplace(ctx, filter, updatedUser, nil).Decode(&newDoc)
+
 	if err != nil {
 		return err
 	}
@@ -40,29 +47,35 @@ func UpdateUser(updatedUser User) error {
 }
 
 func FindUserByID(id string) (User, error) {
-	_id, _ := objectid.FromHex(id)
-	filter := bson.NewDocument(bson.EC.ObjectID("_id", _id))
+	_id, _ := primitive.ObjectIDFromHex(id)
+	filter := bson.M{"_id": _id}
 
-	res := userCollection.FindOne(context.Background(), filter, nil)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(conf.DbTimeout)*time.Second)
+	defer cancel()
 
 	elem := User{}
-	err := res.Decode(&elem)
+	err := userCollection.FindOne(ctx, filter).Decode(&elem)
+
 	return elem, err
 }
 
 func FindUserByEmail(username string) (User, error) {
-	filter := map[string]string{"email": username}
-	res := userCollection.FindOne(context.Background(), filter, nil)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(conf.DbTimeout)*time.Second)
+	defer cancel()
 
 	elem := User{}
-	err := res.Decode(&elem)
+	filter := bson.M{"email": username}
+	err := userCollection.FindOne(ctx, filter).Decode(&elem)
 
 	return elem, err
 }
 
 func DeleteUser(id string) error {
-	_id, _ := objectid.FromHex(id)
-	filter := bson.NewDocument(bson.EC.ObjectID("_id", _id))
-	_, err := userCollection.DeleteOne(context.Background(), filter, nil)
+	_id, _ := primitive.ObjectIDFromHex(id)
+	filter := bson.M{"_id": _id}
+
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(conf.DbTimeout)*time.Second)
+	defer cancel()
+	_, err := userCollection.DeleteOne(ctx, filter, nil)
 	return err
 }
