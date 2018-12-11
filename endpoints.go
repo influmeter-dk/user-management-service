@@ -35,12 +35,12 @@ func loginHandl(c *gin.Context) {
 	user, err := FindUserByEmail(u.Email)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid username and/or password"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid username and/or password"})
 		return
 	}
 
 	if comparePasswordWithHash(user.Password, u.Password) != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid username and/or password"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid username and/or password"})
 		return
 	}
 
@@ -79,7 +79,7 @@ func signupHandl(c *gin.Context) {
 	id, err := CreateUser(u)
 
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 

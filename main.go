@@ -134,6 +134,6 @@ func main() {
 		v1.POST("/signup", bindUserFromBodyMiddleware(), signupHandl)
 	}
 
-	log.Fatal(router.Run(":3100"))
+	log.Fatal(router.Run(":3200"))
 
 }

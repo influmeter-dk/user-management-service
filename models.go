@@ -9,7 +9,7 @@ type User struct {
 	EmailConfirmed bool              `bson:"email_confirmed" json:"email_confirmed"`
 	Password       string            `bson:"password" json:"password"`
 	Roles          []string          `bson:"roles" json:"roles"`
-	Role           string            `json:"role"`
+	Role           string            `bson:"-" json:"role"`
 }
 
 // HasRole checks whether the user has a specified role
