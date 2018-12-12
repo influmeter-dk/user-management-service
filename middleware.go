@@ -22,6 +22,10 @@ func bindUserFromBodyMiddleware() gin.HandlerFunc {
 			return
 		}
 
+		if user.Role == "" {
+			user.Role = "PARTICIPANT"
+		}
+
 		c.Set("user", user)
 
 		c.Next()
