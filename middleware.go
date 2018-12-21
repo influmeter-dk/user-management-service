@@ -15,9 +15,18 @@ func bindUserFromBodyMiddleware() gin.HandlerFunc {
 			c.Abort()
 			return
 		}
-
 		if err := c.ShouldBindJSON(&user); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+			c.Abort()
+			return
+		}
+		if user.Email == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "missing email/username"})
+			c.Abort()
+			return
+		}
+		if user.Password == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "missing password"})
 			c.Abort()
 			return
 		}

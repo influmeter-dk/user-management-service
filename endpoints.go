@@ -69,7 +69,7 @@ func signupHandl(c *gin.Context) {
 	password := hashPassword(u.Password)
 
 	if password == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "password not valid"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "missing password"})
 		return
 	}
 
@@ -79,7 +79,7 @@ func signupHandl(c *gin.Context) {
 	id, err := CreateUser(u)
 
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
