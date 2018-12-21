@@ -31,11 +31,13 @@ func bindUserFromBodyMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		if user.Role == "" {
-			user.Role = "PARTICIPANT"
+		u := User{
+			Email:    user.Email,
+			Password: user.Password,
+			Role:     "PARTICIPANT",
 		}
 
-		c.Set("user", user)
+		c.Set("user", u)
 
 		c.Next()
 	}
