@@ -4,7 +4,7 @@ import "github.com/mongodb/mongo-go-driver/bson/primitive"
 
 // TODO: use this file to define data structs and models used across the main package
 type User struct {
-	ID             primitive.ObjectID `bson:"_id,omitempty" json:"_id,omitempty"`
+	ID             primitive.ObjectID `bson:"_id,omitempty" json:"user_id,omitempty"`
 	Email          string             `bson:"email" json:"email"`
 	EmailConfirmed bool               `bson:"email_confirmed" json:"email_confirmed"`
 	Password       string             `bson:"password" json:"password"`
@@ -23,6 +23,6 @@ func (u User) HasRole(role string) bool {
 }
 
 type UserLoginResponse struct {
-	ID   string `json:"_id"`
+	ID   string `json:"user_id"`
 	Role string `json:"role"`
 }

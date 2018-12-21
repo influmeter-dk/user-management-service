@@ -231,7 +231,7 @@ func TestSignup(t *testing.T) {
 			return
 		}
 		var err error
-		validUser.ID, err = primitive.ObjectIDFromHex(response["_id"])
+		validUser.ID, err = primitive.ObjectIDFromHex(response["user_id"])
 		if err != nil {
 			t.Errorf("error adding ID to valid user\n%s", err)
 		}
