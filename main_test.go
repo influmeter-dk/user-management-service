@@ -3,7 +3,6 @@ package main
 import (
 	"bytes"
 	"encoding/json"
-	"log"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -231,31 +230,66 @@ func TestSignup(t *testing.T) {
 			t.Errorf("response content: %s", w.Body.String())
 			return
 		}
+		var err error
+		validUser.ID, err = primitive.ObjectIDFromHex(response["_id"])
+		if err != nil {
+			t.Errorf("error adding ID to valid user\n%s", err)
+		}
 	})
+
+	t.Run("Testing with existing user", func(t *testing.T) {
+		validUser2 := &User{
+			Email:    validUser.Email,
+			Password: validUser.Password,
+		}
+
+		payload, _ := json.Marshal(validUser2)
+
+		req, _ := http.NewRequest("POST", "/v1/signup", bytes.NewBuffer(payload))
+		req.Header.Add("Content-Type", "application/json")
+		w := performRequest(r, req)
+
+		var response map[string]string
+		if err := json.Unmarshal([]byte(w.Body.String()), &response); err != nil {
+			t.Errorf("error parsing response body: %s", err.Error())
+		}
+
+		_, exists := response["error"]
+		if w.Code != http.StatusBadRequest || !exists {
+			t.Errorf("status code: %d", w.Code)
+			t.Errorf("response content: %s", w.Body.String())
+			return
+		}
+	})
+
+	// db cleanup
+	DeleteUser(validUser.ID.Hex())
 }
 
 // Test login
 func TestLogin(t *testing.T) {
 	r := gin.Default()
-	r.POST("/v1/signup", bindUserFromBodyMiddleware(), loginHandl)
-	r.POST("/v1/login", bindUserFromBodyMiddleware(), signupHandl)
+	r.POST("/v1/signup", bindUserFromBodyMiddleware(), signupHandl)
+	r.POST("/v1/login", bindUserFromBodyMiddleware(), loginHandl)
 
-	validUser := &User{
+	validUser := User{
 		Email:    "test@test.com",
 		Password: "SuperSecurePassword",
 	}
+	hashedUser := User{
+		Email:    validUser.Email,
+		Password: hashPassword(validUser.Password),
+		Roles:    []string{"PARTICIPANT"},
+	}
 
-	signupPayload, _ := json.Marshal(validUser)
-
-	req, _ := http.NewRequest("POST", "/v1/user/login", bytes.NewBuffer(signupPayload))
-	req.Header.Add("Content-Type", "application/json")
-	w := performRequest(r, req)
-
-	// Convert the JSON response to a map
-	var response map[string]string
-	if err := json.Unmarshal([]byte(w.Body.String()), &response); err != nil {
-		log.Println("exited here")
-		log.Fatal(err.Error())
+	// db buildup
+	id, err := CreateUser(hashedUser)
+	if err != nil {
+		t.Errorf("error creating user for testing login")
+	}
+	validUser.ID, err = primitive.ObjectIDFromHex(id)
+	if err != nil {
+		t.Errorf("error converting id")
 	}
 
 	t.Run("Testing without payload", func(t *testing.T) {
@@ -302,7 +336,7 @@ func TestLogin(t *testing.T) {
 
 	t.Run("Testing with wrong email", func(t *testing.T) {
 		invalidUser1 := &User{
-			Email:    "test@t.com",
+			Email:    "test@test11.com",
 			Password: "SuperSecurePassword",
 		}
 
@@ -318,7 +352,7 @@ func TestLogin(t *testing.T) {
 		}
 
 		_, exists := response["error"]
-		if w.Code != http.StatusBadRequest || exists {
+		if w.Code != http.StatusUnauthorized || !exists {
 			t.Errorf("status code: %d", w.Code)
 			t.Errorf("response content: %s", w.Body.String())
 			return
@@ -343,7 +377,7 @@ func TestLogin(t *testing.T) {
 		}
 
 		_, exists := response["error"]
-		if w.Code != http.StatusBadRequest || exists {
+		if w.Code != http.StatusUnauthorized || !exists {
 			t.Errorf("status code: %d", w.Code)
 			t.Errorf("response content: %s", w.Body.String())
 			return
@@ -351,7 +385,11 @@ func TestLogin(t *testing.T) {
 	})
 
 	t.Run("Testing with valid fields", func(t *testing.T) {
-		payload, _ := json.Marshal(validUser)
+		validUser2 := User{
+			Email:    validUser.Email,
+			Password: validUser.Password,
+		}
+		payload, _ := json.Marshal(validUser2)
 
 		req, _ := http.NewRequest("POST", "/v1/login", bytes.NewBuffer(payload))
 		req.Header.Add("Content-Type", "application/json")
@@ -369,4 +407,7 @@ func TestLogin(t *testing.T) {
 			return
 		}
 	})
+
+	// db cleanup
+	DeleteUser(validUser.ID.Hex())
 }
