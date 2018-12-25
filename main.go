@@ -134,9 +134,10 @@ func main() {
 	router := gin.Default()
 
 	v1 := router.Group("/v1")
+	v1.Use(bindUserFromBodyMiddleware())
 	{
-		v1.POST("/login", bindUserFromBodyMiddleware(), loginHandl)
-		v1.POST("/signup", bindUserFromBodyMiddleware(), signupHandl)
+		v1.POST("/login", loginHandl)
+		v1.POST("/signup", signupHandl)
 	}
 
 	log.Fatal(router.Run(":3200"))
