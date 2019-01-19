@@ -219,7 +219,7 @@ func TestSignup(t *testing.T) {
 		req.Header.Add("Content-Type", "application/json")
 		w := performRequest(r, req)
 
-		var response map[string]string
+		var response map[string]interface{}
 		if err := json.Unmarshal([]byte(w.Body.String()), &response); err != nil {
 			t.Errorf("error parsing response body: %s", err.Error())
 		}
@@ -231,7 +231,7 @@ func TestSignup(t *testing.T) {
 			return
 		}
 		var err error
-		validUser.ID, err = primitive.ObjectIDFromHex(response["user_id"])
+		validUser.ID, err = primitive.ObjectIDFromHex(response["user_id"].(string))
 		if err != nil {
 			t.Errorf("error adding ID to valid user\n%s", err)
 		}
@@ -395,7 +395,7 @@ func TestLogin(t *testing.T) {
 		req.Header.Add("Content-Type", "application/json")
 		w := performRequest(r, req)
 
-		var response map[string]string
+		var response map[string]interface{}
 		if err := json.Unmarshal([]byte(w.Body.String()), &response); err != nil {
 			t.Errorf("error parsing response body: %s", err.Error())
 		}

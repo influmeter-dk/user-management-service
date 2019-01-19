@@ -23,6 +23,7 @@ func (u User) HasRole(role string) bool {
 }
 
 type UserLoginResponse struct {
-	ID   string `json:"user_id"`
-	Role string `json:"role"`
+	ID                string   `json:"user_id"`
+	Roles             []string `json:"roles"`
+	AuthenticatedRole string   `json:"authenticated_role"`
 }

@@ -50,8 +50,9 @@ func loginHandl(c *gin.Context) {
 	}
 
 	response := &UserLoginResponse{
-		ID:   user.ID.Hex(),
-		Role: u.Role,
+		ID:                user.ID.Hex(),
+		Roles:             user.Roles,
+		AuthenticatedRole: u.Role,
 	}
 
 	c.JSON(http.StatusOK, response)
@@ -87,8 +88,9 @@ func signupHandl(c *gin.Context) {
 	// TODO: send email with confirmation request
 
 	response := &UserLoginResponse{
-		ID:   id,
-		Role: "PARTICIPANT",
+		ID:                id,
+		Roles:             u.Roles,
+		AuthenticatedRole: u.Role,
 	}
 
 	c.JSON(http.StatusCreated, response)
