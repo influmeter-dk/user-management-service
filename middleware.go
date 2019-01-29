@@ -36,6 +36,12 @@ func bindUserFromBodyMiddleware() gin.HandlerFunc {
 			Password: user.Password,
 			Role:     "PARTICIPANT",
 		}
+		if user.NewPassword != "" {
+			u.NewPassword = user.NewPassword
+		}
+		if user.NewPasswordRepeat != "" {
+			u.NewPasswordRepeat = user.NewPasswordRepeat
+		}
 
 		c.Set("user", u)
 

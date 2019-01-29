@@ -95,3 +95,40 @@ func signupHandl(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, response)
 }
+
+func passwordChangeHandl(c *gin.Context) {
+	u := c.MustGet("user").(User)
+
+	user, err := FindUserByEmail(u.Email)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid username and/or password"})
+		return
+	}
+
+	if comparePasswordWithHash(user.Password, u.Password) != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid username and/or password"})
+		return
+	}
+
+	if u.NewPassword == "" || u.NewPasswordRepeat == "" || u.NewPassword != u.NewPasswordRepeat {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "passwords do not match"})
+		return
+	}
+
+	password := hashPassword(u.NewPassword)
+
+	if password == "" {
+		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "missing new password"})
+		return
+	}
+
+	user.Password = password
+
+	err = UpdateUser(user)
+	if err != nil {
+		c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"success": true})
+}
