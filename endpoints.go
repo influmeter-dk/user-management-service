@@ -126,7 +126,7 @@ func passwordChangeHandl(c *gin.Context) {
 
 	err = UpdateUser(user)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusBadRequest, err.Error())
+		c.AbortWithStatusJSON(http.StatusInternalServerError, err.Error())
 		return
 	}
 
