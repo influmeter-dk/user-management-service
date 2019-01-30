@@ -26,7 +26,7 @@
 
 * **Error Response:**
 
-  * **Code:** 400 Bad request  
+  * **Code:** 400 Bad Request
     **Content:** `{ "error" : "<error message>" }`  
     **Typical reason:** Data format (json body of the Post request) wrong, e.g. missing key for email or password.
 
