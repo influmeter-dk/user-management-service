@@ -5,14 +5,20 @@ import (
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net"
+	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/mongodb/mongo-go-driver/mongo"
+	"google.golang.org/grpc"
 	yaml "gopkg.in/yaml.v2"
+
+	user_api "github.com/Influenzanet/api/user-management"
 )
 
 type config struct {
+	Port              int    `yaml:"port"`
 	DbCredentialsPath string `yaml:"db_credentials_path"`
 	DbAddress         string `yaml:"db_address"`
 	DbTimeout         int    `yaml:"db_timeout"`
@@ -21,6 +27,9 @@ type config struct {
 type dbCredentials struct {
 	Username string `yaml:"username"`
 	Password string `yaml:"password"`
+}
+
+type userManagementServer struct {
 }
 
 var dbClient *mongo.Client
@@ -83,63 +92,12 @@ func init() {
 }
 
 func main() {
-	/*
-		log.Println("Hello World")
+	lis, err := net.Listen("tcp", ":"+strconv.Itoa(conf.Port))
 
-		currentUser := User{
-			Email:    "test2@test.com",
-			Password: HashPassword("testpassword"),
-			Roles:    []string{"participant"},
-		}
-		id, err := CreateUser(currentUser)
-		if err != nil {
-			log.Println(err)
-		}
-		log.Println(id)
-
-		user, _ := FindUserByEmail("test@test.com")
-
-		log.Println(ComparePasswordWithHash(user.Password, "testpassword2"))
-		log.Println(ComparePasswordWithHash(user.Password, "testpassword"))
-
-		FindUserByID("5be84fb1c6dcde996d940385")
-
-		nuser, err := FindUserByEmail("testuser2")
-		if err != nil {
-			log.Fatal(err)
-		}
-		log.Println(nuser)
-	*/
-	/*
-		cur, err := collection.Find(context.Background(), nil)
-		if err != nil {
-			log.Fatal(err)
-		}
-		defer cur.Close(context.Background())
-		for cur.Next(context.Background()) {
-			elem := bson.NewDocument()
-			err := cur.Decode(elem)
-			if err != nil {
-				log.Fatal(err)
-			}
-
-			log.Println(elem)
-			// do something with elem....
-		}
-		if err := cur.Err(); err != nil {
-			log.Fatal(err)
-		}
-	*/
-
-	router := gin.Default()
-
-	v1 := router.Group("/v1")
-	v1.Use(bindUserFromBodyMiddleware())
-	{
-		v1.POST("/login", loginHandl)
-		v1.POST("/signup", signupHandl)
+	if err != nil {
+		log.Fatalf("failed to listen: %v", err)
 	}
-
-	log.Fatal(router.Run(":3200"))
-
+	grpcServer := grpc.NewServer()
+	user_api.RegisterUserManagementApiServer(grpcServer, &userManagementServer{})
+	grpcServer.Serve(lis)
 }

@@ -1,14 +1,18 @@
 package main
 
 import (
+	"context"
+	"errors"
 	"net/http"
 	"regexp"
 
 	"github.com/gin-gonic/gin"
+	"github.com/golang/protobuf/ptypes/empty"
 	"golang.org/x/crypto/bcrypt"
-)
 
-// TODO: add http handler methods here, please avoid using direct DB access here, instead use data_methods.go to define wrapper functions
+	influenzanet "github.com/Influenzanet/api"
+	user_api "github.com/Influenzanet/api/user-management"
+)
 
 func hashPassword(password string) string {
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
@@ -28,34 +32,39 @@ func checkEmailFormat(email string) bool {
 	return re.MatchString(email)
 }
 
-func loginHandl(c *gin.Context) {
+func (s *userManagementServer) Status(ctx context.Context, _ *empty.Empty) (*influenzanet.Status, error) {
+	return nil, errors.New("not implemented")
+}
 
-	u := c.MustGet("user").(User)
-
-	user, err := FindUserByEmail(u.Email)
+func (s *userManagementServer) LoginWithEmail(ctx context.Context, creds *influenzanet.UserCredentials) (*user_api.UserAuthInfo, error) {
+	user, err := FindUserByEmail(creds.Email)
 
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid username and/or password"})
-		return
+		return nil, errors.New("invalid username and/or password")
 	}
 
-	if comparePasswordWithHash(user.Password, u.Password) != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid username and/or password"})
-		return
+	if comparePasswordWithHash(user.Password, creds.Password) != nil {
+		return nil, errors.New("invalid username and/or password")
 	}
 
-	if !user.HasRole(u.Role) {
-		c.JSON(http.StatusForbidden, gin.H{"error": "missing required role"})
-		return
+	if !user.HasRole(creds.LoginRole) {
+		return nil, errors.New("missing required role")
 	}
 
-	response := &UserLoginResponse{
-		ID:                user.ID.Hex(),
+	response := &user_api.UserAuthInfo{
+		UserId:            user.ID.Hex(),
 		Roles:             user.Roles,
-		AuthenticatedRole: u.Role,
+		AuthenticatedRole: creds.LoginRole,
 	}
+	return response, nil
+}
 
-	c.JSON(http.StatusOK, response)
+func (s *userManagementServer) SignupWithEmail(ctx context.Context, creds *user_api.NewUser) (*user_api.UserAuthInfo, error) {
+	return nil, errors.New("not implemented")
+}
+
+func (s *userManagementServer) ChangePassword(ctx context.Context, req *user_api.PasswordChangeMsg) (*influenzanet.Status, error) {
+	return nil, errors.New("not implemented")
 }
 
 func signupHandl(c *gin.Context) {
