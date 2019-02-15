@@ -39,6 +39,9 @@ func (s *userManagementServer) Status(ctx context.Context, _ *empty.Empty) (*inf
 }
 
 func (s *userManagementServer) LoginWithEmail(ctx context.Context, creds *influenzanet.UserCredentials) (*user_api.UserAuthInfo, error) {
+	if creds == nil {
+		return nil, errors.New("invalid username and/or password")
+	}
 	user, err := FindUserByEmail(creds.Email)
 
 	if err != nil {
@@ -49,6 +52,9 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, creds *influe
 		return nil, errors.New("invalid username and/or password")
 	}
 
+	if creds.LoginRole == "" {
+		creds.LoginRole = "PARTICIPANT"
+	}
 	if !user.HasRole(creds.LoginRole) {
 		return nil, errors.New("missing required role")
 	}
@@ -62,6 +68,9 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, creds *influe
 }
 
 func (s *userManagementServer) SignupWithEmail(ctx context.Context, u *user_api.NewUser) (*user_api.UserAuthInfo, error) {
+	if u == nil {
+		return nil, errors.New("missing argument")
+	}
 	if !checkEmailFormat(u.Email) {
 		return nil, errors.New("email not valid")
 	}

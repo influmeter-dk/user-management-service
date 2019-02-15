@@ -7,6 +7,7 @@ import (
 
 	"github.com/mongodb/mongo-go-driver/bson/primitive"
 
+	influenzanet "github.com/Influenzanet/api"
 	user_api "github.com/Influenzanet/api/user-management"
 )
 
@@ -143,6 +144,15 @@ func TestSignup(t *testing.T) {
 	}
 
 	t.Run("Testing without payload", func(t *testing.T) {
+		resp, err := s.SignupWithEmail(context.Background(), nil)
+
+		if err.Error() != "missing argument" || resp != nil {
+			t.Errorf("wrong error: %s", err.Error())
+			t.Errorf("or response: %s", resp)
+		}
+	})
+
+	t.Run("Testing with empty payload", func(t *testing.T) {
 		resp, err := s.SignupWithEmail(context.Background(), emptyNewUserReq)
 
 		if err.Error() != "email not valid" || resp != nil {
@@ -202,153 +212,99 @@ func TestSignup(t *testing.T) {
 	})
 }
 
-/*
 // Test login
 func TestLogin(t *testing.T) {
-	r := gin.Default()
-	r.POST("/v1/signup", bindUserFromBodyMiddleware(), signupHandl)
-	r.POST("/v1/login", bindUserFromBodyMiddleware(), loginHandl)
-
-	validUser := User{
+	// Create Test User
+	testUser := User{
 		Email:    "test@test.com",
-		Password: "SuperSecurePassword",
-	}
-	hashedUser := User{
-		Email:    validUser.Email,
-		Password: hashPassword(validUser.Password),
+		Password: hashPassword("SuperSecurePassword"),
 		Roles:    []string{"PARTICIPANT"},
 	}
 
-	// db buildup
-	id, err := CreateUser(hashedUser)
+	id, err := CreateUser(testUser)
 	if err != nil {
 		t.Errorf("error creating user for testing login")
+		return
 	}
-	validUser.ID, err = primitive.ObjectIDFromHex(id)
+	testUser.ID, err = primitive.ObjectIDFromHex(id)
 	if err != nil {
 		t.Errorf("error converting id")
+		return
 	}
 
+	s := userManagementServer{}
+
 	t.Run("Testing without payload", func(t *testing.T) {
-		req, _ := http.NewRequest("POST", "/v1/login", nil)
-		w := performRequest(r, req)
-
-		var response map[string]string
-		if err := json.Unmarshal([]byte(w.Body.String()), &response); err != nil {
-			t.Errorf("error parsing response body: %s", err.Error())
-		}
-
-		value, exists := response["error"]
-		if w.Code != http.StatusBadRequest || !exists || value != "payload missing" {
-			t.Errorf("status code: %d", w.Code)
-			t.Errorf("response content: %s", w.Body.String())
+		resp, err := s.LoginWithEmail(context.Background(), nil)
+		if err == nil || err.Error() != "invalid username and/or password" || resp != nil {
+			t.Errorf("wrong error: %s", err.Error())
+			t.Errorf("or response: %s", resp)
 			return
 		}
 	})
 
-	t.Run("Testing with missing fields", func(t *testing.T) {
-		emptyUser := &User{
-			Email:    "",
-			Password: "",
-		}
+	t.Run("Testing with empty payload", func(t *testing.T) {
+		req := &influenzanet.UserCredentials{}
 
-		payload, _ := json.Marshal(emptyUser)
-
-		req, _ := http.NewRequest("POST", "/v1/login", bytes.NewBuffer(payload))
-		req.Header.Add("Content-Type", "application/json")
-		w := performRequest(r, req)
-
-		var response map[string]string
-		if err := json.Unmarshal([]byte(w.Body.String()), &response); err != nil {
-			t.Errorf("error parsing response body: %s", err.Error())
-		}
-
-		_, exists := response["error"]
-		if w.Code != http.StatusBadRequest || !exists {
-			t.Errorf("status code: %d", w.Code)
-			t.Errorf("response content: %s", w.Body.String())
+		resp, err := s.LoginWithEmail(context.Background(), req)
+		if err == nil || err.Error() != "invalid username and/or password" || resp != nil {
+			t.Errorf("wrong error: %s", err.Error())
+			t.Errorf("or response: %s", resp)
 			return
 		}
 	})
 
 	t.Run("Testing with wrong email", func(t *testing.T) {
-		invalidUser1 := &User{
-			Email:    "test@test11.com",
-			Password: "SuperSecurePassword",
+		req := &influenzanet.UserCredentials{
+			Email:    "test1@test.com",
+			Password: testUser.Password,
 		}
 
-		payload, _ := json.Marshal(invalidUser1)
-
-		req, _ := http.NewRequest("POST", "/v1/login", bytes.NewBuffer(payload))
-		req.Header.Add("Content-Type", "application/json")
-		w := performRequest(r, req)
-
-		var response map[string]string
-		if err := json.Unmarshal([]byte(w.Body.String()), &response); err != nil {
-			t.Errorf("error parsing response body: %s", err.Error())
-		}
-
-		_, exists := response["error"]
-		if w.Code != http.StatusUnauthorized || !exists {
-			t.Errorf("status code: %d", w.Code)
-			t.Errorf("response content: %s", w.Body.String())
+		resp, err := s.LoginWithEmail(context.Background(), req)
+		if err == nil || err.Error() != "invalid username and/or password" || resp != nil {
+			t.Errorf("wrong error: %s", err.Error())
+			t.Errorf("or response: %s", resp)
 			return
 		}
 	})
 
 	t.Run("Testing with wrong password", func(t *testing.T) {
-		invalidUser2 := &User{
-			Email:    "test@test.com",
-			Password: "SuperWrongPassword",
+		req := &influenzanet.UserCredentials{
+			Email:    testUser.Email,
+			Password: "SuperSecurePassword1",
 		}
 
-		payload, _ := json.Marshal(invalidUser2)
-
-		req, _ := http.NewRequest("POST", "/v1/login", bytes.NewBuffer(payload))
-		req.Header.Add("Content-Type", "application/json")
-		w := performRequest(r, req)
-
-		var response map[string]string
-		if err := json.Unmarshal([]byte(w.Body.String()), &response); err != nil {
-			t.Errorf("error parsing response body: %s", err.Error())
-		}
-
-		_, exists := response["error"]
-		if w.Code != http.StatusUnauthorized || !exists {
-			t.Errorf("status code: %d", w.Code)
-			t.Errorf("response content: %s", w.Body.String())
+		resp, err := s.LoginWithEmail(context.Background(), req)
+		if err == nil || err.Error() != "invalid username and/or password" || resp != nil {
+			t.Errorf("wrong error: %s", err.Error())
+			t.Errorf("or response: %s", resp)
 			return
 		}
 	})
 
 	t.Run("Testing with valid fields", func(t *testing.T) {
-		validUser2 := User{
-			Email:    validUser.Email,
-			Password: validUser.Password,
-		}
-		payload, _ := json.Marshal(validUser2)
-
-		req, _ := http.NewRequest("POST", "/v1/login", bytes.NewBuffer(payload))
-		req.Header.Add("Content-Type", "application/json")
-		w := performRequest(r, req)
-
-		var response map[string]interface{}
-		if err := json.Unmarshal([]byte(w.Body.String()), &response); err != nil {
-			t.Errorf("error parsing response body: %s", err.Error())
+		req := &influenzanet.UserCredentials{
+			Email:    testUser.Email,
+			Password: "SuperSecurePassword",
 		}
 
-		_, exists := response["error"]
-		if w.Code != http.StatusOK || exists {
-			t.Errorf("status code: %d", w.Code)
-			t.Errorf("response content: %s", w.Body.String())
+		resp, err := s.LoginWithEmail(context.Background(), req)
+
+		if err != nil {
+			t.Errorf("unexpected error: %s", err.Error())
+			return
+		}
+		if resp == nil || len(resp.UserId) < 3 || len(resp.Roles) < 1 {
+			t.Errorf("unexpected response: %s", resp)
 			return
 		}
 	})
 
 	// db cleanup
-	DeleteUser(validUser.ID.Hex())
+	DeleteUser(testUser.ID.Hex())
 }
 
+/*
 func TestPasswordChange(t *testing.T) {
 	r := gin.Default()
 	r.POST("/v1/login", bindUserFromBodyMiddleware(), loginHandl)
