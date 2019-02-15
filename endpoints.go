@@ -3,10 +3,8 @@ package main
 import (
 	"context"
 	"errors"
-	"net/http"
 	"regexp"
 
-	"github.com/gin-gonic/gin"
 	"github.com/golang/protobuf/ptypes/empty"
 	"golang.org/x/crypto/bcrypt"
 
@@ -30,6 +28,10 @@ func checkEmailFormat(email string) bool {
 	re := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
 
 	return re.MatchString(email)
+}
+
+func checkPasswordFormat(password string) bool {
+	return len(password) > 5
 }
 
 func (s *userManagementServer) Status(ctx context.Context, _ *empty.Empty) (*influenzanet.Status, error) {
@@ -59,52 +61,46 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, creds *influe
 	return response, nil
 }
 
-func (s *userManagementServer) SignupWithEmail(ctx context.Context, creds *user_api.NewUser) (*user_api.UserAuthInfo, error) {
-	return nil, errors.New("not implemented")
+func (s *userManagementServer) SignupWithEmail(ctx context.Context, u *user_api.NewUser) (*user_api.UserAuthInfo, error) {
+	if !checkEmailFormat(u.Email) {
+		return nil, errors.New("email not valid")
+	}
+	if !checkPasswordFormat(u.Password) {
+		return nil, errors.New("password too weak")
+	}
+
+	password := hashPassword(u.Password)
+
+	// Create user DB object from request:
+	newUser := User{
+		Email:    u.Email,
+		Password: password,
+		Roles:    []string{"PARTICIPANT"},
+		// TODO: add profile
+	}
+
+	id, err := CreateUser(newUser)
+
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO: generate email confirmation token
+	// TODO: send email with confirmation request
+
+	response := &user_api.UserAuthInfo{
+		UserId:            id,
+		Roles:             newUser.Roles,
+		AuthenticatedRole: newUser.Roles[0],
+	}
+	return response, nil
 }
 
 func (s *userManagementServer) ChangePassword(ctx context.Context, req *user_api.PasswordChangeMsg) (*influenzanet.Status, error) {
 	return nil, errors.New("not implemented")
 }
 
-func signupHandl(c *gin.Context) {
-
-	u := c.MustGet("user").(User)
-
-	if !checkEmailFormat(u.Email) {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "email not valid"})
-		return
-	}
-
-	password := hashPassword(u.Password)
-
-	if password == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "missing password"})
-		return
-	}
-
-	u.Password = password
-	u.Roles = []string{"PARTICIPANT"}
-
-	id, err := CreateUser(u)
-
-	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	// TODO: generate email confirmation token
-	// TODO: send email with confirmation request
-
-	response := &UserLoginResponse{
-		ID:                id,
-		Roles:             u.Roles,
-		AuthenticatedRole: u.Role,
-	}
-
-	c.JSON(http.StatusCreated, response)
-}
-
+/*
 func passwordChangeHandl(c *gin.Context) {
 	u := c.MustGet("user").(User)
 
@@ -141,3 +137,4 @@ func passwordChangeHandl(c *gin.Context) {
 
 	c.JSON(http.StatusOK, gin.H{"success": true})
 }
+*/
