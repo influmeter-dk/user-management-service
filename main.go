@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/gin-gonic/gin"
 	"github.com/mongodb/mongo-go-driver/mongo"
 	"google.golang.org/grpc"
 	yaml "gopkg.in/yaml.v2"
@@ -88,7 +87,6 @@ func dbInit() {
 func init() {
 	readConfig()
 	dbInit()
-	gin.SetMode(gin.ReleaseMode)
 }
 
 func main() {

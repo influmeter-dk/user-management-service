@@ -1,28 +1,18 @@
 package main
 
 import (
-	"bytes"
-	"encoding/json"
-	"net/http"
-	"net/http/httptest"
+	"context"
 	"os"
 	"testing"
 
-	"github.com/gin-gonic/gin"
 	"github.com/mongodb/mongo-go-driver/bson/primitive"
+
+	user_api "github.com/Influenzanet/api/user-management"
 )
 
 // Pre-Test Setup
 func TestMain(m *testing.M) {
-	gin.SetMode(gin.TestMode)
-
 	os.Exit(m.Run())
-}
-
-func performRequest(r http.Handler, req *http.Request) *httptest.ResponseRecorder {
-	w := httptest.NewRecorder()
-	r.ServeHTTP(w, req)
-	return w
 }
 
 // Testing Database Interface methods
@@ -132,140 +122,87 @@ func TestDbInterfaceMethods(t *testing.T) {
 	})
 }
 
-// Test middleware
-// TODO: move some tests that only matter to middleware to seperate testfunction
-
 // Test signup
 func TestSignup(t *testing.T) {
-	r := gin.Default()
-	r.POST("/v1/signup", bindUserFromBodyMiddleware(), signupHandl)
+	s := userManagementServer{}
 
-	validUser := &User{
+	emptyNewUserReq := &user_api.NewUser{}
+
+	wrongEmailFormatNewUserReq := &user_api.NewUser{
+		Email:    "my-email",
+		Password: "SuperSecurePassword",
+	}
+
+	wrongPasswordFormatNewUserReq := &user_api.NewUser{
+		Email:    "test@test.com",
+		Password: "short",
+	}
+	validNewUserReq := &user_api.NewUser{
 		Email:    "test@test.com",
 		Password: "SuperSecurePassword",
 	}
 
 	t.Run("Testing without payload", func(t *testing.T) {
-		req, _ := http.NewRequest("POST", "/v1/signup", nil)
-		w := performRequest(r, req)
+		resp, err := s.SignupWithEmail(context.Background(), emptyNewUserReq)
 
-		var response map[string]string
-		if err := json.Unmarshal([]byte(w.Body.String()), &response); err != nil {
-			t.Errorf("error parsing response body: %s", err.Error())
-		}
-
-		value, exists := response["error"]
-		if w.Code != http.StatusBadRequest || !exists || value != "payload missing" {
-			t.Errorf("status code: %d", w.Code)
-			t.Errorf("response content: %s", w.Body.String())
-			return
+		if err.Error() != "email not valid" || resp != nil {
+			t.Errorf("wrong error: %s", err.Error())
+			t.Errorf("or response: %s", resp)
 		}
 	})
 
-	t.Run("Testing with missing fields", func(t *testing.T) {
-		emptyUser := &User{
-			Email:    "",
-			Password: "",
-		}
+	t.Run("Testing with wrong email format", func(t *testing.T) {
+		resp, err := s.SignupWithEmail(context.Background(), wrongEmailFormatNewUserReq)
 
-		payload, _ := json.Marshal(emptyUser)
-
-		req, _ := http.NewRequest("POST", "/v1/signup", bytes.NewBuffer(payload))
-		req.Header.Add("Content-Type", "application/json")
-		w := performRequest(r, req)
-
-		var response map[string]string
-		if err := json.Unmarshal([]byte(w.Body.String()), &response); err != nil {
-			t.Errorf("error parsing response body: %s", err.Error())
-		}
-
-		_, exists := response["error"]
-		if w.Code != http.StatusBadRequest || !exists {
-			t.Errorf("status code: %d", w.Code)
-			t.Errorf("response content: %s", w.Body.String())
-			return
+		if err.Error() != "email not valid" || resp != nil {
+			t.Errorf("wrong error: %s", err.Error())
+			t.Errorf("or response: %s", resp)
 		}
 	})
 
-	t.Run("Testing with invalid email field", func(t *testing.T) {
-		faultyUser := &User{
-			Email:    "asdffsadiidijlkfj.sdf",
-			Password: "SuperSecurePassword",
-		}
+	t.Run("Testing with wrong password format", func(t *testing.T) {
+		resp, err := s.SignupWithEmail(context.Background(), wrongPasswordFormatNewUserReq)
 
-		payload, _ := json.Marshal(faultyUser)
-
-		req, _ := http.NewRequest("POST", "/v1/signup", bytes.NewBuffer(payload))
-		req.Header.Add("Content-Type", "application/json")
-		w := performRequest(r, req)
-
-		var response map[string]string
-		if err := json.Unmarshal([]byte(w.Body.String()), &response); err != nil {
-			t.Errorf("error parsing response body: %s", err.Error())
-		}
-
-		_, exists := response["error"]
-		if w.Code != http.StatusBadRequest || !exists {
-			t.Errorf("status code: %d", w.Code)
-			t.Errorf("response content: %s", w.Body.String())
-			return
+		if err.Error() != "password too weak" || resp != nil {
+			t.Errorf("wrong error: %s", err.Error())
+			t.Errorf("or response: %s", resp)
 		}
 	})
 
 	t.Run("Testing with valid fields", func(t *testing.T) {
-		payload, _ := json.Marshal(validUser)
+		resp, err := s.SignupWithEmail(context.Background(), validNewUserReq)
 
-		req, _ := http.NewRequest("POST", "/v1/signup", bytes.NewBuffer(payload))
-		req.Header.Add("Content-Type", "application/json")
-		w := performRequest(r, req)
-
-		var response map[string]interface{}
-		if err := json.Unmarshal([]byte(w.Body.String()), &response); err != nil {
-			t.Errorf("error parsing response body: %s", err.Error())
-		}
-
-		_, exists := response["error"]
-		if w.Code != http.StatusCreated || exists {
-			t.Errorf("status code: %d", w.Code)
-			t.Errorf("response content: %s", w.Body.String())
-			return
-		}
-		var err error
-		validUser.ID, err = primitive.ObjectIDFromHex(response["user_id"].(string))
 		if err != nil {
-			t.Errorf("error adding ID to valid user\n%s", err)
-		}
-	})
-
-	t.Run("Testing with existing user", func(t *testing.T) {
-		validUser2 := &User{
-			Email:    validUser.Email,
-			Password: validUser.Password,
-		}
-
-		payload, _ := json.Marshal(validUser2)
-
-		req, _ := http.NewRequest("POST", "/v1/signup", bytes.NewBuffer(payload))
-		req.Header.Add("Content-Type", "application/json")
-		w := performRequest(r, req)
-
-		var response map[string]string
-		if err := json.Unmarshal([]byte(w.Body.String()), &response); err != nil {
-			t.Errorf("error parsing response body: %s", err.Error())
-		}
-
-		_, exists := response["error"]
-		if w.Code != http.StatusBadRequest || !exists {
-			t.Errorf("status code: %d", w.Code)
-			t.Errorf("response content: %s", w.Body.String())
+			t.Errorf("unexpected error: %s", err.Error())
 			return
 		}
+		if resp == nil || len(resp.UserId) < 3 || len(resp.Roles) < 1 {
+			t.Errorf("unexpected response: %s", resp)
+			return
+		}
+		DeleteUser(resp.UserId)
 	})
 
-	// db cleanup
-	DeleteUser(validUser.ID.Hex())
+	t.Run("Testing signupwith duplicate user (same email)", func(t *testing.T) {
+		resp, err := s.SignupWithEmail(context.Background(), validNewUserReq)
+		if err != nil {
+			t.Errorf("unexpected error: %s", err.Error())
+			return
+		}
+		uID := resp.UserId
+
+		// Try to signup again:
+		resp, err = s.SignupWithEmail(context.Background(), validNewUserReq)
+		if err == nil || resp != nil {
+			t.Errorf("should fail, when user exists already, wrong response: %s", resp)
+			return
+		}
+
+		DeleteUser(uID)
+	})
 }
 
+/*
 // Test login
 func TestLogin(t *testing.T) {
 	r := gin.Default()
@@ -604,3 +541,4 @@ func TestPasswordChange(t *testing.T) {
 	// TEAR DOWN
 	DeleteUser(testuserID)
 }
+*/
