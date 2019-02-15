@@ -106,44 +106,34 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, u *user_api.
 }
 
 func (s *userManagementServer) ChangePassword(ctx context.Context, req *user_api.PasswordChangeMsg) (*influenzanet.Status, error) {
-	return nil, errors.New("not implemented")
-}
+	if req == nil || req.Auth == nil {
+		return nil, errors.New("missing argument")
+	}
 
-/*
-func passwordChangeHandl(c *gin.Context) {
-	u := c.MustGet("user").(User)
+	if !checkPasswordFormat(req.NewPassword) {
+		return nil, errors.New("new password too weak")
+	}
 
-	user, err := FindUserByEmail(u.Email)
+	user, err := FindUserByID(req.Auth.UserId)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "invalid username and/or password"})
-		return
+		return nil, errors.New("invalid user and/or password")
 	}
 
-	if comparePasswordWithHash(user.Password, u.Password) != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "invalid username and/or password"})
-		return
+	if comparePasswordWithHash(user.Password, req.OldPassword) != nil {
+		return nil, errors.New("invalid user and/or password")
 	}
 
-	if u.NewPassword == "" || u.NewPasswordRepeat == "" || u.NewPassword != u.NewPasswordRepeat {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "passwords do not match"})
-		return
-	}
-
-	password := hashPassword(u.NewPassword)
-
-	if password == "" {
-		c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "missing new password"})
-		return
-	}
-
-	user.Password = password
+	user.Password = hashPassword(req.NewPassword)
 
 	err = UpdateUser(user)
 	if err != nil {
-		c.AbortWithStatusJSON(http.StatusInternalServerError, err.Error())
-		return
+		return nil, err
 	}
 
-	c.JSON(http.StatusOK, gin.H{"success": true})
+	// TODO: initiate email notification for user about password update
+
+	return &influenzanet.Status{
+		Status: influenzanet.Status_NORMAL,
+		Msg:    "password changed",
+	}, nil
 }
-*/

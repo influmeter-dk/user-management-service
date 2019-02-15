@@ -304,197 +304,129 @@ func TestLogin(t *testing.T) {
 	DeleteUser(testUser.ID.Hex())
 }
 
-/*
 func TestPasswordChange(t *testing.T) {
-	r := gin.Default()
-	r.POST("/v1/login", bindUserFromBodyMiddleware(), loginHandl)
-	r.POST("/v1/change-password", bindUserFromBodyMiddleware(), passwordChangeHandl)
+	oldPassword := "SuperSecurePassword"
+	newPassword := "NewSuperSecurePassword"
 
-	// BUILD UP
-	testuser := User{
+	// Create Test User
+	testUser := User{
 		Email:    "test@test.com",
-		Password: hashPassword("testpassword"),
+		Password: hashPassword(oldPassword),
 		Roles:    []string{"PARTICIPANT"},
 	}
 
-	testuserID, testuserErr := CreateUser(testuser)
-	if testuserErr != nil {
-		t.Errorf("error creating user for testing login")
+	id, err := CreateUser(testUser)
+	if err != nil {
+		t.Errorf("error creating users for testing pw change")
+		return
+	}
+	testUser.ID, err = primitive.ObjectIDFromHex(id)
+	if err != nil {
+		t.Errorf("error converting id")
+		return
 	}
 
+	s := userManagementServer{}
+
 	t.Run("Testing without payload", func(t *testing.T) {
-		req, _ := http.NewRequest("POST", "/v1/change-password", nil)
-		w := performRequest(r, req)
+		resp, err := s.ChangePassword(context.Background(), nil)
 
-		var response map[string]string
-		if err := json.Unmarshal([]byte(w.Body.String()), &response); err != nil {
-			t.Errorf("error parsing response body: %s", err.Error())
-		}
-
-		value, exists := response["error"]
-		if w.Code != http.StatusBadRequest || !exists || value != "payload missing" {
-			t.Errorf("status code: %d", w.Code)
-			t.Errorf("response content: %s", w.Body.String())
-			return
+		if err.Error() != "missing argument" || resp != nil {
+			t.Errorf("wrong error: %s", err.Error())
+			t.Errorf("or response: %s", resp)
 		}
 	})
 
-	t.Run("Testing with missing fields", func(t *testing.T) {
-		emptyUser := &User{
-			Email:    "",
-			Password: "",
-		}
-
-		payload, _ := json.Marshal(emptyUser)
-
-		req, _ := http.NewRequest("POST", "/v1/change-password", bytes.NewBuffer(payload))
-		req.Header.Add("Content-Type", "application/json")
-		w := performRequest(r, req)
-
-		var response map[string]string
-		if err := json.Unmarshal([]byte(w.Body.String()), &response); err != nil {
-			t.Errorf("error parsing response body: %s", err.Error())
-		}
-
-		_, exists := response["error"]
-		if w.Code != http.StatusBadRequest || !exists {
-			t.Errorf("status code: %d", w.Code)
-			t.Errorf("response content: %s", w.Body.String())
-			return
+	t.Run("Testing without auth fields", func(t *testing.T) {
+		req := &user_api.PasswordChangeMsg{}
+		resp, err := s.ChangePassword(context.Background(), req)
+		if err.Error() != "missing argument" || resp != nil {
+			t.Errorf("wrong error: %s", err.Error())
+			t.Errorf("or response: %s", resp)
 		}
 	})
 
-	t.Run("Testing with wrong email", func(t *testing.T) {
-		invalidUser := &User{
-			Email:    "testtest@test.com",
-			Password: "testpassword",
+	t.Run("Testing with wrong user id", func(t *testing.T) {
+		req := &user_api.PasswordChangeMsg{
+			Auth: &influenzanet.ParsedToken{
+				UserId: "test-wrong-id",
+				Roles:  []string{"PARTICIPANT"},
+			},
+			OldPassword: oldPassword,
+			NewPassword: newPassword,
 		}
-
-		payload, _ := json.Marshal(invalidUser)
-
-		req, _ := http.NewRequest("POST", "/v1/change-password", bytes.NewBuffer(payload))
-		req.Header.Add("Content-Type", "application/json")
-		w := performRequest(r, req)
-
-		var response map[string]string
-		if err := json.Unmarshal([]byte(w.Body.String()), &response); err != nil {
-			t.Errorf("error parsing response body: %s", err.Error())
-		}
-
-		_, exists := response["error"]
-		if w.Code != http.StatusUnauthorized || !exists {
-			t.Errorf("status code: %d", w.Code)
-			t.Errorf("response content: %s", w.Body.String())
-			return
+		resp, err := s.ChangePassword(context.Background(), req)
+		if err.Error() != "invalid user and/or password" || resp != nil {
+			t.Errorf("wrong error: %s", err.Error())
+			t.Errorf("or response: %s", resp)
 		}
 	})
 
-	t.Run("Testing with wrong password", func(t *testing.T) {
-		invalidUser := &User{
-			Email:    "test@test.com",
-			Password: "SuperWrongPassword",
+	t.Run("Testing with wrong old password", func(t *testing.T) {
+		req := &user_api.PasswordChangeMsg{
+			Auth: &influenzanet.ParsedToken{
+				UserId: id,
+				Roles:  []string{"PARTICIPANT"},
+			},
+			OldPassword: oldPassword + "wrong",
+			NewPassword: newPassword,
 		}
-
-		payload, _ := json.Marshal(invalidUser)
-
-		req, _ := http.NewRequest("POST", "/v1/change-password", bytes.NewBuffer(payload))
-		req.Header.Add("Content-Type", "application/json")
-		w := performRequest(r, req)
-
-		var response map[string]string
-		if err := json.Unmarshal([]byte(w.Body.String()), &response); err != nil {
-			t.Errorf("error parsing response body: %s", err.Error())
-		}
-
-		_, exists := response["error"]
-		if w.Code != http.StatusUnauthorized || !exists {
-			t.Errorf("status code: %d", w.Code)
-			t.Errorf("response content: %s", w.Body.String())
-			return
+		resp, err := s.ChangePassword(context.Background(), req)
+		if err.Error() != "invalid user and/or password" || resp != nil {
+			t.Errorf("wrong error: %s", err.Error())
+			t.Errorf("or response: %s", resp)
 		}
 	})
 
-	t.Run("Testing with non matching new passwords", func(t *testing.T) {
-		invalidUser := &User{
-			Email:             "test@test.com",
-			Password:          "testpassword",
-			NewPassword:       "newtestpassword",
-			NewPasswordRepeat: "newtestpassword1",
+	t.Run("Testing with too weak new password", func(t *testing.T) {
+		req := &user_api.PasswordChangeMsg{
+			Auth: &influenzanet.ParsedToken{
+				UserId: id,
+				Roles:  []string{"PARTICIPANT"},
+			},
+			OldPassword: oldPassword,
+			NewPassword: "short",
 		}
-
-		payload, _ := json.Marshal(invalidUser)
-
-		req, _ := http.NewRequest("POST", "/v1/change-password", bytes.NewBuffer(payload))
-		req.Header.Add("Content-Type", "application/json")
-		w := performRequest(r, req)
-
-		var response map[string]string
-		if err := json.Unmarshal([]byte(w.Body.String()), &response); err != nil {
-			t.Errorf("error parsing response body: %s", err.Error())
-		}
-
-		_, exists := response["error"]
-		if w.Code != http.StatusBadRequest || !exists {
-			t.Errorf("status code: %d", w.Code)
-			t.Errorf("response content: %s", w.Body.String())
-			return
+		resp, err := s.ChangePassword(context.Background(), req)
+		if err.Error() != "new password too weak" || resp != nil {
+			t.Errorf("wrong error: %s", err.Error())
+			t.Errorf("or response: %s", resp)
 		}
 	})
 
-	t.Run("Testing with valid fields", func(t *testing.T) {
-		validUser := &User{
-			Email:             "test@test.com",
-			Password:          "testpassword",
-			NewPassword:       "newtestpassword",
-			NewPasswordRepeat: "newtestpassword",
+	t.Run("Testing with valid data and new password", func(t *testing.T) {
+		req := &user_api.PasswordChangeMsg{
+			Auth: &influenzanet.ParsedToken{
+				UserId: id,
+				Roles:  []string{"PARTICIPANT"},
+			},
+			OldPassword: oldPassword,
+			NewPassword: newPassword,
+		}
+		resp, err := s.ChangePassword(context.Background(), req)
+		if err != nil || resp == nil {
+			t.Errorf("unexpected error: %s", err.Error())
+			t.Errorf("or missing response: %s", resp)
 		}
 
-		payload, _ := json.Marshal(validUser)
-
-		req, _ := http.NewRequest("POST", "/v1/change-password", bytes.NewBuffer(payload))
-		req.Header.Add("Content-Type", "application/json")
-		w := performRequest(r, req)
-
-		var response map[string]interface{}
-		if err := json.Unmarshal([]byte(w.Body.String()), &response); err != nil {
-			t.Errorf("error parsing response body: %s", err.Error())
+		// Check login with new credentials:
+		req2 := &influenzanet.UserCredentials{
+			Email:    testUser.Email,
+			Password: newPassword,
 		}
 
-		_, errExists := response["error"]
-		value, valueExists := response["success"].(bool)
-		if w.Code != http.StatusOK || errExists || !valueExists || !value {
-			t.Errorf("status code: %d", w.Code)
-			t.Errorf("response content: %s", w.Body.String())
+		resp2, err := s.LoginWithEmail(context.Background(), req2)
+
+		if err != nil {
+			t.Errorf("unexpected error: %s", err.Error())
 			return
 		}
-	})
-
-	t.Run("Testing login with new password", func(t *testing.T) {
-		validUser := &User{
-			Email:    "test@test.com",
-			Password: "newtestpassword",
-		}
-
-		payload, _ := json.Marshal(validUser)
-
-		req, _ := http.NewRequest("POST", "/v1/login", bytes.NewBuffer(payload))
-		req.Header.Add("Content-Type", "application/json")
-		w := performRequest(r, req)
-
-		var response map[string]interface{}
-		if err := json.Unmarshal([]byte(w.Body.String()), &response); err != nil {
-			t.Errorf("error parsing response body: %s", err.Error())
-		}
-
-		_, exists := response["error"]
-		if w.Code != http.StatusOK || exists {
-			t.Errorf("status code: %d", w.Code)
-			t.Errorf("response content: %s", w.Body.String())
+		if resp2 == nil || len(resp2.UserId) < 3 || len(resp2.Roles) < 1 {
+			t.Errorf("unexpected response: %s", resp2)
 			return
 		}
 	})
 
 	// TEAR DOWN
-	DeleteUser(testuserID)
+	DeleteUser(testUser.ID.Hex())
 }
-*/
