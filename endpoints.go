@@ -8,8 +8,8 @@ import (
 	"github.com/golang/protobuf/ptypes/empty"
 	"golang.org/x/crypto/bcrypt"
 
-	influenzanet "github.com/Influenzanet/api"
-	user_api "github.com/Influenzanet/api/user-management"
+	influenzanet "github.com/Influenzanet/api/go"
+	user_api "github.com/Influenzanet/api/go/user-management"
 )
 
 func hashPassword(password string) string {
