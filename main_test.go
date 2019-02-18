@@ -7,8 +7,8 @@ import (
 
 	"github.com/mongodb/mongo-go-driver/bson/primitive"
 
-	influenzanet "github.com/Influenzanet/api/go"
-	user_api "github.com/Influenzanet/api/go/user-management"
+	influenzanet "github.com/Influenzanet/api/dist/go"
+	user_api "github.com/Influenzanet/api/dist/go/user-management"
 )
 
 // Pre-Test Setup

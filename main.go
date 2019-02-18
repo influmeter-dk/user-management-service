@@ -13,7 +13,7 @@ import (
 	"google.golang.org/grpc"
 	yaml "gopkg.in/yaml.v2"
 
-	user_api "github.com/Influenzanet/api/go/user-management"
+	user_api "github.com/Influenzanet/api/dist/go/user-management"
 )
 
 type config struct {
