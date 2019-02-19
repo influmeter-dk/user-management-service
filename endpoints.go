@@ -42,7 +42,12 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, creds *influe
 	if creds == nil {
 		return nil, errors.New("invalid username and/or password")
 	}
-	user, err := FindUserByEmail(creds.Email)
+
+	instanceID := creds.InstanceId
+	if instanceID == "" {
+		instanceID = "default"
+	}
+	user, err := findUserByEmail(instanceID, creds.Email)
 
 	if err != nil {
 		return nil, errors.New("invalid username and/or password")
@@ -52,43 +57,41 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, creds *influe
 		return nil, errors.New("invalid username and/or password")
 	}
 
-	if creds.LoginRole == "" {
-		creds.LoginRole = "PARTICIPANT"
-	}
-	if !user.HasRole(creds.LoginRole) {
-		return nil, errors.New("missing required role")
-	}
-
 	response := &user_api.UserAuthInfo{
-		UserId:            user.ID.Hex(),
-		Roles:             user.Roles,
-		AuthenticatedRole: creds.LoginRole,
+		UserId:     user.ID.Hex(),
+		Roles:      user.Roles,
+		InstanceId: instanceID,
 	}
 	return response, nil
 }
 
 func (s *userManagementServer) SignupWithEmail(ctx context.Context, u *user_api.NewUser) (*user_api.UserAuthInfo, error) {
-	if u == nil {
+	if u == nil || u.Auth == nil {
 		return nil, errors.New("missing argument")
 	}
-	if !checkEmailFormat(u.Email) {
+	if !checkEmailFormat(u.Auth.Email) {
 		return nil, errors.New("email not valid")
 	}
-	if !checkPasswordFormat(u.Password) {
+	if !checkPasswordFormat(u.Auth.Password) {
 		return nil, errors.New("password too weak")
 	}
 
-	password := hashPassword(u.Password)
+	password := hashPassword(u.Auth.Password)
 
 	// Create user DB object from request:
 	newUser := User{
-		Email:    u.Email,
+		Email:    u.Auth.Email,
 		Password: password,
 		Roles:    []string{"PARTICIPANT"},
 		// TODO: add profile
 	}
 
-	id, err := CreateUser(newUser)
+	instanceID := u.Auth.InstanceId
+	if instanceID == "" {
+		instanceID = "default"
+	}
+
+	id, err := createUserDB(instanceID, newUser)
 
 	if err != nil {
 		return nil, err
@@ -98,9 +101,9 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, u *user_api.
 	// TODO: send email with confirmation request
 
 	response := &user_api.UserAuthInfo{
-		UserId:            id,
-		Roles:             newUser.Roles,
-		AuthenticatedRole: newUser.Roles[0],
+		UserId:     id,
+		Roles:      newUser.Roles,
+		InstanceId: instanceID,
 	}
 	return response, nil
 }
@@ -114,7 +117,7 @@ func (s *userManagementServer) ChangePassword(ctx context.Context, req *user_api
 		return nil, errors.New("new password too weak")
 	}
 
-	user, err := FindUserByID(req.Auth.UserId)
+	user, err := findUserByID(req.Auth.InstanceId, req.Auth.UserId)
 	if err != nil {
 		return nil, errors.New("invalid user and/or password")
 	}
@@ -125,7 +128,7 @@ func (s *userManagementServer) ChangePassword(ctx context.Context, req *user_api
 
 	user.Password = hashPassword(req.NewPassword)
 
-	err = UpdateUser(user)
+	err = updateUserDB(req.Auth.InstanceId, user)
 	if err != nil {
 		return nil, err
 	}

@@ -32,7 +32,6 @@ type userManagementServer struct {
 }
 
 var dbClient *mongo.Client
-var userCollection *mongo.Collection
 var conf config
 
 func readConfig() {
@@ -80,8 +79,6 @@ func dbInit() {
 	if err != nil {
 		log.Fatal(err)
 	}
-
-	userCollection = dbClient.Database("users").Collection("users")
 }
 
 func init() {

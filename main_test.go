@@ -2,8 +2,11 @@ package main
 
 import (
 	"context"
+	"log"
 	"os"
+	"strconv"
 	"testing"
+	"time"
 
 	"github.com/mongodb/mongo-go-driver/bson/primitive"
 
@@ -11,9 +14,24 @@ import (
 	user_api "github.com/Influenzanet/api/dist/go/user-management"
 )
 
+var testInstanceID = "test-db-" + strconv.FormatInt(time.Now().Unix(), 10)
+
+func dropTestDB() {
+	log.Println("Drop test database")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	err := dbClient.Database(testInstanceID).Drop(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
 // Pre-Test Setup
 func TestMain(m *testing.M) {
-	os.Exit(m.Run())
+	result := m.Run()
+	dropTestDB()
+	os.Exit(result)
 }
 
 // Testing Database Interface methods
@@ -24,7 +42,7 @@ func TestDbInterfaceMethods(t *testing.T) {
 	}
 
 	t.Run("Testing create user", func(t *testing.T) {
-		id, err := CreateUser(testUser)
+		id, err := createUserDB(testInstanceID, testUser)
 		if err != nil {
 			t.Errorf(err.Error())
 			return
@@ -38,14 +56,14 @@ func TestDbInterfaceMethods(t *testing.T) {
 	})
 
 	t.Run("Testing creating existing user", func(t *testing.T) {
-		_, err := CreateUser(testUser)
+		_, err := createUserDB(testInstanceID, testUser)
 		if err == nil {
 			t.Errorf("user already existed, but created again")
 		}
 	})
 
 	t.Run("Testing find existing user by id", func(t *testing.T) {
-		user, err := FindUserByID(testUser.ID.Hex())
+		user, err := findUserByID(testInstanceID, testUser.ID.Hex())
 		if err != nil {
 			t.Errorf(err.Error())
 			return
@@ -57,7 +75,7 @@ func TestDbInterfaceMethods(t *testing.T) {
 	})
 
 	t.Run("Testing find not existing user by id", func(t *testing.T) {
-		_, err := FindUserByID(testUser.ID.Hex() + "1")
+		_, err := findUserByID(testInstanceID, testUser.ID.Hex()+"1")
 		if err == nil {
 			t.Errorf("user should not be found")
 			return
@@ -65,7 +83,7 @@ func TestDbInterfaceMethods(t *testing.T) {
 	})
 
 	t.Run("Testing find existing user by email", func(t *testing.T) {
-		user, err := FindUserByEmail(testUser.Email)
+		user, err := findUserByEmail(testInstanceID, testUser.Email)
 		if err != nil {
 			t.Errorf(err.Error())
 			return
@@ -77,7 +95,7 @@ func TestDbInterfaceMethods(t *testing.T) {
 	})
 
 	t.Run("Testing find not existing user by email", func(t *testing.T) {
-		_, err := FindUserByEmail(testUser.Email + "1")
+		_, err := findUserByEmail(testInstanceID, testUser.Email+"1")
 		if err == nil {
 			t.Errorf("user should not be found")
 			return
@@ -86,7 +104,7 @@ func TestDbInterfaceMethods(t *testing.T) {
 
 	t.Run("Testing updating existing user's attributes", func(t *testing.T) {
 		testUser.EmailConfirmed = true
-		err := UpdateUser(testUser)
+		err := updateUserDB(testInstanceID, testUser)
 		if err != nil {
 			t.Errorf(err.Error())
 			return
@@ -99,7 +117,7 @@ func TestDbInterfaceMethods(t *testing.T) {
 		currentUser := testUser
 		id, err := primitive.ObjectIDFromHex(testUser.ID.Hex() + "1")
 		currentUser.ID = id
-		err = UpdateUser(currentUser)
+		err = updateUserDB(testInstanceID, currentUser)
 		if err == nil {
 			t.Errorf("cannot update not existing user")
 			return
@@ -107,7 +125,7 @@ func TestDbInterfaceMethods(t *testing.T) {
 	})
 
 	t.Run("Testing deleting existing user", func(t *testing.T) {
-		err := DeleteUser(testUser.ID.Hex())
+		err := deleteUserDB(testInstanceID, testUser.ID.Hex())
 		if err != nil {
 			t.Errorf(err.Error())
 			return
@@ -115,7 +133,7 @@ func TestDbInterfaceMethods(t *testing.T) {
 	})
 
 	t.Run("Testing deleting not existing user", func(t *testing.T) {
-		err := DeleteUser(testUser.ID.Hex() + "1")
+		err := deleteUserDB(testInstanceID, testUser.ID.Hex()+"1")
 		if err != nil {
 			t.Errorf(err.Error())
 			return
@@ -127,20 +145,30 @@ func TestDbInterfaceMethods(t *testing.T) {
 func TestSignup(t *testing.T) {
 	s := userManagementServer{}
 
-	emptyNewUserReq := &user_api.NewUser{}
-
 	wrongEmailFormatNewUserReq := &user_api.NewUser{
-		Email:    "my-email",
-		Password: "SuperSecurePassword",
+		Auth: &influenzanet.UserCredentials{
+			Email:      "test-signup",
+			Password:   "SuperSecurePassword",
+			InstanceId: testInstanceID,
+		},
+		Profile: &user_api.Profile{},
 	}
 
 	wrongPasswordFormatNewUserReq := &user_api.NewUser{
-		Email:    "test@test.com",
-		Password: "short",
+		Auth: &influenzanet.UserCredentials{
+			Email:      "test-signup@test.com",
+			Password:   "short",
+			InstanceId: testInstanceID,
+		},
+		Profile: &user_api.Profile{},
 	}
 	validNewUserReq := &user_api.NewUser{
-		Email:    "test@test.com",
-		Password: "SuperSecurePassword",
+		Auth: &influenzanet.UserCredentials{
+			Email:      "test-signup@test.com",
+			Password:   "SuperSecurePassword",
+			InstanceId: testInstanceID,
+		},
+		Profile: &user_api.Profile{},
 	}
 
 	t.Run("Testing without payload", func(t *testing.T) {
@@ -153,9 +181,10 @@ func TestSignup(t *testing.T) {
 	})
 
 	t.Run("Testing with empty payload", func(t *testing.T) {
-		resp, err := s.SignupWithEmail(context.Background(), emptyNewUserReq)
+		req := &user_api.NewUser{}
+		resp, err := s.SignupWithEmail(context.Background(), req)
 
-		if err.Error() != "email not valid" || resp != nil {
+		if err.Error() != "missing argument" || resp != nil {
 			t.Errorf("wrong error: %s", err.Error())
 			t.Errorf("or response: %s", resp)
 		}
@@ -190,38 +219,44 @@ func TestSignup(t *testing.T) {
 			t.Errorf("unexpected response: %s", resp)
 			return
 		}
-		DeleteUser(resp.UserId)
 	})
 
 	t.Run("Testing signupwith duplicate user (same email)", func(t *testing.T) {
-		resp, err := s.SignupWithEmail(context.Background(), validNewUserReq)
+		req := &user_api.NewUser{
+			Auth: &influenzanet.UserCredentials{
+				Email:      "test-signup-1@test.com",
+				Password:   "SuperSecurePassword",
+				InstanceId: testInstanceID,
+			},
+		}
+		resp, err := s.SignupWithEmail(context.Background(), req)
 		if err != nil {
 			t.Errorf("unexpected error: %s", err.Error())
 			return
 		}
-		uID := resp.UserId
 
 		// Try to signup again:
-		resp, err = s.SignupWithEmail(context.Background(), validNewUserReq)
+		resp, err = s.SignupWithEmail(context.Background(), req)
 		if err == nil || resp != nil {
 			t.Errorf("should fail, when user exists already, wrong response: %s", resp)
 			return
 		}
-
-		DeleteUser(uID)
 	})
 }
 
 // Test login
 func TestLogin(t *testing.T) {
+
+	s := userManagementServer{}
+
 	// Create Test User
 	testUser := User{
-		Email:    "test@test.com",
+		Email:    "test-login@test.com",
 		Password: hashPassword("SuperSecurePassword"),
 		Roles:    []string{"PARTICIPANT"},
 	}
 
-	id, err := CreateUser(testUser)
+	id, err := createUserDB(testInstanceID, testUser)
 	if err != nil {
 		t.Errorf("error creating user for testing login")
 		return
@@ -231,8 +266,6 @@ func TestLogin(t *testing.T) {
 		t.Errorf("error converting id")
 		return
 	}
-
-	s := userManagementServer{}
 
 	t.Run("Testing without payload", func(t *testing.T) {
 		resp, err := s.LoginWithEmail(context.Background(), nil)
@@ -256,8 +289,9 @@ func TestLogin(t *testing.T) {
 
 	t.Run("Testing with wrong email", func(t *testing.T) {
 		req := &influenzanet.UserCredentials{
-			Email:    "test1@test.com",
-			Password: testUser.Password,
+			Email:      "test-login@test.com",
+			Password:   testUser.Password,
+			InstanceId: testInstanceID,
 		}
 
 		resp, err := s.LoginWithEmail(context.Background(), req)
@@ -270,8 +304,9 @@ func TestLogin(t *testing.T) {
 
 	t.Run("Testing with wrong password", func(t *testing.T) {
 		req := &influenzanet.UserCredentials{
-			Email:    testUser.Email,
-			Password: "SuperSecurePassword1",
+			Email:      testUser.Email,
+			Password:   "SuperSecurePassword1",
+			InstanceId: testInstanceID,
 		}
 
 		resp, err := s.LoginWithEmail(context.Background(), req)
@@ -284,8 +319,9 @@ func TestLogin(t *testing.T) {
 
 	t.Run("Testing with valid fields", func(t *testing.T) {
 		req := &influenzanet.UserCredentials{
-			Email:    testUser.Email,
-			Password: "SuperSecurePassword",
+			Email:      testUser.Email,
+			Password:   "SuperSecurePassword",
+			InstanceId: testInstanceID,
 		}
 
 		resp, err := s.LoginWithEmail(context.Background(), req)
@@ -299,23 +335,22 @@ func TestLogin(t *testing.T) {
 			return
 		}
 	})
-
-	// db cleanup
-	DeleteUser(testUser.ID.Hex())
 }
 
 func TestPasswordChange(t *testing.T) {
+	s := userManagementServer{}
+
 	oldPassword := "SuperSecurePassword"
 	newPassword := "NewSuperSecurePassword"
 
 	// Create Test User
 	testUser := User{
-		Email:    "test@test.com",
+		Email:    "test-password-change@test.com",
 		Password: hashPassword(oldPassword),
 		Roles:    []string{"PARTICIPANT"},
 	}
 
-	id, err := CreateUser(testUser)
+	id, err := createUserDB(testInstanceID, testUser)
 	if err != nil {
 		t.Errorf("error creating users for testing pw change")
 		return
@@ -325,8 +360,6 @@ func TestPasswordChange(t *testing.T) {
 		t.Errorf("error converting id")
 		return
 	}
-
-	s := userManagementServer{}
 
 	t.Run("Testing without payload", func(t *testing.T) {
 		resp, err := s.ChangePassword(context.Background(), nil)
@@ -349,8 +382,9 @@ func TestPasswordChange(t *testing.T) {
 	t.Run("Testing with wrong user id", func(t *testing.T) {
 		req := &user_api.PasswordChangeMsg{
 			Auth: &influenzanet.ParsedToken{
-				UserId: "test-wrong-id",
-				Roles:  []string{"PARTICIPANT"},
+				UserId:     "test-wrong-id",
+				Roles:      []string{"PARTICIPANT"},
+				InstanceId: testInstanceID,
 			},
 			OldPassword: oldPassword,
 			NewPassword: newPassword,
@@ -365,8 +399,9 @@ func TestPasswordChange(t *testing.T) {
 	t.Run("Testing with wrong old password", func(t *testing.T) {
 		req := &user_api.PasswordChangeMsg{
 			Auth: &influenzanet.ParsedToken{
-				UserId: id,
-				Roles:  []string{"PARTICIPANT"},
+				UserId:     id,
+				Roles:      []string{"PARTICIPANT"},
+				InstanceId: testInstanceID,
 			},
 			OldPassword: oldPassword + "wrong",
 			NewPassword: newPassword,
@@ -381,8 +416,9 @@ func TestPasswordChange(t *testing.T) {
 	t.Run("Testing with too weak new password", func(t *testing.T) {
 		req := &user_api.PasswordChangeMsg{
 			Auth: &influenzanet.ParsedToken{
-				UserId: id,
-				Roles:  []string{"PARTICIPANT"},
+				UserId:     id,
+				Roles:      []string{"PARTICIPANT"},
+				InstanceId: testInstanceID,
 			},
 			OldPassword: oldPassword,
 			NewPassword: "short",
@@ -397,8 +433,9 @@ func TestPasswordChange(t *testing.T) {
 	t.Run("Testing with valid data and new password", func(t *testing.T) {
 		req := &user_api.PasswordChangeMsg{
 			Auth: &influenzanet.ParsedToken{
-				UserId: id,
-				Roles:  []string{"PARTICIPANT"},
+				UserId:     id,
+				Roles:      []string{"PARTICIPANT"},
+				InstanceId: testInstanceID,
 			},
 			OldPassword: oldPassword,
 			NewPassword: newPassword,
@@ -411,8 +448,9 @@ func TestPasswordChange(t *testing.T) {
 
 		// Check login with new credentials:
 		req2 := &influenzanet.UserCredentials{
-			Email:    testUser.Email,
-			Password: newPassword,
+			Email:      testUser.Email,
+			Password:   newPassword,
+			InstanceId: testInstanceID,
 		}
 
 		resp2, err := s.LoginWithEmail(context.Background(), req2)
@@ -426,7 +464,4 @@ func TestPasswordChange(t *testing.T) {
 			return
 		}
 	})
-
-	// TEAR DOWN
-	DeleteUser(testUser.ID.Hex())
 }

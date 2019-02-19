@@ -7,11 +7,15 @@ import (
 
 	"github.com/mongodb/mongo-go-driver/bson"
 	"github.com/mongodb/mongo-go-driver/bson/primitive"
+	"github.com/mongodb/mongo-go-driver/mongo"
 )
 
-// TODO: add methods interfacing database here - this is an abstraction layer to the DB
-func CreateUser(user User) (id string, err error) {
-	_, err = FindUserByEmail(user.Email)
+func instanceDBRef(instanceID string) *mongo.Collection {
+	return dbClient.Database(instanceID + "_users").Collection("users")
+}
+
+func createUserDB(instanceID string, user User) (id string, err error) {
+	_, err = findUserByEmail(instanceID, user.Email)
 	if err == nil {
 		err = errors.New("user already exists")
 		return
@@ -20,7 +24,7 @@ func CreateUser(user User) (id string, err error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(conf.DbTimeout)*time.Second)
 	defer cancel()
 
-	res, err := userCollection.InsertOne(ctx, user)
+	res, err := instanceDBRef(instanceID).InsertOne(ctx, user)
 	if err != nil {
 		return
 	}
@@ -28,14 +32,14 @@ func CreateUser(user User) (id string, err error) {
 	return
 }
 
-func UpdateUser(updatedUser User) error {
+func updateUserDB(instanceID string, updatedUser User) error {
 	filter := bson.M{"_id": updatedUser.ID}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(conf.DbTimeout)*time.Second)
 	defer cancel()
 
 	newDoc := User{}
-	err := userCollection.FindOneAndReplace(ctx, filter, updatedUser, nil).Decode(&newDoc)
+	err := instanceDBRef(instanceID).FindOneAndReplace(ctx, filter, updatedUser, nil).Decode(&newDoc)
 
 	if err != nil {
 		return err
@@ -46,7 +50,7 @@ func UpdateUser(updatedUser User) error {
 	return nil
 }
 
-func FindUserByID(id string) (User, error) {
+func findUserByID(instanceID string, id string) (User, error) {
 	_id, _ := primitive.ObjectIDFromHex(id)
 	filter := bson.M{"_id": _id}
 
@@ -54,28 +58,28 @@ func FindUserByID(id string) (User, error) {
 	defer cancel()
 
 	elem := User{}
-	err := userCollection.FindOne(ctx, filter).Decode(&elem)
+	err := instanceDBRef(instanceID).FindOne(ctx, filter).Decode(&elem)
 
 	return elem, err
 }
 
-func FindUserByEmail(username string) (User, error) {
+func findUserByEmail(instanceID string, username string) (User, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(conf.DbTimeout)*time.Second)
 	defer cancel()
 
 	elem := User{}
 	filter := bson.M{"email": username}
-	err := userCollection.FindOne(ctx, filter).Decode(&elem)
+	err := instanceDBRef(instanceID).FindOne(ctx, filter).Decode(&elem)
 
 	return elem, err
 }
 
-func DeleteUser(id string) error {
+func deleteUserDB(instanceID string, id string) error {
 	_id, _ := primitive.ObjectIDFromHex(id)
 	filter := bson.M{"_id": _id}
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(conf.DbTimeout)*time.Second)
 	defer cancel()
-	_, err := userCollection.DeleteOne(ctx, filter, nil)
+	_, err := instanceDBRef(instanceID).DeleteOne(ctx, filter, nil)
 	return err
 }
