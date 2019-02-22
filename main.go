@@ -88,6 +88,7 @@ func init() {
 
 func main() {
 	lis, err := net.Listen("tcp", ":"+strconv.Itoa(conf.Port))
+	log.Println("wait connections on port " + strconv.Itoa(conf.Port))
 
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)

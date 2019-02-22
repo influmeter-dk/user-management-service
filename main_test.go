@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/mongodb/mongo-go-driver/bson/primitive"
+	"google.golang.org/grpc/status"
 
 	influenzanet "github.com/Influenzanet/api/dist/go"
 	user_api "github.com/Influenzanet/api/dist/go/user-management"
@@ -173,8 +174,8 @@ func TestSignup(t *testing.T) {
 
 	t.Run("Testing without payload", func(t *testing.T) {
 		resp, err := s.SignupWithEmail(context.Background(), nil)
-
-		if err.Error() != "missing argument" || resp != nil {
+		st, ok := status.FromError(err)
+		if !ok || st == nil || st.Message() != "missing argument" || resp != nil {
 			t.Errorf("wrong error: %s", err.Error())
 			t.Errorf("or response: %s", resp)
 		}
@@ -183,8 +184,8 @@ func TestSignup(t *testing.T) {
 	t.Run("Testing with empty payload", func(t *testing.T) {
 		req := &user_api.NewUser{}
 		resp, err := s.SignupWithEmail(context.Background(), req)
-
-		if err.Error() != "missing argument" || resp != nil {
+		st, ok := status.FromError(err)
+		if !ok || st == nil || st.Message() != "missing argument" || resp != nil {
 			t.Errorf("wrong error: %s", err.Error())
 			t.Errorf("or response: %s", resp)
 		}
@@ -192,8 +193,8 @@ func TestSignup(t *testing.T) {
 
 	t.Run("Testing with wrong email format", func(t *testing.T) {
 		resp, err := s.SignupWithEmail(context.Background(), wrongEmailFormatNewUserReq)
-
-		if err.Error() != "email not valid" || resp != nil {
+		st, ok := status.FromError(err)
+		if !ok || st == nil || st.Message() != "email not valid" || resp != nil {
 			t.Errorf("wrong error: %s", err.Error())
 			t.Errorf("or response: %s", resp)
 		}
@@ -201,8 +202,8 @@ func TestSignup(t *testing.T) {
 
 	t.Run("Testing with wrong password format", func(t *testing.T) {
 		resp, err := s.SignupWithEmail(context.Background(), wrongPasswordFormatNewUserReq)
-
-		if err.Error() != "password too weak" || resp != nil {
+		st, ok := status.FromError(err)
+		if !ok || st == nil || st.Message() != "password too weak" || resp != nil {
 			t.Errorf("wrong error: %s", err.Error())
 			t.Errorf("or response: %s", resp)
 		}
@@ -269,7 +270,8 @@ func TestLogin(t *testing.T) {
 
 	t.Run("Testing without payload", func(t *testing.T) {
 		resp, err := s.LoginWithEmail(context.Background(), nil)
-		if err == nil || err.Error() != "invalid username and/or password" || resp != nil {
+		st, ok := status.FromError(err)
+		if !ok || st == nil || st.Message() != "invalid username and/or password" || resp != nil {
 			t.Errorf("wrong error: %s", err.Error())
 			t.Errorf("or response: %s", resp)
 			return
@@ -280,7 +282,8 @@ func TestLogin(t *testing.T) {
 		req := &influenzanet.UserCredentials{}
 
 		resp, err := s.LoginWithEmail(context.Background(), req)
-		if err == nil || err.Error() != "invalid username and/or password" || resp != nil {
+		st, ok := status.FromError(err)
+		if !ok || st == nil || st.Message() != "invalid username and/or password" || resp != nil {
 			t.Errorf("wrong error: %s", err.Error())
 			t.Errorf("or response: %s", resp)
 			return
@@ -295,7 +298,8 @@ func TestLogin(t *testing.T) {
 		}
 
 		resp, err := s.LoginWithEmail(context.Background(), req)
-		if err == nil || err.Error() != "invalid username and/or password" || resp != nil {
+		st, ok := status.FromError(err)
+		if !ok || st == nil || st.Message() != "invalid username and/or password" || resp != nil {
 			t.Errorf("wrong error: %s", err.Error())
 			t.Errorf("or response: %s", resp)
 			return
@@ -310,7 +314,8 @@ func TestLogin(t *testing.T) {
 		}
 
 		resp, err := s.LoginWithEmail(context.Background(), req)
-		if err == nil || err.Error() != "invalid username and/or password" || resp != nil {
+		st, ok := status.FromError(err)
+		if !ok || st == nil || st.Message() != "invalid username and/or password" || resp != nil {
 			t.Errorf("wrong error: %s", err.Error())
 			t.Errorf("or response: %s", resp)
 			return
@@ -363,8 +368,8 @@ func TestPasswordChange(t *testing.T) {
 
 	t.Run("Testing without payload", func(t *testing.T) {
 		resp, err := s.ChangePassword(context.Background(), nil)
-
-		if err.Error() != "missing argument" || resp != nil {
+		st, ok := status.FromError(err)
+		if !ok || st == nil || st.Message() != "missing argument" || resp != nil {
 			t.Errorf("wrong error: %s", err.Error())
 			t.Errorf("or response: %s", resp)
 		}
@@ -373,7 +378,8 @@ func TestPasswordChange(t *testing.T) {
 	t.Run("Testing without auth fields", func(t *testing.T) {
 		req := &user_api.PasswordChangeMsg{}
 		resp, err := s.ChangePassword(context.Background(), req)
-		if err.Error() != "missing argument" || resp != nil {
+		st, ok := status.FromError(err)
+		if !ok || st == nil || st.Message() != "missing argument" || resp != nil {
 			t.Errorf("wrong error: %s", err.Error())
 			t.Errorf("or response: %s", resp)
 		}
@@ -390,7 +396,8 @@ func TestPasswordChange(t *testing.T) {
 			NewPassword: newPassword,
 		}
 		resp, err := s.ChangePassword(context.Background(), req)
-		if err.Error() != "invalid user and/or password" || resp != nil {
+		st, ok := status.FromError(err)
+		if !ok || st == nil || st.Message() != "invalid user and/or password" || resp != nil {
 			t.Errorf("wrong error: %s", err.Error())
 			t.Errorf("or response: %s", resp)
 		}
@@ -407,7 +414,8 @@ func TestPasswordChange(t *testing.T) {
 			NewPassword: newPassword,
 		}
 		resp, err := s.ChangePassword(context.Background(), req)
-		if err.Error() != "invalid user and/or password" || resp != nil {
+		st, ok := status.FromError(err)
+		if !ok || st == nil || st.Message() != "invalid user and/or password" || resp != nil {
 			t.Errorf("wrong error: %s", err.Error())
 			t.Errorf("or response: %s", resp)
 		}
@@ -424,8 +432,9 @@ func TestPasswordChange(t *testing.T) {
 			NewPassword: "short",
 		}
 		resp, err := s.ChangePassword(context.Background(), req)
-		if err.Error() != "new password too weak" || resp != nil {
-			t.Errorf("wrong error: %s", err.Error())
+		st, ok := status.FromError(err)
+		if !ok || st == nil || st.Message() != "new password too weak" || resp != nil {
+			t.Errorf("wrong error: %s", st.Message())
 			t.Errorf("or response: %s", resp)
 		}
 	})
@@ -442,7 +451,8 @@ func TestPasswordChange(t *testing.T) {
 		}
 		resp, err := s.ChangePassword(context.Background(), req)
 		if err != nil || resp == nil {
-			t.Errorf("unexpected error: %s", err.Error())
+			st, _ := status.FromError(err)
+			t.Errorf("unexpected error: %s", st.Message())
 			t.Errorf("or missing response: %s", resp)
 		}
 

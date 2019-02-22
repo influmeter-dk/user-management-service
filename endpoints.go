@@ -2,11 +2,12 @@ package main
 
 import (
 	"context"
-	"errors"
 	"regexp"
 
 	"github.com/golang/protobuf/ptypes/empty"
 	"golang.org/x/crypto/bcrypt"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 
 	influenzanet "github.com/Influenzanet/api/dist/go"
 	user_api "github.com/Influenzanet/api/dist/go/user-management"
@@ -35,12 +36,12 @@ func checkPasswordFormat(password string) bool {
 }
 
 func (s *userManagementServer) Status(ctx context.Context, _ *empty.Empty) (*influenzanet.Status, error) {
-	return nil, errors.New("not implemented")
+	return nil, status.Error(codes.Unimplemented, "not implemented")
 }
 
 func (s *userManagementServer) LoginWithEmail(ctx context.Context, creds *influenzanet.UserCredentials) (*user_api.UserAuthInfo, error) {
 	if creds == nil {
-		return nil, errors.New("invalid username and/or password")
+		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
 	}
 
 	instanceID := creds.InstanceId
@@ -50,11 +51,11 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, creds *influe
 	user, err := findUserByEmail(instanceID, creds.Email)
 
 	if err != nil {
-		return nil, errors.New("invalid username and/or password")
+		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
 	}
 
 	if comparePasswordWithHash(user.Password, creds.Password) != nil {
-		return nil, errors.New("invalid username and/or password")
+		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
 	}
 
 	response := &user_api.UserAuthInfo{
@@ -67,13 +68,13 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, creds *influe
 
 func (s *userManagementServer) SignupWithEmail(ctx context.Context, u *user_api.NewUser) (*user_api.UserAuthInfo, error) {
 	if u == nil || u.Auth == nil {
-		return nil, errors.New("missing argument")
+		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
 	if !checkEmailFormat(u.Auth.Email) {
-		return nil, errors.New("email not valid")
+		return nil, status.Error(codes.InvalidArgument, "email not valid")
 	}
 	if !checkPasswordFormat(u.Auth.Password) {
-		return nil, errors.New("password too weak")
+		return nil, status.Error(codes.InvalidArgument, "password too weak")
 	}
 
 	password := hashPassword(u.Auth.Password)
@@ -94,7 +95,7 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, u *user_api.
 	id, err := createUserDB(instanceID, newUser)
 
 	if err != nil {
-		return nil, err
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	// TODO: generate email confirmation token
@@ -110,27 +111,27 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, u *user_api.
 
 func (s *userManagementServer) ChangePassword(ctx context.Context, req *user_api.PasswordChangeMsg) (*influenzanet.Status, error) {
 	if req == nil || req.Auth == nil {
-		return nil, errors.New("missing argument")
+		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
 
 	if !checkPasswordFormat(req.NewPassword) {
-		return nil, errors.New("new password too weak")
+		return nil, status.Error(codes.InvalidArgument, "new password too weak")
 	}
 
 	user, err := findUserByID(req.Auth.InstanceId, req.Auth.UserId)
 	if err != nil {
-		return nil, errors.New("invalid user and/or password")
+		return nil, status.Error(codes.InvalidArgument, "invalid user and/or password")
 	}
 
 	if comparePasswordWithHash(user.Password, req.OldPassword) != nil {
-		return nil, errors.New("invalid user and/or password")
+		return nil, status.Error(codes.InvalidArgument, "invalid user and/or password")
 	}
 
 	user.Password = hashPassword(req.NewPassword)
 
 	err = updateUserDB(req.Auth.InstanceId, user)
 	if err != nil {
-		return nil, err
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	// TODO: initiate email notification for user about password update
