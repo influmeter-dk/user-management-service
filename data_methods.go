@@ -21,7 +21,7 @@ func createUserDB(instanceID string, user User) (id string, err error) {
 		return
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(conf.DbTimeout)*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(conf.DB.Timeout)*time.Second)
 	defer cancel()
 
 	res, err := instanceDBRef(instanceID).InsertOne(ctx, user)
@@ -35,7 +35,7 @@ func createUserDB(instanceID string, user User) (id string, err error) {
 func updateUserDB(instanceID string, updatedUser User) error {
 	filter := bson.M{"_id": updatedUser.ID}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(conf.DbTimeout)*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(conf.DB.Timeout)*time.Second)
 	defer cancel()
 
 	newDoc := User{}
@@ -54,7 +54,7 @@ func findUserByID(instanceID string, id string) (User, error) {
 	_id, _ := primitive.ObjectIDFromHex(id)
 	filter := bson.M{"_id": _id}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(conf.DbTimeout)*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(conf.DB.Timeout)*time.Second)
 	defer cancel()
 
 	elem := User{}
@@ -64,7 +64,7 @@ func findUserByID(instanceID string, id string) (User, error) {
 }
 
 func findUserByEmail(instanceID string, username string) (User, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(conf.DbTimeout)*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(conf.DB.Timeout)*time.Second)
 	defer cancel()
 
 	elem := User{}
@@ -78,7 +78,7 @@ func deleteUserDB(instanceID string, id string) error {
 	_id, _ := primitive.ObjectIDFromHex(id)
 	filter := bson.M{"_id": _id}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(conf.DbTimeout)*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(conf.DB.Timeout)*time.Second)
 	defer cancel()
 	_, err := instanceDBRef(instanceID).DeleteOne(ctx, filter, nil)
 	return err

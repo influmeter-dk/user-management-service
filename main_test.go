@@ -12,7 +12,7 @@ import (
 	"google.golang.org/grpc/status"
 
 	influenzanet "github.com/Influenzanet/api/dist/go"
-	user_api "github.com/Influenzanet/api/dist/go/user-management"
+	user_api "github.com/influenzanet/api/dist/go/user-management"
 )
 
 var testInstanceID = "test-db-" + strconv.FormatInt(time.Now().Unix(), 10)

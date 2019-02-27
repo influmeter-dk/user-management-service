@@ -9,8 +9,8 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	influenzanet "github.com/Influenzanet/api/dist/go"
-	user_api "github.com/Influenzanet/api/dist/go/user-management"
+	influenzanet "github.com/influenzanet/api/dist/go"
+	user_api "github.com/influenzanet/api/dist/go/user-management"
 )
 
 func hashPassword(password string) string {

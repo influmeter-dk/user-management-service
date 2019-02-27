@@ -13,14 +13,18 @@ import (
 	"google.golang.org/grpc"
 	yaml "gopkg.in/yaml.v2"
 
-	user_api "github.com/Influenzanet/api/dist/go/user-management"
+	user_api "github.com/influenzanet/api/dist/go/user-management"
 )
 
+type dbConf struct {
+	CredentialsPath string `yaml:"credentials_path"`
+	Address         string `yaml:"address"`
+	Timeout         int    `yaml:"timeout"`
+}
+
 type config struct {
-	Port              int    `yaml:"port"`
-	DbCredentialsPath string `yaml:"db_credentials_path"`
-	DbAddress         string `yaml:"db_address"`
-	DbTimeout         int    `yaml:"db_timeout"`
+	Port int
+	DB   dbConf
 }
 
 type dbCredentials struct {
@@ -59,20 +63,20 @@ func readDBcredentials(path string) (dbCredentials, error) {
 }
 
 func dbInit() {
-	dbCreds, err := readDBcredentials(conf.DbCredentialsPath)
+	dbCreds, err := readDBcredentials(conf.DB.CredentialsPath)
 	if err != nil {
 		log.Fatal(err)
 	}
 
 	// mongodb+srv://user-management-service:<PASSWORD>@influenzanettestdbcluster-pwvbz.mongodb.net/test?retryWrites=true
-	address := fmt.Sprintf(`mongodb+srv://%s:%s@%s`, dbCreds.Username, dbCreds.Password, conf.DbAddress)
+	address := fmt.Sprintf(`mongodb+srv://%s:%s@%s`, dbCreds.Username, dbCreds.Password, conf.DB.Address)
 
 	dbClient, err = mongo.NewClient(address)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(conf.DbTimeout)*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(conf.DB.Timeout)*time.Second)
 	defer cancel()
 
 	err = dbClient.Connect(ctx)
