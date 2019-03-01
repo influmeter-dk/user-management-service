@@ -1,6 +1,6 @@
 package main
 
-import "github.com/mongodb/mongo-go-driver/bson/primitive"
+import "go.mongodb.org/mongo-driver/bson/primitive"
 
 // User describes the user as saved in the DB
 type User struct {

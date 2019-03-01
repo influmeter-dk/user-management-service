@@ -8,10 +8,10 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mongodb/mongo-go-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc/status"
 
-	influenzanet "github.com/Influenzanet/api/dist/go"
+	influenzanet "github.com/influenzanet/api/dist/go"
 	user_api "github.com/influenzanet/api/dist/go/user-management"
 )
 

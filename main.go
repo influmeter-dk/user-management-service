@@ -9,7 +9,8 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/mongodb/mongo-go-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"google.golang.org/grpc"
 	yaml "gopkg.in/yaml.v2"
 
@@ -71,7 +72,7 @@ func dbInit() {
 	// mongodb+srv://user-management-service:<PASSWORD>@influenzanettestdbcluster-pwvbz.mongodb.net/test?retryWrites=true
 	address := fmt.Sprintf(`mongodb+srv://%s:%s@%s`, dbCreds.Username, dbCreds.Password, conf.DB.Address)
 
-	dbClient, err = mongo.NewClient(address)
+	dbClient, err = mongo.NewClient(options.Client().ApplyURI(address))
 	if err != nil {
 		log.Fatal(err)
 	}
