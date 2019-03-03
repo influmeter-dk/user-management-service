@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"log"
 	"regexp"
 
 	"github.com/golang/protobuf/ptypes/empty"
@@ -58,6 +59,10 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, creds *influe
 		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
 	}
 
+	if err := updateLoginTimeInDB(instanceID, user.ID.Hex()); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
 	response := &user_api.UserAuthInfo{
 		UserId:     user.ID.Hex(),
 		Roles:      user.Roles,
@@ -98,6 +103,7 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, u *user_api.
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
+	log.Println("new user created")
 	// TODO: generate email confirmation token
 	// TODO: send email with confirmation request
 
@@ -127,17 +133,32 @@ func (s *userManagementServer) ChangePassword(ctx context.Context, req *user_api
 		return nil, status.Error(codes.InvalidArgument, "invalid user and/or password")
 	}
 
-	user.Password = hashPassword(req.NewPassword)
-
-	err = updateUserDB(req.Auth.InstanceId, user)
+	newHashedPw := hashPassword(req.NewPassword)
+	err = updateUserPasswordDB(req.Auth.InstanceId, req.Auth.UserId, newHashedPw)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+	log.Printf("user %s initiated password change", req.Auth.UserId)
 
 	// TODO: initiate email notification for user about password update
 
 	return &influenzanet.Status{
 		Status: influenzanet.Status_NORMAL,
 		Msg:    "password changed",
+	}, nil
+}
+
+func (s *userManagementServer) TokenRefreshed(ctx context.Context, req *user_api.UserReference) (*influenzanet.Status, error) {
+	if req == nil || req.Auth == nil || req.UserId == "" {
+		return nil, status.Error(codes.InvalidArgument, "missing argument")
+	}
+
+	if err := updateTokenRefreshTimeInDB(req.Auth.InstanceId, req.UserId); err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &influenzanet.Status{
+		Status: influenzanet.Status_NORMAL,
+		Msg:    "token refresh time updated",
 	}, nil
 }

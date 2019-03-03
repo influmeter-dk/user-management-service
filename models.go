@@ -1,6 +1,15 @@
 package main
 
-import "go.mongodb.org/mongo-driver/bson/primitive"
+import (
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
+
+type ObjectInfos struct {
+	LastTokenRefresh int64 `bson:"lastTokenRefresh"`
+	LastLogin        int64 `bson:"lastLogin"`
+	CreatedAt        int64 `bson:"createdAt"`
+	UpdatedAt        int64 `bson:"updatedAt"`
+}
 
 // User describes the user as saved in the DB
 type User struct {
@@ -8,8 +17,8 @@ type User struct {
 	Email          string             `bson:"email" json:"email"`
 	EmailConfirmed bool               `bson:"email_confirmed" json:"email_confirmed"`
 	Password       string             `bson:"password" json:"password"`
-	NewPassword    string             `bson:"-" json:"newPassword"`
 	Roles          []string           `bson:"roles" json:"roles"`
+	ObjectInfos    ObjectInfos        `bson:"objectInfos"`
 	// TODO: add profile with e.g. firstname, lastname etc.
 }
 
