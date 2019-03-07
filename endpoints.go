@@ -33,7 +33,31 @@ func checkEmailFormat(email string) bool {
 }
 
 func checkPasswordFormat(password string) bool {
-	return len(password) > 5
+	if len(password) < 8 {
+		return false
+	}
+
+	var res = 0
+
+	lowercase := regexp.MustCompile("[a-z]")
+	uppercase := regexp.MustCompile("[A-Z]")
+	number := regexp.MustCompile("\\d") //"^(?:(?=.*[a-z])(?:(?=.*[A-Z])(?=.*[\\d\\W])|(?=.*\\W)(?=.*\d))|(?=.*\W)(?=.*[A-Z])(?=.*\d)).{8,}$")
+	symbol := regexp.MustCompile("\\W")
+
+	if lowercase.MatchString(password) {
+		res++
+	}
+	if uppercase.MatchString(password) {
+		res++
+	}
+	if number.MatchString(password) {
+		res++
+	}
+	if symbol.MatchString(password) {
+		res++
+	}
+
+	return res >= 3
 }
 
 func (s *userManagementServer) Status(ctx context.Context, _ *empty.Empty) (*influenzanet.Status, error) {
