@@ -21,7 +21,6 @@ type User struct {
 	Roles          []string           `bson:"roles" json:"roles"`
 	ObjectInfos    ObjectInfos        `bson:"objectInfos"`
 	PersonInfos    Person             `bson:"personInfos"`
-	// TODO: add profile with e.g. firstname, lastname etc.
 }
 
 // HasRole checks whether the user has a specified role
@@ -32,4 +31,13 @@ func (u User) HasRole(role string) bool {
 		}
 	}
 	return false
+}
+
+// InitProfile initializes a profile with empty values
+func (u User) InitProfile() {
+	u.PersonInfos = Person{}
+	u.PersonInfos.Gender = ""
+	u.PersonInfos.Title = ""
+	u.PersonInfos.FirstName = ""
+	u.PersonInfos.LastName = ""
 }

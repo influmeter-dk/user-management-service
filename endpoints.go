@@ -113,8 +113,9 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, u *user_api.
 		Email:    u.Auth.Email,
 		Password: password,
 		Roles:    []string{"PARTICIPANT"},
-		// TODO: add profile
 	}
+
+	newUser.InitProfile()
 
 	instanceID := u.Auth.InstanceId
 	if instanceID == "" {
