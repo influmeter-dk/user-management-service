@@ -149,7 +149,7 @@ func TestSignup(t *testing.T) {
 	wrongEmailFormatNewUserReq := &user_api.NewUser{
 		Auth: &influenzanet.UserCredentials{
 			Email:      "test-signup",
-			Password:   "SuperSecurePassword",
+			Password:   "SuperSecurePassword123!§$",
 			InstanceId: testInstanceID,
 		},
 		Profile: &user_api.Profile{},
@@ -166,7 +166,7 @@ func TestSignup(t *testing.T) {
 	validNewUserReq := &user_api.NewUser{
 		Auth: &influenzanet.UserCredentials{
 			Email:      "test-signup@test.com",
-			Password:   "SuperSecurePassword",
+			Password:   "SuperSecurePassword123!§$",
 			InstanceId: testInstanceID,
 		},
 		Profile: &user_api.Profile{},
@@ -226,7 +226,7 @@ func TestSignup(t *testing.T) {
 		req := &user_api.NewUser{
 			Auth: &influenzanet.UserCredentials{
 				Email:      "test-signup-1@test.com",
-				Password:   "SuperSecurePassword",
+				Password:   "SuperSecurePassword123!§$",
 				InstanceId: testInstanceID,
 			},
 		}
@@ -253,7 +253,7 @@ func TestLogin(t *testing.T) {
 	// Create Test User
 	testUser := User{
 		Email:    "test-login@test.com",
-		Password: hashPassword("SuperSecurePassword"),
+		Password: hashPassword("SuperSecurePassword123!§$"),
 		Roles:    []string{"PARTICIPANT"},
 	}
 
@@ -325,7 +325,7 @@ func TestLogin(t *testing.T) {
 	t.Run("Testing with valid fields", func(t *testing.T) {
 		req := &influenzanet.UserCredentials{
 			Email:      testUser.Email,
-			Password:   "SuperSecurePassword",
+			Password:   "SuperSecurePassword123!§$",
 			InstanceId: testInstanceID,
 		}
 
@@ -345,8 +345,8 @@ func TestLogin(t *testing.T) {
 func TestPasswordChange(t *testing.T) {
 	s := userManagementServer{}
 
-	oldPassword := "SuperSecurePassword"
-	newPassword := "NewSuperSecurePassword"
+	oldPassword := "SuperSecurePassword123!§$"
+	newPassword := "NewSuperSecurePassword123!§$"
 
 	// Create Test User
 	testUser := User{
