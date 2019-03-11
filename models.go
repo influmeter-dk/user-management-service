@@ -19,6 +19,7 @@ type User struct {
 	Password       string             `bson:"password" json:"password"`
 	Roles          []string           `bson:"roles" json:"roles"`
 	ObjectInfos    ObjectInfos        `bson:"objectInfos"`
+	PersonInfos    Person             `bson:"personInfos"`
 	// TODO: add profile with e.g. firstname, lastname etc.
 }
 
