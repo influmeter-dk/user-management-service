@@ -54,4 +54,5 @@
 
 * **Notes:**
 
-  None
+  - Passwords are required to be at least 8 characters long and include 3 of these 4 character types:
+    - lowercase, uppercase, number, symbol

@@ -43,7 +43,7 @@
   ```go
      creds := &userCredentials{
       Email:    "your@email.com", // `json:"email"`
-      Password: "yourpassword", // `json:"password"`
+      Password: "yourpassword123!§$", // `json:"password"`
       Role:     "ADMIN", // `json:"role"`
     }
     payload, err := json.Marshal(creds)

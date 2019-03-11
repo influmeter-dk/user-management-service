@@ -43,9 +43,9 @@ Change the password of the user to the new one after checking that all credentia
   ```go
      creds := &userCredentials{
       Email:             "your@email.com",  // `json:"email"`
-      Password:          "yourpassword",    // `json:"password"`
-      NewPassword:       "yournewpassword", // `json:"newPassword"`
-      NewPasswordRepeat: "yournewpassword", // `json:"newPasswordRepeat"`
+      Password:          "yourpassword123!§$",    // `json:"password"`
+      NewPassword:       "yournewpassword123!§$", // `json:"newPassword"`
+      NewPasswordRepeat: "yournewpassword123!§$", // `json:"newPasswordRepeat"`
     }
     payload, err := json.Marshal(creds)
     res, err := http.Post(user-service-addr + "/v1/user/change-password", "application/json", bytes.NewBuffer(payload))
@@ -54,4 +54,5 @@ Change the password of the user to the new one after checking that all credentia
 
 * **Notes:**
 
-  None
+  - Passwords are required to be at least 8 characters long and include 3 of these 4 character types:
+    - lowercase, uppercase, number, symbol
