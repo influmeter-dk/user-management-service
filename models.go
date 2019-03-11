@@ -4,6 +4,7 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+// ObjectInfos describes metadata for the User
 type ObjectInfos struct {
 	LastTokenRefresh int64 `bson:"lastTokenRefresh"`
 	LastLogin        int64 `bson:"lastLogin"`

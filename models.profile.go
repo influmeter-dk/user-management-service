@@ -4,17 +4,18 @@ import (
 	user_api "github.com/influenzanet/api/dist/go/user-management"
 )
 
+// Person describes personal profile information for a User
 type Person struct {
 	Gender    string `bson:"gender"`
-	Title     string `bson:"tite"`
+	Title     string `bson:"title"`
 	FirstName string `bson:"first_name"`
 	LastName  string `bson:"last_name"`
 }
 
 func personFromProtobuf(p *user_api.Profile) Person {
 	return Person{
-		Gender:    "", // TODO
-		Title:     "", // TODO
+		Gender:    p.Gender,
+		Title:     p.Title,
 		FirstName: p.FirstName,
 		LastName:  p.LastName,
 	}
@@ -24,6 +25,8 @@ func personFromProtobuf(p *user_api.Profile) Person {
 func (p Person) ToProtobuf() *user_api.Profile {
 	return &user_api.Profile{
 		// TODO: convert attributes like gender, title etc.
+		Gender:    p.Gender,
+		Title:     p.Title,
 		FirstName: p.FirstName,
 		LastName:  p.LastName,
 	}
