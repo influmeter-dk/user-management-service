@@ -95,29 +95,29 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, creds *influe
 	return response, nil
 }
 
-func (s *userManagementServer) SignupWithEmail(ctx context.Context, u *user_api.NewUser) (*user_api.UserAuthInfo, error) {
-	if u == nil || u.Auth == nil {
+func (s *userManagementServer) SignupWithEmail(ctx context.Context, u *influenzanet.UserCredentials) (*user_api.UserAuthInfo, error) {
+	if u == nil {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
-	if !checkEmailFormat(u.Auth.Email) {
+	if !checkEmailFormat(u.Email) {
 		return nil, status.Error(codes.InvalidArgument, "email not valid")
 	}
-	if !checkPasswordFormat(u.Auth.Password) {
+	if !checkPasswordFormat(u.Password) {
 		return nil, status.Error(codes.InvalidArgument, "password too weak")
 	}
 
-	password := hashPassword(u.Auth.Password)
+	password := hashPassword(u.Password)
 
 	// Create user DB object from request:
 	newUser := User{
-		Email:    u.Auth.Email,
+		Email:    u.Email,
 		Password: password,
 		Roles:    []string{"PARTICIPANT"},
 	}
 
 	newUser.InitProfile()
 
-	instanceID := u.Auth.InstanceId
+	instanceID := u.InstanceId
 	if instanceID == "" {
 		instanceID = "default"
 	}

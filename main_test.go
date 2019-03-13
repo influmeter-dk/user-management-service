@@ -146,33 +146,24 @@ func TestDbInterfaceMethods(t *testing.T) {
 func TestSignup(t *testing.T) {
 	s := userManagementServer{}
 
-	wrongEmailFormatNewUserReq := &user_api.NewUser{
-		Auth: &influenzanet.UserCredentials{
-			Email:      "test-signup",
-			Password:   "SuperSecurePassword123!§$",
-			InstanceId: testInstanceID,
-		},
-		Profile: &user_api.Profile{},
+	wrongEmailFormatNewUserReq := &influenzanet.UserCredentials{
+		Email:      "test-signup",
+		Password:   "SuperSecurePassword123!§$",
+		InstanceId: testInstanceID,
 	}
 
-	wrongPasswordFormatNewUserReq := &user_api.NewUser{
-		Auth: &influenzanet.UserCredentials{
-			Email:      "test-signup@test.com",
-			Password:   "short",
-			InstanceId: testInstanceID,
-		},
-		Profile: &user_api.Profile{},
+	wrongPasswordFormatNewUserReq := &influenzanet.UserCredentials{
+		Email:      "test-signup@test.com",
+		Password:   "short",
+		InstanceId: testInstanceID,
 	}
-	validNewUserReq := &user_api.NewUser{
-		Auth: &influenzanet.UserCredentials{
-			Email:      "test-signup@test.com",
-			Password:   "SuperSecurePassword123!§$",
-			InstanceId: testInstanceID,
-		},
-		Profile: &user_api.Profile{},
+	validNewUserReq := &influenzanet.UserCredentials{
+		Email:      "test-signup@test.com",
+		Password:   "SuperSecurePassword123!§$",
+		InstanceId: testInstanceID,
 	}
 
-	t.Run("Testing without payload", func(t *testing.T) {
+	t.Run("without payload", func(t *testing.T) {
 		resp, err := s.SignupWithEmail(context.Background(), nil)
 		st, ok := status.FromError(err)
 		if !ok || st == nil || st.Message() != "missing argument" || resp != nil {
@@ -181,8 +172,8 @@ func TestSignup(t *testing.T) {
 		}
 	})
 
-	t.Run("Testing with empty payload", func(t *testing.T) {
-		req := &user_api.NewUser{}
+	t.Run("with empty payload", func(t *testing.T) {
+		req := &influenzanet.UserCredentials{}
 		resp, err := s.SignupWithEmail(context.Background(), req)
 		st, ok := status.FromError(err)
 		if !ok || st == nil || st.Message() != "missing argument" || resp != nil {
@@ -191,7 +182,7 @@ func TestSignup(t *testing.T) {
 		}
 	})
 
-	t.Run("Testing with wrong email format", func(t *testing.T) {
+	t.Run("with wrong email format", func(t *testing.T) {
 		resp, err := s.SignupWithEmail(context.Background(), wrongEmailFormatNewUserReq)
 		st, ok := status.FromError(err)
 		if !ok || st == nil || st.Message() != "email not valid" || resp != nil {
@@ -200,7 +191,7 @@ func TestSignup(t *testing.T) {
 		}
 	})
 
-	t.Run("Testing with wrong password format", func(t *testing.T) {
+	t.Run("with wrong password format", func(t *testing.T) {
 		resp, err := s.SignupWithEmail(context.Background(), wrongPasswordFormatNewUserReq)
 		st, ok := status.FromError(err)
 		if !ok || st == nil || st.Message() != "password too weak" || resp != nil {
@@ -209,7 +200,7 @@ func TestSignup(t *testing.T) {
 		}
 	})
 
-	t.Run("Testing with valid fields", func(t *testing.T) {
+	t.Run("with valid fields", func(t *testing.T) {
 		resp, err := s.SignupWithEmail(context.Background(), validNewUserReq)
 
 		if err != nil {
@@ -222,13 +213,11 @@ func TestSignup(t *testing.T) {
 		}
 	})
 
-	t.Run("Testing signupwith duplicate user (same email)", func(t *testing.T) {
-		req := &user_api.NewUser{
-			Auth: &influenzanet.UserCredentials{
-				Email:      "test-signup-1@test.com",
-				Password:   "SuperSecurePassword123!§$",
-				InstanceId: testInstanceID,
-			},
+	t.Run("with duplicate user (same email)", func(t *testing.T) {
+		req := &influenzanet.UserCredentials{
+			Email:      "test-signup-1@test.com",
+			Password:   "SuperSecurePassword123!§$",
+			InstanceId: testInstanceID,
 		}
 		resp, err := s.SignupWithEmail(context.Background(), req)
 		if err != nil {
