@@ -34,12 +34,15 @@ func TestMain(m *testing.M) {
 // Testing Database Interface methods
 func TestDbInterfaceMethods(t *testing.T) {
 	testUser := User{
-		Email:    "test@test.com",
-		Password: "testhashedpassword-youcantreadme",
+		Account: Account{
+			Type:     "email",
+			Email:    "test@test.com",
+			Password: "testhashedpassword-youcantreadme",
+		},
 	}
 
 	t.Run("Testing create user", func(t *testing.T) {
-		id, err := createUserDB(testInstanceID, testUser)
+		id, err := addUserToDB(testInstanceID, testUser)
 		if err != nil {
 			t.Errorf(err.Error())
 			return
@@ -53,26 +56,26 @@ func TestDbInterfaceMethods(t *testing.T) {
 	})
 
 	t.Run("Testing creating existing user", func(t *testing.T) {
-		_, err := createUserDB(testInstanceID, testUser)
+		_, err := addUserToDB(testInstanceID, testUser)
 		if err == nil {
 			t.Errorf("user already existed, but created again")
 		}
 	})
 
 	t.Run("Testing find existing user by id", func(t *testing.T) {
-		user, err := findUserByID(testInstanceID, testUser.ID.Hex())
+		user, err := getUserByIDFromDB(testInstanceID, testUser.ID.Hex())
 		if err != nil {
 			t.Errorf(err.Error())
 			return
 		}
-		if user.Email != testUser.Email {
+		if user.Account.Email != testUser.Account.Email {
 			t.Errorf("found user is not matching test user")
 			return
 		}
 	})
 
 	t.Run("Testing find not existing user by id", func(t *testing.T) {
-		_, err := findUserByID(testInstanceID, testUser.ID.Hex()+"1")
+		_, err := getUserByIDFromDB(testInstanceID, testUser.ID.Hex()+"1")
 		if err == nil {
 			t.Errorf("user should not be found")
 			return
@@ -80,19 +83,19 @@ func TestDbInterfaceMethods(t *testing.T) {
 	})
 
 	t.Run("Testing find existing user by email", func(t *testing.T) {
-		user, err := findUserByEmail(testInstanceID, testUser.Email)
+		user, err := getUserByEmailFromDB(testInstanceID, testUser.Account.Email)
 		if err != nil {
 			t.Errorf(err.Error())
 			return
 		}
-		if user.Email != testUser.Email {
+		if user.Account.Email != testUser.Account.Email {
 			t.Errorf("found user is not matching test user")
 			return
 		}
 	})
 
 	t.Run("Testing find not existing user by email", func(t *testing.T) {
-		_, err := findUserByEmail(testInstanceID, testUser.Email+"1")
+		_, err := getUserByEmailFromDB(testInstanceID, testUser.Account.Email+"1")
 		if err == nil {
 			t.Errorf("user should not be found")
 			return
@@ -100,8 +103,8 @@ func TestDbInterfaceMethods(t *testing.T) {
 	})
 
 	t.Run("Testing updating existing user's attributes", func(t *testing.T) {
-		testUser.EmailConfirmed = true
-		err := updateUserDB(testInstanceID, testUser)
+		testUser.Account.EmailConfirmed = true
+		_, err := updateUserInDB(testInstanceID, testUser)
 		if err != nil {
 			t.Errorf(err.Error())
 			return
@@ -110,11 +113,11 @@ func TestDbInterfaceMethods(t *testing.T) {
 	})
 
 	t.Run("Testing updating not existing user's attributes", func(t *testing.T) {
-		testUser.EmailConfirmed = false
+		testUser.Account.EmailConfirmed = false
 		currentUser := testUser
 		id, err := primitive.ObjectIDFromHex(testUser.ID.Hex() + "1")
 		currentUser.ID = id
-		err = updateUserDB(testInstanceID, currentUser)
+		_, err = updateUserInDB(testInstanceID, currentUser)
 		if err == nil {
 			t.Errorf("cannot update not existing user")
 			return
@@ -122,7 +125,7 @@ func TestDbInterfaceMethods(t *testing.T) {
 	})
 
 	t.Run("Testing deleting existing user", func(t *testing.T) {
-		err := deleteUserDB(testInstanceID, testUser.ID.Hex())
+		err := deleteUserFromDB(testInstanceID, testUser.ID.Hex())
 		if err != nil {
 			t.Errorf(err.Error())
 			return
@@ -130,7 +133,7 @@ func TestDbInterfaceMethods(t *testing.T) {
 	})
 
 	t.Run("Testing deleting not existing user", func(t *testing.T) {
-		err := deleteUserDB(testInstanceID, testUser.ID.Hex()+"1")
+		err := deleteUserFromDB(testInstanceID, testUser.ID.Hex()+"1")
 		if err != nil {
 			t.Errorf(err.Error())
 			return

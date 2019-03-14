@@ -13,13 +13,17 @@ func TestLogin(t *testing.T) {
 	s := userManagementServer{}
 
 	// Create Test User
+	currentPw := "SuperSecurePassword123!§$"
 	testUser := User{
-		Email:    "test-login@test.com",
-		Password: hashPassword("SuperSecurePassword123!§$"),
-		Roles:    []string{"PARTICIPANT"},
+		Account: Account{
+			Type:     "email",
+			Email:    "test-login@test.com",
+			Password: hashPassword(currentPw),
+		},
+		Roles: []string{"PARTICIPANT"},
 	}
 
-	id, err := createUserDB(testInstanceID, testUser)
+	id, err := addUserToDB(testInstanceID, testUser)
 	if err != nil {
 		t.Errorf("error creating user for testing login")
 		return
@@ -44,8 +48,7 @@ func TestLogin(t *testing.T) {
 		req := &influenzanet.UserCredentials{}
 
 		resp, err := s.LoginWithEmail(context.Background(), req)
-		st, ok := status.FromError(err)
-		if !ok || st == nil || st.Message() != "invalid username and/or password" || resp != nil {
+		if err == nil || status.Convert(err).Message() != "invalid username and/or password" || resp != nil {
 			t.Errorf("wrong error: %s", err.Error())
 			t.Errorf("or response: %s", resp)
 			return
@@ -54,40 +57,44 @@ func TestLogin(t *testing.T) {
 
 	t.Run("with wrong email", func(t *testing.T) {
 		req := &influenzanet.UserCredentials{
-			Email:      "test-login@test.com",
-			Password:   testUser.Password,
+			Email:      "wrong@test.com",
+			Password:   currentPw,
 			InstanceId: testInstanceID,
 		}
 
 		resp, err := s.LoginWithEmail(context.Background(), req)
-		st, ok := status.FromError(err)
-		if !ok || st == nil || st.Message() != "invalid username and/or password" || resp != nil {
+		if err == nil || resp != nil {
+			t.Errorf("wrong response: %s", resp)
+			return
+		}
+		if status.Convert(err).Message() != "invalid username and/or password" {
 			t.Errorf("wrong error: %s", err.Error())
-			t.Errorf("or response: %s", resp)
 			return
 		}
 	})
 
 	t.Run("with wrong password", func(t *testing.T) {
 		req := &influenzanet.UserCredentials{
-			Email:      testUser.Email,
-			Password:   "SuperSecurePassword1",
+			Email:      testUser.Account.Email,
+			Password:   currentPw + "w",
 			InstanceId: testInstanceID,
 		}
 
 		resp, err := s.LoginWithEmail(context.Background(), req)
-		st, ok := status.FromError(err)
-		if !ok || st == nil || st.Message() != "invalid username and/or password" || resp != nil {
+		if err == nil || resp != nil {
+			t.Errorf("wrong response: %s", resp)
+			return
+		}
+		if status.Convert(err).Message() != "invalid username and/or password" {
 			t.Errorf("wrong error: %s", err.Error())
-			t.Errorf("or response: %s", resp)
 			return
 		}
 	})
 
 	t.Run("with valid fields", func(t *testing.T) {
 		req := &influenzanet.UserCredentials{
-			Email:      testUser.Email,
-			Password:   "SuperSecurePassword123!§$",
+			Email:      testUser.Account.Email,
+			Password:   currentPw,
 			InstanceId: testInstanceID,
 		}
 

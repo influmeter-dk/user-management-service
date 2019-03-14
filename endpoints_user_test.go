@@ -28,12 +28,15 @@ func TestChangePasswordEndpoint(t *testing.T) {
 
 	// Create Test User
 	testUser := User{
-		Email:    "test-password-change@test.com",
-		Password: hashPassword(oldPassword),
-		Roles:    []string{"PARTICIPANT"},
+		Account: Account{
+			Type:     "email",
+			Email:    "test-password-change@test.com",
+			Password: hashPassword(oldPassword),
+		},
+		Roles: []string{"PARTICIPANT"},
 	}
 
-	id, err := createUserDB(testInstanceID, testUser)
+	id, err := addUserToDB(testInstanceID, testUser)
 	if err != nil {
 		t.Errorf("error creating users for testing pw change")
 		return
@@ -136,7 +139,7 @@ func TestChangePasswordEndpoint(t *testing.T) {
 
 		// Check login with new credentials:
 		req2 := &influenzanet.UserCredentials{
-			Email:      testUser.Email,
+			Email:      testUser.Account.Email,
 			Password:   newPassword,
 			InstanceId: testInstanceID,
 		}

@@ -12,8 +12,6 @@ import (
 	user_api "github.com/influenzanet/api/dist/go/user-management"
 )
 
-
-
 func (s *userManagementServer) Status(ctx context.Context, _ *empty.Empty) (*influenzanet.Status, error) {
 	return nil, status.Error(codes.Unimplemented, "not implemented")
 }
@@ -27,13 +25,13 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, creds *influe
 	if instanceID == "" {
 		instanceID = "default"
 	}
-	user, err := findUserByEmail(instanceID, creds.Email)
+	user, err := getUserByEmailFromDB(instanceID, creds.Email)
 
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
 	}
 
-	if comparePasswordWithHash(user.Password, creds.Password) != nil {
+	if comparePasswordWithHash(user.Account.Password, creds.Password) != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
 	}
 
@@ -64,19 +62,21 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, u *influenza
 
 	// Create user DB object from request:
 	newUser := User{
-		Email:    u.Email,
-		Password: password,
-		Roles:    []string{"PARTICIPANT"},
+		Account: Account{
+			Type:           "email",
+			Email:          u.Email,
+			EmailConfirmed: false,
+			Password:       password,
+		},
+		Roles: []string{"PARTICIPANT"},
 	}
-
-	newUser.InitProfile()
 
 	instanceID := u.InstanceId
 	if instanceID == "" {
 		instanceID = "default"
 	}
 
-	id, err := createUserDB(instanceID, newUser)
+	id, err := addUserToDB(instanceID, newUser)
 
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -108,4 +108,3 @@ func (s *userManagementServer) TokenRefreshed(ctx context.Context, req *user_api
 		Msg:    "token refresh time updated",
 	}, nil
 }
-

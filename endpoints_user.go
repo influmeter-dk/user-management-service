@@ -23,17 +23,17 @@ func (s *userManagementServer) ChangePassword(ctx context.Context, req *user_api
 		return nil, status.Error(codes.InvalidArgument, "new password too weak")
 	}
 
-	user, err := findUserByID(req.Auth.InstanceId, req.Auth.UserId)
+	user, err := getUserByIDFromDB(req.Auth.InstanceId, req.Auth.UserId)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid user and/or password")
 	}
 
-	if comparePasswordWithHash(user.Password, req.OldPassword) != nil {
+	if comparePasswordWithHash(user.Account.Password, req.OldPassword) != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid user and/or password")
 	}
 
 	newHashedPw := hashPassword(req.NewPassword)
-	err = updateUserPasswordDB(req.Auth.InstanceId, req.Auth.UserId, newHashedPw)
+	err = updateUserPasswordInDB(req.Auth.InstanceId, req.Auth.UserId, newHashedPw)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
