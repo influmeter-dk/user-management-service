@@ -260,14 +260,92 @@ func TestChangeEmailEndpoint(t *testing.T) {
 	t.Error("test not implemented")
 }
 
-func TestSetProfileEndpoint(t *testing.T) {
-	// s := userManagementServer{}
+func TestUpdateProfileEndpoint(t *testing.T) {
+	s := userManagementServer{}
 
-	// TODO: without payload
-	// TODO: with empty payload
-	// TODO: with other user id
-	// TODO: with own user id
-	t.Error("test not implemented")
+	testUsers, err := addTestUsers([]User{
+		User{
+			Account: Account{
+				Type:     "email",
+				Email:    "update_profile_1@test.com",
+				Password: hashPassword("13sd ckld fg§$5"),
+			},
+		},
+	})
+	if err != nil {
+		t.Errorf("failed to create testusers: %s", err.Error())
+		return
+	}
+
+	t.Run("without payload", func(t *testing.T) {
+		resp, err := s.UpdateProfile(context.Background(), nil)
+		if err == nil {
+			t.Errorf("or response: %s", resp)
+			return
+		}
+		if status.Convert(err).Message() != "missing argument" {
+			t.Errorf("wrong error: %s", err.Error())
+		}
+	})
+
+	t.Run("with empty payload", func(t *testing.T) {
+		req := &user_api.ProfileRequest{}
+		resp, err := s.UpdateProfile(context.Background(), req)
+		if err == nil {
+			t.Errorf("or response: %s", resp)
+			return
+		}
+		if status.Convert(err).Message() != "missing argument" {
+			t.Errorf("wrong error: %s", err.Error())
+		}
+	})
+
+	t.Run("with wrong user id", func(t *testing.T) {
+		req := &user_api.ProfileRequest{
+			Auth: &influenzanet.ParsedToken{
+				UserId:     testUsers[0].ID.Hex() + "w",
+				InstanceId: testInstanceID,
+			},
+			Profile: &user_api.Profile{
+				Gender:    "test",
+				Title:     "none",
+				FirstName: "First",
+				LastName:  "Last",
+			},
+		}
+		resp, err := s.UpdateProfile(context.Background(), req)
+		if err == nil {
+			t.Errorf("or response: %s", resp)
+			return
+		}
+		if status.Convert(err).Message() != "not found" {
+			t.Errorf("wrong error: %s", err.Error())
+		}
+	})
+
+	t.Run("with own user id", func(t *testing.T) {
+		newProfile := &user_api.Profile{
+			Gender:    "test",
+			Title:     "none",
+			FirstName: "First",
+			LastName:  "Last",
+		}
+		req := &user_api.ProfileRequest{
+			Auth: &influenzanet.ParsedToken{
+				UserId:     testUsers[0].ID.Hex(),
+				InstanceId: testInstanceID,
+			},
+			Profile: newProfile,
+		}
+		resp, err := s.UpdateProfile(context.Background(), req)
+		if err != nil {
+			t.Errorf("unexpected error: %s", err.Error())
+			return
+		}
+		if resp.Profile.Gender != newProfile.Gender || resp.Profile.LastName != newProfile.LastName {
+			t.Errorf("wrong response: %s", resp)
+		}
+	})
 }
 
 func TestAddSubprofileEndpoint(t *testing.T) {
