@@ -84,7 +84,21 @@ func (s *userManagementServer) UpdateProfile(ctx context.Context, req *user_api.
 }
 
 func (s *userManagementServer) AddSubprofile(ctx context.Context, req *user_api.SubProfileRequest) (*user_api.User, error) {
-	return nil, status.Error(codes.Unimplemented, "not implemented")
+	if req == nil || req.Auth == nil || req.SubProfile == nil {
+		return nil, status.Error(codes.InvalidArgument, "missing argument")
+	}
+	user, err := getUserByIDFromDB(req.Auth.InstanceId, req.Auth.UserId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "not found")
+	}
+
+	user.AddSubProfile(subProfileFromAPI(req.SubProfile))
+	user, err = updateUserInDB(req.Auth.InstanceId, user)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return user.ToAPI(), nil
 }
 
 func (s *userManagementServer) EditSubprofile(ctx context.Context, req *user_api.SubProfileRequest) (*user_api.User, error) {

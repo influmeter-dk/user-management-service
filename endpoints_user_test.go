@@ -349,13 +349,86 @@ func TestUpdateProfileEndpoint(t *testing.T) {
 }
 
 func TestAddSubprofileEndpoint(t *testing.T) {
-	// s := userManagementServer{}
+	s := userManagementServer{}
 
-	// TODO: without payload
-	// TODO: with empty payload
-	// TODO: with other user id
-	// TODO: with own user id
-	t.Error("test not implemented")
+	testUsers, err := addTestUsers([]User{
+		User{
+			Account: Account{
+				Type:     "email",
+				Email:    "add_subprofile_1@test.com",
+				Password: hashPassword("54sd ckld fg§pe5"),
+			},
+		},
+	})
+	if err != nil {
+		t.Errorf("failed to create testusers: %s", err.Error())
+		return
+	}
+
+	t.Run("without payload", func(t *testing.T) {
+		resp, err := s.AddSubprofile(context.Background(), nil)
+		if err == nil {
+			t.Errorf("or response: %s", resp)
+			return
+		}
+		if status.Convert(err).Message() != "missing argument" {
+			t.Errorf("wrong error: %s", err.Error())
+		}
+	})
+
+	t.Run("with empty payload", func(t *testing.T) {
+		req := &user_api.SubProfileRequest{}
+		resp, err := s.AddSubprofile(context.Background(), req)
+		if err == nil {
+			t.Errorf("or response: %s", resp)
+			return
+		}
+		if status.Convert(err).Message() != "missing argument" {
+			t.Errorf("wrong error: %s", err.Error())
+		}
+	})
+
+	t.Run("with wrong user id", func(t *testing.T) {
+		req := &user_api.SubProfileRequest{
+			Auth: &influenzanet.ParsedToken{
+				UserId:     testUsers[0].ID.Hex() + "w",
+				InstanceId: testInstanceID,
+			},
+			SubProfile: &user_api.SubProfile{
+				Name:      "Testname",
+				BirthYear: 1911,
+			},
+		}
+		resp, err := s.AddSubprofile(context.Background(), req)
+		if err == nil {
+			t.Errorf("or response: %s", resp)
+			return
+		}
+		if status.Convert(err).Message() != "not found" {
+			t.Errorf("wrong error: %s", err.Error())
+		}
+	})
+
+	t.Run("with own user id", func(t *testing.T) {
+		req := &user_api.SubProfileRequest{
+			Auth: &influenzanet.ParsedToken{
+				UserId:     testUsers[0].ID.Hex(),
+				InstanceId: testInstanceID,
+			},
+			SubProfile: &user_api.SubProfile{
+				Name:      "Testname",
+				BirthYear: 1911,
+			},
+		}
+		resp, err := s.AddSubprofile(context.Background(), req)
+		if err != nil {
+			t.Errorf("unexpected error: %s", err.Error())
+			return
+		}
+		if len(resp.SubProfiles) < 1 {
+			t.Errorf("wrong response: %s", resp)
+		}
+	})
 }
 
 func TestEditSubprofileEndpoint(t *testing.T) {
