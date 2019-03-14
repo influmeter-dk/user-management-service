@@ -11,13 +11,105 @@ import (
 )
 
 func TestGetUserEndpoint(t *testing.T) {
-	// s := userManagementServer{}
+	s := userManagementServer{}
 
-	// TODO: without payload
-	// TODO: with empty payload
-	// TODO: with other user id
-	// TODO: with own user id
-	t.Error("test not implemented")
+	testUsers, err := addTestUsers([]User{
+		User{
+			Account: Account{
+				Type:     "email",
+				Email:    "get_user_1@test.com",
+				Password: hashPassword("13 ckld fg§$5"),
+			},
+		},
+		User{
+			Account: Account{
+				Type:     "email",
+				Email:    "get_user_2@test.com",
+				Password: hashPassword("13 ckld fg§$5"),
+			},
+		},
+	})
+	if err != nil {
+		t.Errorf("failed to create testusers: %s", err.Error())
+		return
+	}
+
+	t.Run("without payload", func(t *testing.T) {
+		resp, err := s.GetUser(context.Background(), nil)
+		if err == nil {
+			t.Errorf("or response: %s", resp)
+			return
+		}
+		if status.Convert(err).Message() != "missing argument" {
+			t.Errorf("wrong error: %s", err.Error())
+		}
+	})
+
+	t.Run("with empty payload", func(t *testing.T) {
+		req := &user_api.UserReference{}
+		resp, err := s.GetUser(context.Background(), req)
+		if err == nil {
+			t.Errorf("or response: %s", resp)
+			return
+		}
+		if status.Convert(err).Message() != "missing argument" {
+			t.Errorf("wrong error: %s", err.Error())
+		}
+	})
+
+	t.Run("with wrong user id", func(t *testing.T) {
+		req := &user_api.UserReference{
+			Auth: &influenzanet.ParsedToken{
+				UserId:     testUsers[0].ID.Hex() + "w",
+				InstanceId: testInstanceID,
+			},
+			UserId: testUsers[0].ID.Hex() + "w",
+		}
+		resp, err := s.GetUser(context.Background(), req)
+		if err == nil {
+			t.Errorf("or response: %s", resp)
+			return
+		}
+		if status.Convert(err).Message() != "not found" {
+			t.Errorf("wrong error: %s", err.Error())
+		}
+	})
+
+	t.Run("with other user id", func(t *testing.T) {
+		req := &user_api.UserReference{
+			Auth: &influenzanet.ParsedToken{
+				UserId:     testUsers[1].ID.Hex(),
+				InstanceId: testInstanceID,
+			},
+			UserId: testUsers[0].ID.Hex(),
+		}
+		resp, err := s.GetUser(context.Background(), req)
+		if err == nil {
+			t.Errorf("or response: %s", resp)
+			return
+		}
+		if status.Convert(err).Message() != "not authorized" {
+			t.Errorf("wrong error: %s", err.Error())
+		}
+	})
+
+	t.Run("with own user id", func(t *testing.T) {
+		req := &user_api.UserReference{
+			Auth: &influenzanet.ParsedToken{
+				UserId:     testUsers[1].ID.Hex(),
+				InstanceId: testInstanceID,
+			},
+			UserId: testUsers[1].ID.Hex(),
+		}
+		resp, err := s.GetUser(context.Background(), req)
+		if err != nil {
+			t.Errorf("unexpected error: %s", err.Error())
+			return
+		}
+		if testUsers[1].Account.Email != resp.Account.Email {
+			t.Errorf("wrong response: %s", resp)
+		}
+	})
 }
 
 func TestChangePasswordEndpoint(t *testing.T) {

@@ -11,7 +11,20 @@ import (
 )
 
 func (s *userManagementServer) GetUser(ctx context.Context, req *user_api.UserReference) (*user_api.User, error) {
-	return nil, status.Error(codes.Unimplemented, "not implemented")
+	if req == nil || req.Auth == nil || req.UserId == "" {
+		return nil, status.Error(codes.InvalidArgument, "missing argument")
+	}
+
+	if req.Auth.UserId != req.UserId { // Later can be overwritten
+		log.Printf("not authorized: %s tried to access %s", req.Auth.UserId, req.UserId)
+		return nil, status.Error(codes.PermissionDenied, "not authorized")
+	}
+
+	user, err := getUserByIDFromDB(req.Auth.InstanceId, req.UserId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "not found")
+	}
+	return user.ToAPI(), nil
 }
 
 func (s *userManagementServer) ChangePassword(ctx context.Context, req *user_api.PasswordChangeMsg) (*influenzanet.Status, error) {
