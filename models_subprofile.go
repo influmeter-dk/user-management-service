@@ -12,6 +12,9 @@ type SubProfile struct {
 	BirthYear int32              `bson:"birthYear"`
 }
 
+// SubProfiles is a slice of SubProfile objects
+type SubProfiles []SubProfile
+
 func subProfileFromAPI(a *user_api.SubProfile) SubProfile {
 	if a == nil {
 		return SubProfile{}
@@ -31,4 +34,13 @@ func (sp SubProfile) ToAPI() *user_api.SubProfile {
 		Name:      sp.Name,
 		BirthYear: sp.BirthYear,
 	}
+}
+
+// ToAPI converts a list of object from DB to API format
+func (sps SubProfiles) ToAPI() []*user_api.SubProfile {
+	res := make([]*user_api.SubProfile, len(sps))
+	for i, v := range sps {
+		res[i] = v.ToAPI()
+	}
+	return res
 }

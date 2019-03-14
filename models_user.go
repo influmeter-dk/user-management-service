@@ -32,7 +32,19 @@ type User struct {
 	Roles       []string           `bson:"roles" json:"roles"`
 	ObjectInfos ObjectInfos        `bson:"objectInfos"`
 	Profile     Profile            `bson:"profile"`
-	SubProfiles []SubProfile       `bson:"subProfiles"` // earlier referred as 'household member'
+	SubProfiles SubProfiles        `bson:"subProfiles"` // earlier referred as 'household member'
+}
+
+// ToAPI converts the object from DB to API format
+func (u User) ToAPI() *user_api.User {
+	return &user_api.User{
+		Id:          u.ID.Hex(),
+		Account:     u.Account.ToAPI(),
+		Roles:       u.Roles,
+		Profile:     u.Profile.ToAPI(),
+		SubProfiles: u.SubProfiles.ToAPI(),
+		Infos:       u.ObjectInfos.ToAPI(),
+	}
 }
 
 // HasRole checks whether the user has a specified role
