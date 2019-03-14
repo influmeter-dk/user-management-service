@@ -3,10 +3,8 @@ package main
 import (
 	"context"
 	"log"
-	"regexp"
 
 	"github.com/golang/protobuf/ptypes/empty"
-	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -14,51 +12,7 @@ import (
 	user_api "github.com/influenzanet/api/dist/go/user-management"
 )
 
-func hashPassword(password string) string {
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
-	if err != nil {
-		return ""
-	}
-	return string(hashedPassword)
-}
 
-func comparePasswordWithHash(hashedPassword string, password string) error {
-	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
-}
-
-func checkEmailFormat(email string) bool {
-	re := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
-
-	return re.MatchString(email)
-}
-
-func checkPasswordFormat(password string) bool {
-	if len(password) < 8 {
-		return false
-	}
-
-	var res = 0
-
-	lowercase := regexp.MustCompile("[a-z]")
-	uppercase := regexp.MustCompile("[A-Z]")
-	number := regexp.MustCompile("\\d") //"^(?:(?=.*[a-z])(?:(?=.*[A-Z])(?=.*[\\d\\W])|(?=.*\\W)(?=.*\d))|(?=.*\W)(?=.*[A-Z])(?=.*\d)).{8,}$")
-	symbol := regexp.MustCompile("\\W")
-
-	if lowercase.MatchString(password) {
-		res++
-	}
-	if uppercase.MatchString(password) {
-		res++
-	}
-	if number.MatchString(password) {
-		res++
-	}
-	if symbol.MatchString(password) {
-		res++
-	}
-
-	return res >= 3
-}
 
 func (s *userManagementServer) Status(ctx context.Context, _ *empty.Empty) (*influenzanet.Status, error) {
 	return nil, status.Error(codes.Unimplemented, "not implemented")
@@ -140,39 +94,6 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, u *influenza
 	return response, nil
 }
 
-func (s *userManagementServer) ChangePassword(ctx context.Context, req *user_api.PasswordChangeMsg) (*influenzanet.Status, error) {
-	if req == nil || req.Auth == nil {
-		return nil, status.Error(codes.InvalidArgument, "missing argument")
-	}
-
-	if !checkPasswordFormat(req.NewPassword) {
-		return nil, status.Error(codes.InvalidArgument, "new password too weak")
-	}
-
-	user, err := findUserByID(req.Auth.InstanceId, req.Auth.UserId)
-	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, "invalid user and/or password")
-	}
-
-	if comparePasswordWithHash(user.Password, req.OldPassword) != nil {
-		return nil, status.Error(codes.InvalidArgument, "invalid user and/or password")
-	}
-
-	newHashedPw := hashPassword(req.NewPassword)
-	err = updateUserPasswordDB(req.Auth.InstanceId, req.Auth.UserId, newHashedPw)
-	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-	log.Printf("user %s initiated password change", req.Auth.UserId)
-
-	// TODO: initiate email notification for user about password update
-
-	return &influenzanet.Status{
-		Status: influenzanet.Status_NORMAL,
-		Msg:    "password changed",
-	}, nil
-}
-
 func (s *userManagementServer) TokenRefreshed(ctx context.Context, req *user_api.UserReference) (*influenzanet.Status, error) {
 	if req == nil || req.Auth == nil || req.UserId == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
@@ -187,3 +108,4 @@ func (s *userManagementServer) TokenRefreshed(ctx context.Context, req *user_api
 		Msg:    "token refresh time updated",
 	}, nil
 }
+
