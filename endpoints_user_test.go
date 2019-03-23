@@ -464,13 +464,117 @@ func TestAddSubprofileEndpoint(t *testing.T) {
 }
 
 func TestEditSubprofileEndpoint(t *testing.T) {
-	// s := userManagementServer{}
+	s := userManagementServer{}
 
-	// TODO: without payload
-	// TODO: with empty payload
-	// TODO: with other user id
-	// TODO: with own user id
-	t.Error("test not implemented")
+	testUsers, err := addTestUsers([]User{
+		User{
+			Account: Account{
+				Type:     "email",
+				Email:    "edit_subprofile_1@test.com",
+				Password: hashPassword("54sd ckld fg§pe5"),
+			},
+			SubProfiles: SubProfiles{
+				SubProfile{
+					ID:        primitive.NewObjectID(),
+					Name:      "Test to Edit",
+					BirthYear: 1999,
+				},
+			},
+		},
+	})
+	if err != nil {
+		t.Errorf("failed to create testusers: %s", err.Error())
+		return
+	}
+
+	t.Run("without payload", func(t *testing.T) {
+		resp, err := s.EditSubprofile(context.Background(), nil)
+		if err == nil {
+			t.Errorf("or response: %s", resp)
+			return
+		}
+		if status.Convert(err).Message() != "missing argument" {
+			t.Errorf("wrong error: %s", err.Error())
+		}
+	})
+
+	t.Run("with empty payload", func(t *testing.T) {
+		req := &user_api.SubProfileRequest{}
+		resp, err := s.EditSubprofile(context.Background(), req)
+		if err == nil {
+			t.Errorf("or response: %s", resp)
+			return
+		}
+		if status.Convert(err).Message() != "missing argument" {
+			t.Errorf("wrong error: %s", err.Error())
+		}
+	})
+
+	t.Run("with wrong user id", func(t *testing.T) {
+		req := &user_api.SubProfileRequest{
+			Auth: &influenzanet.ParsedToken{
+				UserId:     testUsers[0].ID.Hex() + "w",
+				InstanceId: testInstanceID,
+			},
+			SubProfile: &user_api.SubProfile{
+				Id:        testUsers[0].SubProfiles[0].ID.Hex(),
+				Name:      "Testname",
+				BirthYear: 1911,
+			},
+		}
+		resp, err := s.EditSubprofile(context.Background(), req)
+		if err == nil {
+			t.Errorf("or response: %s", resp)
+			return
+		}
+		if status.Convert(err).Message() != "not found" {
+			t.Errorf("wrong error: %s", err.Error())
+		}
+	})
+
+	t.Run("with wrong subprofile id", func(t *testing.T) {
+		req := &user_api.SubProfileRequest{
+			Auth: &influenzanet.ParsedToken{
+				UserId:     testUsers[0].ID.Hex(),
+				InstanceId: testInstanceID,
+			},
+			SubProfile: &user_api.SubProfile{
+				Id:        testUsers[0].SubProfiles[0].ID.Hex() + "1",
+				Name:      "Testname",
+				BirthYear: 1911,
+			},
+		}
+		resp, err := s.EditSubprofile(context.Background(), req)
+		if err == nil {
+			t.Errorf("or response: %s", resp)
+			return
+		}
+		if status.Convert(err).Message() != "item with given ID not found" {
+			t.Errorf("wrong error: %s", err.Error())
+		}
+	})
+
+	t.Run("with own user id", func(t *testing.T) {
+		req := &user_api.SubProfileRequest{
+			Auth: &influenzanet.ParsedToken{
+				UserId:     testUsers[0].ID.Hex(),
+				InstanceId: testInstanceID,
+			},
+			SubProfile: &user_api.SubProfile{
+				Id:        testUsers[0].SubProfiles[0].ID.Hex(),
+				Name:      "Testname",
+				BirthYear: 1911,
+			},
+		}
+		resp, err := s.EditSubprofile(context.Background(), req)
+		if err != nil {
+			t.Errorf("unexpected error: %s", err.Error())
+			return
+		}
+		if len(resp.SubProfiles) < 1 || resp.SubProfiles[0].Name != "Testname" || resp.SubProfiles[0].BirthYear != 1911 {
+			t.Errorf("wrong response: %s", resp)
+		}
+	})
 }
 
 func TestRemoveSubprofileEndpoint(t *testing.T) {
