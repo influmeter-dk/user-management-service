@@ -260,6 +260,37 @@ func TestChangeEmailEndpoint(t *testing.T) {
 	t.Error("test not implemented")
 }
 
+func TestUpdateNameEndpoint(t *testing.T) {
+	// s := userManagementServer{}
+
+	// TODO: without payload
+	// TODO: with empty payload
+	// TODO: with other user id
+	// TODO: with own user id
+	t.Error("test not implemented")
+}
+
+func TestUpdateBirthDateEndpoint(t *testing.T) {
+	// s := userManagementServer{}
+
+	// TODO: without payload
+	// TODO: with empty payload
+	// TODO: with other user id
+	// TODO: with own user id - check if values really updated
+	t.Error("test not implemented")
+}
+
+func TestUpdateChildrenEndpoint(t *testing.T) {
+	// s := userManagementServer{}
+
+	// TODO: without payload
+	// TODO: with empty payload
+	// TODO: with other user id
+	// TODO: with own user id - check if values updated
+	t.Error("test not implemented")
+}
+
+/* TODO: remove
 func TestUpdateProfileEndpoint(t *testing.T) {
 	s := userManagementServer{}
 
@@ -347,6 +378,7 @@ func TestUpdateProfileEndpoint(t *testing.T) {
 		}
 	})
 }
+*/
 
 func TestAddSubprofileEndpoint(t *testing.T) {
 	s := userManagementServer{}

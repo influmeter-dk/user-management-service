@@ -64,6 +64,22 @@ func (s *userManagementServer) ChangeEmail(ctx context.Context, req *user_api.Em
 	return nil, status.Error(codes.Unimplemented, "not implemented")
 }
 
+func (s *userManagementServer) UpdateName(ctx context.Context, req *user_api.NameUpdateRequest) (*user_api.User, error) {
+	return nil, status.Error(codes.Unimplemented, "not implemented")
+}
+
+func (s *userManagementServer) UpdateBirthDate(ctx context.Context, req *user_api.ProfileRequest) (*user_api.User, error) {
+	// TODO: Update updated at time as well
+	return nil, status.Error(codes.Unimplemented, "not implemented")
+}
+
+func (s *userManagementServer) UpdateChildren(ctx context.Context, req *user_api.ProfileRequest) (*user_api.User, error) {
+	// TODO: Update updated at time as well
+	return nil, status.Error(codes.Unimplemented, "not implemented")
+}
+
+/*
+TODO: remove
 func (s *userManagementServer) UpdateProfile(ctx context.Context, req *user_api.ProfileRequest) (*user_api.User, error) {
 	if req == nil || req.Auth == nil || req.Profile == nil {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
@@ -81,7 +97,7 @@ func (s *userManagementServer) UpdateProfile(ctx context.Context, req *user_api.
 	}
 
 	return user.ToAPI(), nil
-}
+}*/
 
 func (s *userManagementServer) AddSubprofile(ctx context.Context, req *user_api.SubProfileRequest) (*user_api.User, error) {
 	if req == nil || req.Auth == nil || req.SubProfile == nil {
