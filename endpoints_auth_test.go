@@ -205,3 +205,4 @@ func TestSignup(t *testing.T) {
 func TestTokenRefreshedEndpoint(t *testing.T) {
 	t.Error("test not implemented")
 }
+

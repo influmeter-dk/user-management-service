@@ -270,6 +270,39 @@ func TestUpdateNameEndpoint(t *testing.T) {
 	t.Error("test not implemented")
 }
 
+func TestDeleteAccountEndpoint(t *testing.T) {
+	s := userManagementServer{}
+
+	// TODO: add test users
+
+	t.Run("without payload", func(t *testing.T) {
+		resp, err := s.DeleteAccount(context.Background(), nil)
+		if err == nil {
+			t.Error("should return error")
+			return
+		}
+		if status.Convert(err).Message() != "missing argument" || resp != nil {
+			t.Errorf("wrong error: %s", err.Error())
+			t.Errorf("or response: %s", resp)
+		}
+	})
+
+	t.Run("with empty payload", func(t *testing.T) {
+		req := &user_api.UserReference{}
+		resp, err := s.DeleteAccount(context.Background(), req)
+		if err == nil {
+			t.Error("should return error")
+			return
+		}
+		if status.Convert(err).Message() != "missing argument" || resp != nil {
+			t.Errorf("wrong error: %s", err.Error())
+			t.Errorf("or response: %s", resp)
+		}
+	})
+
+	t.Error("test not implemented")
+}
+
 func TestUpdateBirthDateEndpoint(t *testing.T) {
 	// s := userManagementServer{}
 

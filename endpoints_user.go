@@ -68,6 +68,17 @@ func (s *userManagementServer) UpdateName(ctx context.Context, req *user_api.Nam
 	return nil, status.Error(codes.Unimplemented, "not implemented")
 }
 
+func (s *userManagementServer) DeleteAccount(ctx context.Context, req *user_api.UserReference) (*influenzanet.Status, error) {
+	if req == nil || req.Auth == nil || req.UserId == "" {
+		return nil, status.Error(codes.InvalidArgument, "missing argument")
+	}
+	log.Printf("user %s initiated account removal for user id", req.Auth.UserId, req.UserId)
+	// TODO: check if allowed
+	// TODO: delete account
+	log.Printf("user account with id %s successfully removed", req.UserId)
+	return nil, status.Error(codes.Unimplemented, "unimplemented")
+}
+
 func (s *userManagementServer) UpdateBirthDate(ctx context.Context, req *user_api.ProfileRequest) (*user_api.User, error) {
 	// TODO: Update updated at time as well
 	return nil, status.Error(codes.Unimplemented, "not implemented")
