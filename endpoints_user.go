@@ -72,11 +72,23 @@ func (s *userManagementServer) DeleteAccount(ctx context.Context, req *user_api.
 	if req == nil || req.Auth == nil || req.UserId == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
-	log.Printf("user %s initiated account removal for user id", req.Auth.UserId, req.UserId)
-	// TODO: check if allowed
-	// TODO: delete account
+
+	// TODO: check if user auth is from admin - to remove user by admin
+	if req.Auth.UserId != req.UserId {
+		log.Printf("unauthorized request: user %s initiated account removal for user id %s", req.Auth.UserId, req.UserId)
+		return nil, status.Error(codes.PermissionDenied, "not authorized")
+	}
+	log.Printf("user %s initiated account removal for user id %s", req.Auth.UserId, req.UserId)
+
+	if err := deleteUserFromDB(req.Auth.InstanceId, req.UserId); err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	// TODO: remove all tokens for the given user ID using auth-service
 	log.Printf("user account with id %s successfully removed", req.UserId)
-	return nil, status.Error(codes.Unimplemented, "unimplemented")
+	return &influenzanet.Status{
+		Status: influenzanet.Status_NORMAL,
+		Msg:    "user deleted",
+	}, nil
 }
 
 func (s *userManagementServer) UpdateBirthDate(ctx context.Context, req *user_api.ProfileRequest) (*user_api.User, error) {

@@ -273,7 +273,27 @@ func TestUpdateNameEndpoint(t *testing.T) {
 func TestDeleteAccountEndpoint(t *testing.T) {
 	s := userManagementServer{}
 
-	// TODO: add test users
+	// Create Test User
+	testUsers, err := addTestUsers([]User{
+		User{
+			Account: Account{
+				Type:     "email",
+				Email:    "delete_user_1@test.com",
+				Password: hashPassword("13 ckld fg§$5"),
+			},
+		},
+		User{
+			Account: Account{
+				Type:     "email",
+				Email:    "delete_user_2@test.com",
+				Password: hashPassword("13 ckld fg§$5"),
+			},
+		},
+	})
+	if err != nil {
+		t.Errorf("failed to create testusers: %s", err.Error())
+		return
+	}
 
 	t.Run("without payload", func(t *testing.T) {
 		resp, err := s.DeleteAccount(context.Background(), nil)
@@ -300,7 +320,45 @@ func TestDeleteAccountEndpoint(t *testing.T) {
 		}
 	})
 
-	t.Error("test not implemented")
+	t.Run("with other user", func(t *testing.T) {
+		req := &user_api.UserReference{
+			Auth: &influenzanet.ParsedToken{
+				UserId:     testUsers[0].ID.Hex(),
+				Roles:      []string{"PARTICIPANT"},
+				InstanceId: testInstanceID,
+			},
+			UserId: testUsers[1].ID.Hex(),
+		}
+		resp, err := s.DeleteAccount(context.Background(), req)
+		if err == nil {
+			t.Error("should return error")
+			return
+		}
+		if status.Convert(err).Message() != "not authorized" || resp != nil {
+			t.Errorf("wrong error: %s", err.Error())
+			t.Errorf("or response: %s", resp)
+		}
+	})
+
+	t.Run("with same user", func(t *testing.T) {
+		req := &user_api.UserReference{
+			Auth: &influenzanet.ParsedToken{
+				UserId:     testUsers[0].ID.Hex(),
+				Roles:      []string{"PARTICIPANT"},
+				InstanceId: testInstanceID,
+			},
+			UserId: testUsers[0].ID.Hex(),
+		}
+		_, err := s.DeleteAccount(context.Background(), req)
+		if err != nil {
+			t.Errorf("unexpected error: %s", err.Error())
+			return
+		}
+		_, err = getUserByIDFromDB(testInstanceID, testUsers[0].ID.Hex())
+		if err == nil {
+			t.Error("user should not exist")
+		}
+	})
 }
 
 func TestUpdateBirthDateEndpoint(t *testing.T) {
