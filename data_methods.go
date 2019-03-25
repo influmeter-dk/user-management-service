@@ -130,6 +130,12 @@ func deleteUserFromDB(instanceID string, id string) error {
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(conf.DB.Timeout)*time.Second)
 	defer cancel()
-	_, err := instanceUserColRef(instanceID).DeleteOne(ctx, filter, nil)
-	return err
+	res, err := instanceUserColRef(instanceID).DeleteOne(ctx, filter, nil)
+	if err != nil {
+		return err
+	}
+	if res.DeletedCount < 1 {
+		return errors.New("no user found with the given id")
+	}
+	return nil
 }
