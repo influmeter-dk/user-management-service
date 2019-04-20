@@ -65,7 +65,21 @@ func (s *userManagementServer) ChangeEmail(ctx context.Context, req *user_api.Em
 }
 
 func (s *userManagementServer) UpdateName(ctx context.Context, req *user_api.NameUpdateRequest) (*user_api.User, error) {
-	return nil, status.Error(codes.Unimplemented, "not implemented")
+	if req == nil || req.Auth == nil || req.Name == nil {
+		return nil, status.Error(codes.InvalidArgument, "missing argument")
+	}
+	user, err := getUserByIDFromDB(req.Auth.InstanceId, req.Auth.UserId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "not found")
+	}
+
+	user.Account.Name = nameFromAPI(req.Name)
+	user, err = updateUserInDB(req.Auth.InstanceId, user)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "not found")
+	}
+
+	return user.ToAPI(), nil
 }
 
 func (s *userManagementServer) DeleteAccount(ctx context.Context, req *user_api.UserReference) (*influenzanet.Status, error) {

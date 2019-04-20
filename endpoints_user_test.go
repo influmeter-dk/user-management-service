@@ -261,13 +261,99 @@ func TestChangeEmailEndpoint(t *testing.T) {
 }
 
 func TestUpdateNameEndpoint(t *testing.T) {
-	// s := userManagementServer{}
+	s := userManagementServer{}
 
-	// TODO: without payload
-	// TODO: with empty payload
-	// TODO: with other user id
-	// TODO: with own user id
-	t.Error("test not implemented")
+	// Create Test User
+	testUser := User{
+		Account: Account{
+			Type:     "email",
+			Email:    "test-name-change@test.com",
+			Password: hashPassword("sdf6524Vfcv-"),
+			Name: Name{
+				Gender:    "Male",
+				FirstName: "First",
+				LastName:  "Last",
+			},
+		},
+		Roles: []string{"PARTICIPANT"},
+	}
+
+	id, err := addUserToDB(testInstanceID, testUser)
+	if err != nil {
+		t.Errorf("error creating users for testing pw change")
+		return
+	}
+	testUser.ID, err = primitive.ObjectIDFromHex(id)
+	if err != nil {
+		t.Errorf("error converting id")
+		return
+	}
+
+	t.Run("without payload", func(t *testing.T) {
+		resp, err := s.UpdateName(context.Background(), nil)
+		st, ok := status.FromError(err)
+		if !ok || st == nil || st.Message() != "missing argument" || resp != nil {
+			t.Errorf("wrong error: %s", err.Error())
+			t.Errorf("or response: %s", resp)
+		}
+	})
+
+	t.Run("without empty fields", func(t *testing.T) {
+		req := &user_api.NameUpdateRequest{}
+		resp, err := s.UpdateName(context.Background(), req)
+		st, ok := status.FromError(err)
+		if !ok || st == nil || st.Message() != "missing argument" || resp != nil {
+			t.Errorf("wrong error: %s", err.Error())
+			t.Errorf("or response: %s", resp)
+		}
+	})
+
+	t.Run("with wrong user id", func(t *testing.T) {
+		req := &user_api.NameUpdateRequest{
+			Auth: &influenzanet.ParsedToken{
+				UserId:     "test-wrong-id",
+				Roles:      []string{"PARTICIPANT"},
+				InstanceId: testInstanceID,
+			},
+			Name: &user_api.Name{
+				Gender:    "Female",
+				FirstName: "First2",
+				LastName:  "Last2",
+				Title:     "Dr.",
+			},
+		}
+		resp, err := s.UpdateName(context.Background(), req)
+		st, ok := status.FromError(err)
+		if !ok || st == nil || st.Message() != "not found" || resp != nil {
+			t.Errorf("wrong error: %s", err.Error())
+			t.Errorf("or response: %s", resp)
+		}
+	})
+
+	t.Run("with valid input", func(t *testing.T) {
+		newName := user_api.Name{
+			Gender:    "Female",
+			FirstName: "First2",
+			LastName:  "Last2",
+			Title:     "Dr.",
+		}
+		req := &user_api.NameUpdateRequest{
+			Auth: &influenzanet.ParsedToken{
+				UserId:     testUser.ID.Hex(),
+				Roles:      []string{"PARTICIPANT"},
+				InstanceId: testInstanceID,
+			},
+			Name: &newName,
+		}
+		resp, err := s.UpdateName(context.Background(), req)
+		if err != nil {
+			t.Errorf("unexpected error: %s", err.Error())
+			return
+		}
+		if resp.Account.Name == &newName {
+			t.Error("name is not updated")
+		}
+	})
 }
 
 func TestDeleteAccountEndpoint(t *testing.T) {
