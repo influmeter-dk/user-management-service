@@ -64,21 +64,3 @@ func TestCheckEmailFormat(t *testing.T) {
 		}
 	})
 }
-
-func TestHashAndComparePassword(t *testing.T) {
-	testPw := "öl.§42342_,sdfsdf"
-	testPwHash := hashPassword(testPw)
-
-	t.Run("with wrong password", func(t *testing.T) {
-		err := comparePasswordWithHash(testPwHash, testPw+"1")
-		if err == nil {
-			t.Error("wrong pasword should generate error")
-		}
-	})
-	t.Run("with correct password", func(t *testing.T) {
-		err := comparePasswordWithHash(testPwHash, testPw)
-		if err != nil {
-			t.Errorf("unexpected error: %s", err.Error())
-		}
-	})
-}

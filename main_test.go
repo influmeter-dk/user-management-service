@@ -147,8 +147,8 @@ func TestDbInterfaceMethods(t *testing.T) {
 
 	t.Run("Testing deleting not existing user", func(t *testing.T) {
 		err := deleteUserFromDB(testInstanceID, testUser.ID.Hex()+"1")
-		if err != nil {
-			t.Errorf(err.Error())
+		if err == nil {
+			t.Errorf("user should not be found - error expected")
 			return
 		}
 	})

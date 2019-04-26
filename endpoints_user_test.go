@@ -16,16 +16,14 @@ func TestGetUserEndpoint(t *testing.T) {
 	testUsers, err := addTestUsers([]User{
 		User{
 			Account: Account{
-				Type:     "email",
-				Email:    "get_user_1@test.com",
-				Password: hashPassword("13 ckld fg§$5"),
+				Type:  "email",
+				Email: "get_user_1@test.com",
 			},
 		},
 		User{
 			Account: Account{
-				Type:     "email",
-				Email:    "get_user_2@test.com",
-				Password: hashPassword("13 ckld fg§$5"),
+				Type:  "email",
+				Email: "get_user_2@test.com",
 			},
 		},
 	})
@@ -118,12 +116,14 @@ func TestChangePasswordEndpoint(t *testing.T) {
 	oldPassword := "SuperSecurePassword123!§$"
 	newPassword := "NewSuperSecurePassword123!§$"
 
+	hashedOldPassword, _ := hashPassword(oldPassword)
+
 	// Create Test User
 	testUser := User{
 		Account: Account{
 			Type:     "email",
 			Email:    "test-password-change@test.com",
-			Password: hashPassword(oldPassword),
+			Password: hashedOldPassword,
 		},
 		Roles: []string{"PARTICIPANT"},
 	}
@@ -266,9 +266,8 @@ func TestUpdateNameEndpoint(t *testing.T) {
 	// Create Test User
 	testUser := User{
 		Account: Account{
-			Type:     "email",
-			Email:    "test-name-change@test.com",
-			Password: hashPassword("sdf6524Vfcv-"),
+			Type:  "email",
+			Email: "test-name-change@test.com",
 			Name: Name{
 				Gender:    "Male",
 				FirstName: "First",
@@ -363,16 +362,14 @@ func TestDeleteAccountEndpoint(t *testing.T) {
 	testUsers, err := addTestUsers([]User{
 		User{
 			Account: Account{
-				Type:     "email",
-				Email:    "delete_user_1@test.com",
-				Password: hashPassword("13 ckld fg§$5"),
+				Type:  "email",
+				Email: "delete_user_1@test.com",
 			},
 		},
 		User{
 			Account: Account{
-				Type:     "email",
-				Email:    "delete_user_2@test.com",
-				Password: hashPassword("13 ckld fg§$5"),
+				Type:  "email",
+				Email: "delete_user_2@test.com",
 			},
 		},
 	})
@@ -467,105 +464,14 @@ func TestUpdateChildrenEndpoint(t *testing.T) {
 	t.Error("test not implemented")
 }
 
-/* TODO: remove
-func TestUpdateProfileEndpoint(t *testing.T) {
-	s := userManagementServer{}
-
-	testUsers, err := addTestUsers([]User{
-		User{
-			Account: Account{
-				Type:     "email",
-				Email:    "update_profile_1@test.com",
-				Password: hashPassword("13sd ckld fg§$5"),
-			},
-		},
-	})
-	if err != nil {
-		t.Errorf("failed to create testusers: %s", err.Error())
-		return
-	}
-
-	t.Run("without payload", func(t *testing.T) {
-		resp, err := s.UpdateProfile(context.Background(), nil)
-		if err == nil {
-			t.Errorf("or response: %s", resp)
-			return
-		}
-		if status.Convert(err).Message() != "missing argument" {
-			t.Errorf("wrong error: %s", err.Error())
-		}
-	})
-
-	t.Run("with empty payload", func(t *testing.T) {
-		req := &user_api.ProfileRequest{}
-		resp, err := s.UpdateProfile(context.Background(), req)
-		if err == nil {
-			t.Errorf("or response: %s", resp)
-			return
-		}
-		if status.Convert(err).Message() != "missing argument" {
-			t.Errorf("wrong error: %s", err.Error())
-		}
-	})
-
-	t.Run("with wrong user id", func(t *testing.T) {
-		req := &user_api.ProfileRequest{
-			Auth: &influenzanet.ParsedToken{
-				UserId:     testUsers[0].ID.Hex() + "w",
-				InstanceId: testInstanceID,
-			},
-			Profile: &user_api.Profile{
-				Gender:    "test",
-				Title:     "none",
-				FirstName: "First",
-				LastName:  "Last",
-			},
-		}
-		resp, err := s.UpdateProfile(context.Background(), req)
-		if err == nil {
-			t.Errorf("or response: %s", resp)
-			return
-		}
-		if status.Convert(err).Message() != "not found" {
-			t.Errorf("wrong error: %s", err.Error())
-		}
-	})
-
-	t.Run("with own user id", func(t *testing.T) {
-		newProfile := &user_api.Profile{
-			Gender:    "test",
-			Title:     "none",
-			FirstName: "First",
-			LastName:  "Last",
-		}
-		req := &user_api.ProfileRequest{
-			Auth: &influenzanet.ParsedToken{
-				UserId:     testUsers[0].ID.Hex(),
-				InstanceId: testInstanceID,
-			},
-			Profile: newProfile,
-		}
-		resp, err := s.UpdateProfile(context.Background(), req)
-		if err != nil {
-			t.Errorf("unexpected error: %s", err.Error())
-			return
-		}
-		if resp.Profile.Gender != newProfile.Gender || resp.Profile.LastName != newProfile.LastName {
-			t.Errorf("wrong response: %s", resp)
-		}
-	})
-}
-*/
-
 func TestAddSubprofileEndpoint(t *testing.T) {
 	s := userManagementServer{}
 
 	testUsers, err := addTestUsers([]User{
 		User{
 			Account: Account{
-				Type:     "email",
-				Email:    "add_subprofile_1@test.com",
-				Password: hashPassword("54sd ckld fg§pe5"),
+				Type:  "email",
+				Email: "add_subprofile_1@test.com",
 			},
 		},
 	})
@@ -646,9 +552,8 @@ func TestEditSubprofileEndpoint(t *testing.T) {
 	testUsers, err := addTestUsers([]User{
 		User{
 			Account: Account{
-				Type:     "email",
-				Email:    "edit_subprofile_1@test.com",
-				Password: hashPassword("54sd ckld fg§pe5"),
+				Type:  "email",
+				Email: "edit_subprofile_1@test.com",
 			},
 			SubProfiles: SubProfiles{
 				SubProfile{
@@ -760,9 +665,8 @@ func TestRemoveSubprofileEndpoint(t *testing.T) {
 	testUsers, err := addTestUsers([]User{
 		User{
 			Account: Account{
-				Type:     "email",
-				Email:    "remove_subprofile_1@test.com",
-				Password: hashPassword("54sd ckld fg§pe5"),
+				Type:  "email",
+				Email: "remove_subprofile_1@test.com",
 			},
 			SubProfiles: SubProfiles{
 				SubProfile{

@@ -41,11 +41,16 @@ func (s *userManagementServer) ChangePassword(ctx context.Context, req *user_api
 		return nil, status.Error(codes.InvalidArgument, "invalid user and/or password")
 	}
 
-	if comparePasswordWithHash(user.Account.Password, req.OldPassword) != nil {
+	match, err := comparePasswordWithHash(user.Account.Password, req.OldPassword)
+	if err != nil || !match {
 		return nil, status.Error(codes.InvalidArgument, "invalid user and/or password")
 	}
 
-	newHashedPw := hashPassword(req.NewPassword)
+	newHashedPw, err := hashPassword(req.NewPassword)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
 	err = updateUserPasswordInDB(req.Auth.InstanceId, req.Auth.UserId, newHashedPw)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())

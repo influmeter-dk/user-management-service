@@ -31,7 +31,8 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, creds *influe
 		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
 	}
 
-	if comparePasswordWithHash(user.Account.Password, creds.Password) != nil {
+	match, err := comparePasswordWithHash(user.Account.Password, creds.Password)
+	if err != nil || !match {
 		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
 	}
 
@@ -58,7 +59,10 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, u *influenza
 		return nil, status.Error(codes.InvalidArgument, "password too weak")
 	}
 
-	password := hashPassword(u.Password)
+	password, err := hashPassword(u.Password)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 
 	// Create user DB object from request:
 	newUser := User{

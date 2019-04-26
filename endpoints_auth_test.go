@@ -14,11 +14,17 @@ func TestLogin(t *testing.T) {
 
 	// Create Test User
 	currentPw := "SuperSecurePassword123!§$"
+	hashedPw, err := hashPassword(currentPw)
+	if err != nil {
+		t.Errorf("error creating user for testing login")
+		return
+	}
+
 	testUser := User{
 		Account: Account{
 			Type:     "email",
 			Email:    "test-login@test.com",
-			Password: hashPassword(currentPw),
+			Password: hashedPw,
 		},
 		Roles: []string{"PARTICIPANT"},
 	}
@@ -205,4 +211,3 @@ func TestSignup(t *testing.T) {
 func TestTokenRefreshedEndpoint(t *testing.T) {
 	t.Error("test not implemented")
 }
-
