@@ -73,7 +73,7 @@ func TestGetUserEndpoint(t *testing.T) {
 			gomock.Any(),
 			gomock.Any(),
 		).Return(&api.TokenInfos{
-			Id:         testUsers[0].ID.Hex(),
+			Id:         testUsers[0].ID.Hex() + "w",
 			InstanceId: testInstanceID,
 		}, nil)
 
@@ -90,7 +90,7 @@ func TestGetUserEndpoint(t *testing.T) {
 	t.Run("with other user id", func(t *testing.T) {
 		req := &api.UserReference{
 			Token:  "mck_token",
-			UserId: testUsers[0].ID.Hex(),
+			UserId: testUsers[1].ID.Hex(),
 		}
 		mockAuthServiceClient.EXPECT().ValidateJWT(
 			gomock.Any(),
@@ -118,7 +118,7 @@ func TestGetUserEndpoint(t *testing.T) {
 			gomock.Any(),
 			gomock.Any(),
 		).Return(&api.TokenInfos{
-			Id:         testUsers[0].ID.Hex(),
+			Id:         testUsers[1].ID.Hex(),
 			InstanceId: testInstanceID,
 		}, nil)
 		resp, err := s.GetUser(context.Background(), req)

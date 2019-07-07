@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"log"
 
 	api "github.com/influenzanet/user-management-service/api"
 	"google.golang.org/grpc/codes"
@@ -12,21 +13,23 @@ func (s *userManagementServer) GetUser(ctx context.Context, req *api.UserReferen
 	if req == nil || req.Token == "" || req.UserId == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
-	// TODO: parsedToken -> using auth service
-	return nil, status.Error(codes.Unimplemented, "not implemented")
+	parsedToken, err := clients.authService.ValidateJWT(context.Background(), &api.JWTRequest{
+		Token: req.Token,
+	})
+	if err != nil {
+		return nil, status.Error(codes.Unauthenticated, err.Error())
+	}
 
-	/*
-		if req.Auth.UserId != req.UserId { // Later can be overwritten
-			log.Printf("not authorized: %s tried to access %s", req.Auth.UserId, req.UserId)
-			return nil, status.Error(codes.PermissionDenied, "not authorized")
-		}
+	if parsedToken.Id != req.UserId { // Later can be overwritten
+		log.Printf("not authorized GetUser(): %s tried to access %s", parsedToken.Id, req.UserId)
+		return nil, status.Error(codes.PermissionDenied, "not authorized")
+	}
 
-		user, err := getUserByIDFromDB(req.Auth.InstanceId, req.UserId)
-		if err != nil {
-			return nil, status.Error(codes.Internal, "not found")
-		}
-		return user.ToAPI(), nil
-	*/
+	user, err := getUserByIDFromDB(parsedToken.InstanceId, req.UserId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "not found")
+	}
+	return user.ToAPI(), nil
 }
 
 func (s *userManagementServer) ChangePassword(ctx context.Context, req *api.PasswordChangeMsg) (*api.Status, error) {
