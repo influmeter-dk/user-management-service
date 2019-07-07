@@ -11,7 +11,7 @@ import (
 )
 
 func (s *userManagementServer) GetUser(ctx context.Context, req *api.UserReference) (*api.User, error) {
-	if req == nil || req.Token == "" || req.UserId == "" {
+	if req == nil || req.Token == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
 	parsedToken, err := clients.authService.ValidateJWT(context.Background(), &api.JWTRequest{
@@ -19,6 +19,10 @@ func (s *userManagementServer) GetUser(ctx context.Context, req *api.UserReferen
 	})
 	if err != nil {
 		return nil, status.Error(codes.Unauthenticated, err.Error())
+	}
+
+	if req.UserId == "" {
+		req.UserId = parsedToken.Id
 	}
 
 	if parsedToken.Id != req.UserId { // Later can be overwritten
