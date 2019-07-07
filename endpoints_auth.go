@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"time"
 
 	"github.com/golang/protobuf/ptypes/empty"
 	"google.golang.org/grpc/codes"
@@ -106,18 +107,24 @@ func (s *userManagementServer) CheckRefreshToken(ctx context.Context, req *api.U
 }
 
 func (s *userManagementServer) TokenRefreshed(ctx context.Context, req *api.UserReference) (*api.Status, error) {
-	if req == nil || req.Token == "" || req.UserId == "" {
+	if req == nil || req.Token == "" || req.UserId == "" || req.InstanceId == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
-	return nil, status.Error(codes.Unimplemented, "not implemented")
-	// TODO: handle token refresh logic
-	/*
-		if err := updateTokenRefreshTimeInDB(req.Auth.InstanceId, req.UserId); err != nil {
-			return nil, status.Error(codes.Internal, err.Error())
-		}
 
-		return &api.Status{
-			Status: api.Status_NORMAL,
-			Msg:    "token refresh time updated",
-		}, nil*/
+	user, err := getUserByIDFromDB(req.InstanceId, req.UserId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "user not found")
+	}
+	user.AddRefreshToken(req.Token)
+	user.ObjectInfos.LastTokenRefresh = time.Now().Unix()
+
+	user, err = updateUserInDB(req.InstanceId, user)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &api.Status{
+		Status: api.Status_NORMAL,
+		Msg:    "token refresh time updated",
+	}, nil
 }

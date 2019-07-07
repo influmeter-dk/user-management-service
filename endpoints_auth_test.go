@@ -364,7 +364,7 @@ func TestTokenRefreshedEndpoint(t *testing.T) {
 			t.Errorf("unexpected error: %s", st.Message())
 			return
 		}
-		if !user.HasRefreshToken("new.test-token") {
+		if !user.HasRefreshToken("new-test-token") {
 			t.Errorf("refresh token should have been added: %s", user.Account.RefreshTokens)
 		}
 	})
