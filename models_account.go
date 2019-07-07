@@ -6,11 +6,12 @@ import (
 
 // Account holds information about user authentication methods
 type Account struct {
-	Type           string `bson:"type"`
-	Email          string `bson:"email"`
-	Password       string `bson:"password"`
-	EmailConfirmed bool   `bson:"emailConfirmed"`
-	Name           Name   `bson:"name"`
+	Type           string   `bson:"type"`
+	Email          string   `bson:"email"`
+	Password       string   `bson:"password"`
+	EmailConfirmed bool     `bson:"emailConfirmed"`
+	RefreshTokens  []string `bson:"refreshTokens"`
+	Name           Name     `bson:"name"`
 }
 
 func accountFromAPI(a *api.User_Account) Account {

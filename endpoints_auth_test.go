@@ -210,9 +210,162 @@ func TestSignup(t *testing.T) {
 }
 
 func TestCheckRefreshTokenEndpoint(t *testing.T) {
-	t.Error("test not implemented")
+	s := userManagementServer{}
+	testUsers, err := addTestUsers([]User{
+		User{
+			Account: Account{
+				Type:  "email",
+				Email: "test_check_refresh_token_1@test.com",
+			},
+		},
+		User{
+			Account: Account{
+				Type:          "email",
+				Email:         "test_check_refresh_token_2@test.com",
+				RefreshTokens: []string{"test-token"},
+			},
+		},
+	})
+	if err != nil {
+		t.Errorf("failed to create testusers: %s", err.Error())
+		return
+	}
+
+	t.Run("without payload", func(t *testing.T) {
+		resp, err := s.CheckRefreshToken(context.Background(), nil)
+		if err == nil {
+			t.Error("should return error")
+		}
+		st, ok := status.FromError(err)
+		if !ok || st.Message() != "missing argument" || resp != nil {
+			t.Errorf("wrong error: %s", err.Error())
+			t.Errorf("or response: %s", resp)
+		}
+	})
+
+	t.Run("with empty payload", func(t *testing.T) {
+		req := &api.UserReference{}
+		resp, err := s.CheckRefreshToken(context.Background(), req)
+		if err == nil {
+			t.Error("should return error")
+		}
+		st, ok := status.FromError(err)
+		if !ok || st.Message() != "missing argument" || resp != nil {
+			t.Errorf("wrong error: %s", err.Error())
+			t.Errorf("or response: %s", resp)
+		}
+	})
+
+	t.Run("with no tokens for the user", func(t *testing.T) {
+		req := &api.UserReference{
+			Token:      "test-token",
+			InstanceId: testInstanceID,
+			UserId:     testUsers[0].ID.Hex(),
+		}
+		_, err := s.CheckRefreshToken(context.Background(), req)
+		if err == nil {
+			t.Error("should return error")
+		}
+	})
+
+	t.Run("with wrong token for the user", func(t *testing.T) {
+		req := &api.UserReference{
+			Token:      "wrong-test-token",
+			InstanceId: testInstanceID,
+			UserId:     testUsers[1].ID.Hex(),
+		}
+		_, err := s.CheckRefreshToken(context.Background(), req)
+		if err == nil {
+			t.Error("should return error")
+		}
+	})
+
+	t.Run("with token for the user", func(t *testing.T) {
+		req := &api.UserReference{
+			Token:      "test-token",
+			InstanceId: testInstanceID,
+			UserId:     testUsers[1].ID.Hex(),
+		}
+		_, err := s.CheckRefreshToken(context.Background(), req)
+		if err != nil {
+			st, _ := status.FromError(err)
+			t.Errorf("unexpected error: %s", st.Message())
+			return
+		}
+
+		user, err := getUserByIDFromDB(testInstanceID, testUsers[1].ID.Hex())
+		if err != nil {
+			st, _ := status.FromError(err)
+			t.Errorf("unexpected error: %s", st.Message())
+			return
+		}
+		if user.HasRefreshToken("test-token") {
+			t.Errorf("refresh token should have been deleted: %s", user.Account.RefreshTokens)
+		}
+	})
 }
 
 func TestTokenRefreshedEndpoint(t *testing.T) {
-	t.Error("test not implemented")
+	s := userManagementServer{}
+	testUsers, err := addTestUsers([]User{
+		User{
+			Account: Account{
+				Type:  "email",
+				Email: "test_token_refreshed_1@test.com",
+			},
+		},
+	})
+	if err != nil {
+		t.Errorf("failed to create testusers: %s", err.Error())
+		return
+	}
+
+	t.Run("without payload", func(t *testing.T) {
+		resp, err := s.TokenRefreshed(context.Background(), nil)
+		if err == nil {
+			t.Error("should return error")
+		}
+		st, ok := status.FromError(err)
+		if !ok || st.Message() != "missing argument" || resp != nil {
+			t.Errorf("wrong error: %s", err.Error())
+			t.Errorf("or response: %s", resp)
+		}
+	})
+
+	t.Run("with empty payload", func(t *testing.T) {
+		req := &api.UserReference{}
+		resp, err := s.TokenRefreshed(context.Background(), req)
+		if err == nil {
+			t.Error("should return error")
+		}
+		st, ok := status.FromError(err)
+		if !ok || st.Message() != "missing argument" || resp != nil {
+			t.Errorf("wrong error: %s", err.Error())
+			t.Errorf("or response: %s", resp)
+		}
+	})
+
+	t.Run("with new token for the user", func(t *testing.T) {
+		req := &api.UserReference{
+			Token:      "new-test-token",
+			InstanceId: testInstanceID,
+			UserId:     testUsers[0].ID.Hex(),
+		}
+		_, err := s.TokenRefreshed(context.Background(), req)
+		if err != nil {
+			st, _ := status.FromError(err)
+			t.Errorf("unexpected error: %s", st.Message())
+			return
+		}
+
+		user, err := getUserByIDFromDB(testInstanceID, testUsers[0].ID.Hex())
+		if err != nil {
+			st, _ := status.FromError(err)
+			t.Errorf("unexpected error: %s", st.Message())
+			return
+		}
+		if !user.HasRefreshToken("new.test-token") {
+			t.Errorf("refresh token should have been added: %s", user.Account.RefreshTokens)
+		}
+	})
 }

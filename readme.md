@@ -20,3 +20,7 @@ mockgen -source=./api/auth-service.pb.go AuthServiceApiClient > mocks/auth-servi
 ```
 
 For more information about testing grpc clients with go check: <https://github.com/grpc/grpc-go/blob/master/Documentation/gomock-example.md>
+
+## To sort
+
+Maximum ten devices can get a refresh token at the same time - see models_user.go
