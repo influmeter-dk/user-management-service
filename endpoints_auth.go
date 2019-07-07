@@ -100,10 +100,29 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, u *api.UserC
 }
 
 func (s *userManagementServer) CheckRefreshToken(ctx context.Context, req *api.UserReference) (*api.Status, error) {
-	if req == nil || req.Token == "" || req.UserId == "" {
+	if req == nil || req.Token == "" || req.UserId == "" || req.InstanceId == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
-	return nil, status.Error(codes.Unimplemented, "not implemented")
+	user, err := getUserByIDFromDB(req.InstanceId, req.UserId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "user not found")
+	}
+
+	err = user.RemoveRefreshToken(req.Token)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "token not found")
+	}
+	user.ObjectInfos.LastTokenRefresh = time.Now().Unix()
+
+	user, err = updateUserInDB(req.InstanceId, user)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return &api.Status{
+		Status: api.Status_NORMAL,
+		Msg:    "refresh token removed",
+	}, nil
 }
 
 func (s *userManagementServer) TokenRefreshed(ctx context.Context, req *api.UserReference) (*api.Status, error) {
