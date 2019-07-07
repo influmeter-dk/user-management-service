@@ -508,6 +508,11 @@ func TestDeleteAccountEndpoint(t *testing.T) {
 			Id:         testUsers[0].ID.Hex(),
 			InstanceId: testInstanceID,
 		}, nil)
+		mockAuthServiceClient.EXPECT().PurgeUserTempTokens(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(&api.Status{}, nil)
+
 		_, err := s.DeleteAccount(context.Background(), req)
 		if err != nil {
 			t.Errorf("unexpected error: %s", err.Error())

@@ -127,7 +127,15 @@ func (s *userManagementServer) DeleteAccount(ctx context.Context, req *api.UserR
 	if err := deleteUserFromDB(parsedToken.InstanceId, req.UserId); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	// TODO: remove all tokens for the given user ID using auth-service
+
+	// remove all TempTokens for the given user ID using auth-service
+	if _, err := clients.authService.PurgeUserTempTokens(context.Background(), &api.TempTokenInfo{
+		UserId:     parsedToken.Id,
+		InstanceId: parsedToken.InstanceId,
+	}); err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
 	log.Printf("user account with id %s successfully removed", req.UserId)
 	return &api.Status{
 		Status: api.Status_NORMAL,
