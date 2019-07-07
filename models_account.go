@@ -1,7 +1,7 @@
 package main
 
 import (
-	user_api "github.com/influenzanet/api/dist/go/user-management"
+	api "github.com/influenzanet/user-management-service/api"
 )
 
 // Account holds information about user authentication methods
@@ -13,7 +13,7 @@ type Account struct {
 	Name           Name   `bson:"name"`
 }
 
-func accountFromAPI(a *user_api.User_Account) Account {
+func accountFromAPI(a *api.User_Account) Account {
 	if a == nil {
 		return Account{}
 	}
@@ -26,8 +26,8 @@ func accountFromAPI(a *user_api.User_Account) Account {
 }
 
 // ToAPI converts the object from DB to API format
-func (a Account) ToAPI() *user_api.User_Account {
-	return &user_api.User_Account{
+func (a Account) ToAPI() *api.User_Account {
+	return &api.User_Account{
 		Type:           a.Type,
 		Email:          a.Email,
 		EmailConfirmed: a.EmailConfirmed,
@@ -43,7 +43,7 @@ type Name struct {
 	LastName  string `bson:"lastName"`
 }
 
-func nameFromAPI(a *user_api.Name) Name {
+func nameFromAPI(a *api.Name) Name {
 	if a == nil {
 		return Name{}
 	}
@@ -56,8 +56,8 @@ func nameFromAPI(a *user_api.Name) Name {
 }
 
 // ToAPI converts the object from DB to API format
-func (a Name) ToAPI() *user_api.Name {
-	return &user_api.Name{
+func (a Name) ToAPI() *api.Name {
+	return &api.Name{
 		Gender:    a.Gender,
 		Title:     a.Title,
 		FirstName: a.FirstName,

@@ -1,0 +1,3 @@
+export AUTH_SERVICE="auth-service:3423"
+go test  ./...
+

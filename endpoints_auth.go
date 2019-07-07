@@ -8,15 +8,15 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	influenzanet "github.com/influenzanet/api/dist/go"
-	user_api "github.com/influenzanet/api/dist/go/user-management"
+	api "github.com/influenzanet/user-management-service/api"
+	utils "github.com/influenzanet/user-management-service/utils"
 )
 
-func (s *userManagementServer) Status(ctx context.Context, _ *empty.Empty) (*influenzanet.Status, error) {
+func (s *userManagementServer) Status(ctx context.Context, _ *empty.Empty) (*api.Status, error) {
 	return nil, status.Error(codes.Unimplemented, "not implemented")
 }
 
-func (s *userManagementServer) LoginWithEmail(ctx context.Context, creds *influenzanet.UserCredentials) (*user_api.UserAuthInfo, error) {
+func (s *userManagementServer) LoginWithEmail(ctx context.Context, creds *api.UserCredentials) (*api.UserAuthInfo, error) {
 	if creds == nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
 	}
@@ -31,7 +31,7 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, creds *influe
 		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
 	}
 
-	match, err := comparePasswordWithHash(user.Account.Password, creds.Password)
+	match, err := utils.ComparePasswordWithHash(user.Account.Password, creds.Password)
 	if err != nil || !match {
 		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
 	}
@@ -40,7 +40,7 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, creds *influe
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	response := &user_api.UserAuthInfo{
+	response := &api.UserAuthInfo{
 		UserId:     user.ID.Hex(),
 		Roles:      user.Roles,
 		InstanceId: instanceID,
@@ -48,18 +48,18 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, creds *influe
 	return response, nil
 }
 
-func (s *userManagementServer) SignupWithEmail(ctx context.Context, u *influenzanet.UserCredentials) (*user_api.UserAuthInfo, error) {
+func (s *userManagementServer) SignupWithEmail(ctx context.Context, u *api.UserCredentials) (*api.UserAuthInfo, error) {
 	if u == nil {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
-	if !checkEmailFormat(u.Email) {
+	if !utils.CheckEmailFormat(u.Email) {
 		return nil, status.Error(codes.InvalidArgument, "email not valid")
 	}
-	if !checkPasswordFormat(u.Password) {
+	if !utils.CheckPasswordFormat(u.Password) {
 		return nil, status.Error(codes.InvalidArgument, "password too weak")
 	}
 
-	password, err := hashPassword(u.Password)
+	password, err := utils.HashPassword(u.Password)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -90,7 +90,7 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, u *influenza
 	// TODO: generate email confirmation token
 	// TODO: send email with confirmation request
 
-	response := &user_api.UserAuthInfo{
+	response := &api.UserAuthInfo{
 		UserId:     id,
 		Roles:      newUser.Roles,
 		InstanceId: instanceID,
@@ -98,17 +98,26 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, u *influenza
 	return response, nil
 }
 
-func (s *userManagementServer) TokenRefreshed(ctx context.Context, req *user_api.UserReference) (*influenzanet.Status, error) {
-	if req == nil || req.Auth == nil || req.UserId == "" {
+func (s *userManagementServer) CheckRefreshToken(ctx context.Context, req *api.UserReference) (*api.Status, error) {
+	if req == nil || req.Token == "" || req.UserId == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
+	return nil, status.Error(codes.Unimplemented, "not implemented")
+}
 
-	if err := updateTokenRefreshTimeInDB(req.Auth.InstanceId, req.UserId); err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
+func (s *userManagementServer) TokenRefreshed(ctx context.Context, req *api.UserReference) (*api.Status, error) {
+	if req == nil || req.Token == "" || req.UserId == "" {
+		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
+	return nil, status.Error(codes.Unimplemented, "not implemented")
+	// TODO: handle token refresh logic
+	/*
+		if err := updateTokenRefreshTimeInDB(req.Auth.InstanceId, req.UserId); err != nil {
+			return nil, status.Error(codes.Internal, err.Error())
+		}
 
-	return &influenzanet.Status{
-		Status: influenzanet.Status_NORMAL,
-		Msg:    "token refresh time updated",
-	}, nil
+		return &api.Status{
+			Status: api.Status_NORMAL,
+			Msg:    "token refresh time updated",
+		}, nil*/
 }

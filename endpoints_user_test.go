@@ -4,13 +4,21 @@ import (
 	"context"
 	"testing"
 
-	influenzanet "github.com/influenzanet/api/dist/go"
-	user_api "github.com/influenzanet/api/dist/go/user-management"
+	"github.com/golang/mock/gomock"
+	"github.com/influenzanet/user-management-service/utils"
+
+	api "github.com/influenzanet/user-management-service/api"
+	api_mock "github.com/influenzanet/user-management-service/mocks"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc/status"
 )
 
 func TestGetUserEndpoint(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockAuthServiceClient := api_mock.NewMockAuthServiceApiClient(mockCtrl)
+	clients.authService = mockAuthServiceClient
+
 	s := userManagementServer{}
 
 	testUsers, err := addTestUsers([]User{
@@ -44,7 +52,7 @@ func TestGetUserEndpoint(t *testing.T) {
 	})
 
 	t.Run("with empty payload", func(t *testing.T) {
-		req := &user_api.UserReference{}
+		req := &api.UserReference{}
 		resp, err := s.GetUser(context.Background(), req)
 		if err == nil {
 			t.Errorf("or response: %s", resp)
@@ -56,13 +64,19 @@ func TestGetUserEndpoint(t *testing.T) {
 	})
 
 	t.Run("with wrong user id", func(t *testing.T) {
-		req := &user_api.UserReference{
-			Auth: &influenzanet.ParsedToken{
-				UserId:     testUsers[0].ID.Hex() + "w",
-				InstanceId: testInstanceID,
-			},
+		req := &api.UserReference{
+			Token:  "mck_token",
 			UserId: testUsers[0].ID.Hex() + "w",
 		}
+
+		mockAuthServiceClient.EXPECT().ValidateJWT(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(&api.TokenInfos{
+			Id:         testUsers[0].ID.Hex(),
+			InstanceId: testInstanceID,
+		}, nil)
+
 		resp, err := s.GetUser(context.Background(), req)
 		if err == nil {
 			t.Errorf("or response: %s", resp)
@@ -74,13 +88,17 @@ func TestGetUserEndpoint(t *testing.T) {
 	})
 
 	t.Run("with other user id", func(t *testing.T) {
-		req := &user_api.UserReference{
-			Auth: &influenzanet.ParsedToken{
-				UserId:     testUsers[1].ID.Hex(),
-				InstanceId: testInstanceID,
-			},
+		req := &api.UserReference{
+			Token:  "mck_token",
 			UserId: testUsers[0].ID.Hex(),
 		}
+		mockAuthServiceClient.EXPECT().ValidateJWT(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(&api.TokenInfos{
+			Id:         testUsers[0].ID.Hex(),
+			InstanceId: testInstanceID,
+		}, nil)
 		resp, err := s.GetUser(context.Background(), req)
 		if err == nil {
 			t.Errorf("or response: %s", resp)
@@ -92,13 +110,17 @@ func TestGetUserEndpoint(t *testing.T) {
 	})
 
 	t.Run("with own user id", func(t *testing.T) {
-		req := &user_api.UserReference{
-			Auth: &influenzanet.ParsedToken{
-				UserId:     testUsers[1].ID.Hex(),
-				InstanceId: testInstanceID,
-			},
+		req := &api.UserReference{
+			Token:  "mck_token",
 			UserId: testUsers[1].ID.Hex(),
 		}
+		mockAuthServiceClient.EXPECT().ValidateJWT(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(&api.TokenInfos{
+			Id:         testUsers[0].ID.Hex(),
+			InstanceId: testInstanceID,
+		}, nil)
 		resp, err := s.GetUser(context.Background(), req)
 		if err != nil {
 			t.Errorf("unexpected error: %s", err.Error())
@@ -111,12 +133,17 @@ func TestGetUserEndpoint(t *testing.T) {
 }
 
 func TestChangePasswordEndpoint(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockAuthServiceClient := api_mock.NewMockAuthServiceApiClient(mockCtrl)
+	clients.authService = mockAuthServiceClient
+
 	s := userManagementServer{}
 
 	oldPassword := "SuperSecurePassword123!§$"
 	newPassword := "NewSuperSecurePassword123!§$"
 
-	hashedOldPassword, _ := hashPassword(oldPassword)
+	hashedOldPassword, _ := utils.HashPassword(oldPassword)
 
 	// Create Test User
 	testUser := User{
@@ -149,7 +176,7 @@ func TestChangePasswordEndpoint(t *testing.T) {
 	})
 
 	t.Run("without auth fields", func(t *testing.T) {
-		req := &user_api.PasswordChangeMsg{}
+		req := &api.PasswordChangeMsg{}
 		resp, err := s.ChangePassword(context.Background(), req)
 		st, ok := status.FromError(err)
 		if !ok || st == nil || st.Message() != "missing argument" || resp != nil {
@@ -159,15 +186,24 @@ func TestChangePasswordEndpoint(t *testing.T) {
 	})
 
 	t.Run("with wrong user id", func(t *testing.T) {
-		req := &user_api.PasswordChangeMsg{
-			Auth: &influenzanet.ParsedToken{
+		req := &api.PasswordChangeMsg{
+			Token: "mck_token",
+			/*Auth: &influenzanet.ParsedToken{
 				UserId:     "test-wrong-id",
 				Roles:      []string{"PARTICIPANT"},
 				InstanceId: testInstanceID,
-			},
+			},*/
 			OldPassword: oldPassword,
 			NewPassword: newPassword,
 		}
+		mockAuthServiceClient.EXPECT().ValidateJWT(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(&api.TokenInfos{
+			Id:         "wrong-id",
+			InstanceId: testInstanceID,
+		}, nil)
+
 		resp, err := s.ChangePassword(context.Background(), req)
 		st, ok := status.FromError(err)
 		if !ok || st == nil || st.Message() != "invalid user and/or password" || resp != nil {
@@ -177,15 +213,19 @@ func TestChangePasswordEndpoint(t *testing.T) {
 	})
 
 	t.Run("with wrong old password", func(t *testing.T) {
-		req := &user_api.PasswordChangeMsg{
-			Auth: &influenzanet.ParsedToken{
-				UserId:     id,
-				Roles:      []string{"PARTICIPANT"},
-				InstanceId: testInstanceID,
-			},
+		req := &api.PasswordChangeMsg{
+			Token:       "mck_token",
 			OldPassword: oldPassword + "wrong",
 			NewPassword: newPassword,
 		}
+		mockAuthServiceClient.EXPECT().ValidateJWT(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(&api.TokenInfos{
+			Id:         id,
+			InstanceId: testInstanceID,
+		}, nil)
+
 		resp, err := s.ChangePassword(context.Background(), req)
 		st, ok := status.FromError(err)
 		if !ok || st == nil || st.Message() != "invalid user and/or password" || resp != nil {
@@ -195,15 +235,19 @@ func TestChangePasswordEndpoint(t *testing.T) {
 	})
 
 	t.Run("with too weak new password", func(t *testing.T) {
-		req := &user_api.PasswordChangeMsg{
-			Auth: &influenzanet.ParsedToken{
-				UserId:     id,
-				Roles:      []string{"PARTICIPANT"},
-				InstanceId: testInstanceID,
-			},
+		req := &api.PasswordChangeMsg{
+			Token:       "mck_token",
 			OldPassword: oldPassword,
 			NewPassword: "short",
 		}
+		mockAuthServiceClient.EXPECT().ValidateJWT(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(&api.TokenInfos{
+			Id:         id,
+			InstanceId: testInstanceID,
+		}, nil)
+
 		resp, err := s.ChangePassword(context.Background(), req)
 		st, ok := status.FromError(err)
 		if !ok || st == nil || st.Message() != "new password too weak" || resp != nil {
@@ -213,15 +257,18 @@ func TestChangePasswordEndpoint(t *testing.T) {
 	})
 
 	t.Run("with valid data and new password", func(t *testing.T) {
-		req := &user_api.PasswordChangeMsg{
-			Auth: &influenzanet.ParsedToken{
-				UserId:     id,
-				Roles:      []string{"PARTICIPANT"},
-				InstanceId: testInstanceID,
-			},
+		req := &api.PasswordChangeMsg{
+			Token:       "mck_token",
 			OldPassword: oldPassword,
 			NewPassword: newPassword,
 		}
+		mockAuthServiceClient.EXPECT().ValidateJWT(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(&api.TokenInfos{
+			Id:         id,
+			InstanceId: testInstanceID,
+		}, nil)
 		resp, err := s.ChangePassword(context.Background(), req)
 		if err != nil || resp == nil {
 			st, _ := status.FromError(err)
@@ -230,7 +277,7 @@ func TestChangePasswordEndpoint(t *testing.T) {
 		}
 
 		// Check login with new credentials:
-		req2 := &influenzanet.UserCredentials{
+		req2 := &api.UserCredentials{
 			Email:      testUser.Account.Email,
 			Password:   newPassword,
 			InstanceId: testInstanceID,
@@ -250,6 +297,12 @@ func TestChangePasswordEndpoint(t *testing.T) {
 }
 
 func TestChangeEmailEndpoint(t *testing.T) {
+	/*
+		mockCtrl := gomock.NewController(t)
+		defer mockCtrl.Finish()
+		mockAuthServiceClient := api_mock.NewMockAuthServiceApiClient(mockCtrl)
+		clients.authService = mockAuthServiceClient
+	*/
 	// s := userManagementServer{}
 
 	// TODO: without payload
@@ -261,6 +314,11 @@ func TestChangeEmailEndpoint(t *testing.T) {
 }
 
 func TestUpdateNameEndpoint(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockAuthServiceClient := api_mock.NewMockAuthServiceApiClient(mockCtrl)
+	clients.authService = mockAuthServiceClient
+
 	s := userManagementServer{}
 
 	// Create Test User
@@ -298,7 +356,7 @@ func TestUpdateNameEndpoint(t *testing.T) {
 	})
 
 	t.Run("without empty fields", func(t *testing.T) {
-		req := &user_api.NameUpdateRequest{}
+		req := &api.NameUpdateRequest{}
 		resp, err := s.UpdateName(context.Background(), req)
 		st, ok := status.FromError(err)
 		if !ok || st == nil || st.Message() != "missing argument" || resp != nil {
@@ -308,19 +366,23 @@ func TestUpdateNameEndpoint(t *testing.T) {
 	})
 
 	t.Run("with wrong user id", func(t *testing.T) {
-		req := &user_api.NameUpdateRequest{
-			Auth: &influenzanet.ParsedToken{
-				UserId:     "test-wrong-id",
-				Roles:      []string{"PARTICIPANT"},
-				InstanceId: testInstanceID,
-			},
-			Name: &user_api.Name{
+		req := &api.NameUpdateRequest{
+			Token: "mock-token",
+			Name: &api.Name{
 				Gender:    "Female",
 				FirstName: "First2",
 				LastName:  "Last2",
 				Title:     "Dr.",
 			},
 		}
+
+		mockAuthServiceClient.EXPECT().ValidateJWT(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(&api.TokenInfos{
+			Id:         "wrong-id",
+			InstanceId: testInstanceID,
+		}, nil)
 		resp, err := s.UpdateName(context.Background(), req)
 		st, ok := status.FromError(err)
 		if !ok || st == nil || st.Message() != "not found" || resp != nil {
@@ -330,20 +392,23 @@ func TestUpdateNameEndpoint(t *testing.T) {
 	})
 
 	t.Run("with valid input", func(t *testing.T) {
-		newName := user_api.Name{
+		newName := api.Name{
 			Gender:    "Female",
 			FirstName: "First2",
 			LastName:  "Last2",
 			Title:     "Dr.",
 		}
-		req := &user_api.NameUpdateRequest{
-			Auth: &influenzanet.ParsedToken{
-				UserId:     testUser.ID.Hex(),
-				Roles:      []string{"PARTICIPANT"},
-				InstanceId: testInstanceID,
-			},
-			Name: &newName,
+		req := &api.NameUpdateRequest{
+			Token: "mock_token",
+			Name:  &newName,
 		}
+		mockAuthServiceClient.EXPECT().ValidateJWT(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(&api.TokenInfos{
+			Id:         testUser.ID.Hex(),
+			InstanceId: testInstanceID,
+		}, nil)
 		resp, err := s.UpdateName(context.Background(), req)
 		if err != nil {
 			t.Errorf("unexpected error: %s", err.Error())
@@ -356,6 +421,11 @@ func TestUpdateNameEndpoint(t *testing.T) {
 }
 
 func TestDeleteAccountEndpoint(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockAuthServiceClient := api_mock.NewMockAuthServiceApiClient(mockCtrl)
+	clients.authService = mockAuthServiceClient
+
 	s := userManagementServer{}
 
 	// Create Test User
@@ -391,7 +461,7 @@ func TestDeleteAccountEndpoint(t *testing.T) {
 	})
 
 	t.Run("with empty payload", func(t *testing.T) {
-		req := &user_api.UserReference{}
+		req := &api.UserReference{}
 		resp, err := s.DeleteAccount(context.Background(), req)
 		if err == nil {
 			t.Error("should return error")
@@ -404,14 +474,17 @@ func TestDeleteAccountEndpoint(t *testing.T) {
 	})
 
 	t.Run("with other user", func(t *testing.T) {
-		req := &user_api.UserReference{
-			Auth: &influenzanet.ParsedToken{
-				UserId:     testUsers[0].ID.Hex(),
-				Roles:      []string{"PARTICIPANT"},
-				InstanceId: testInstanceID,
-			},
+		req := &api.UserReference{
+			Token:  "mock_token",
 			UserId: testUsers[1].ID.Hex(),
 		}
+		mockAuthServiceClient.EXPECT().ValidateJWT(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(&api.TokenInfos{
+			Id:         testUsers[0].ID.Hex(),
+			InstanceId: testInstanceID,
+		}, nil)
 		resp, err := s.DeleteAccount(context.Background(), req)
 		if err == nil {
 			t.Error("should return error")
@@ -424,14 +497,17 @@ func TestDeleteAccountEndpoint(t *testing.T) {
 	})
 
 	t.Run("with same user", func(t *testing.T) {
-		req := &user_api.UserReference{
-			Auth: &influenzanet.ParsedToken{
-				UserId:     testUsers[0].ID.Hex(),
-				Roles:      []string{"PARTICIPANT"},
-				InstanceId: testInstanceID,
-			},
+		req := &api.UserReference{
+			Token:  "mock_token",
 			UserId: testUsers[0].ID.Hex(),
 		}
+		mockAuthServiceClient.EXPECT().ValidateJWT(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(&api.TokenInfos{
+			Id:         testUsers[0].ID.Hex(),
+			InstanceId: testInstanceID,
+		}, nil)
 		_, err := s.DeleteAccount(context.Background(), req)
 		if err != nil {
 			t.Errorf("unexpected error: %s", err.Error())
@@ -445,6 +521,12 @@ func TestDeleteAccountEndpoint(t *testing.T) {
 }
 
 func TestUpdateBirthDateEndpoint(t *testing.T) {
+	/*
+		mockCtrl := gomock.NewController(t)
+		defer mockCtrl.Finish()
+		mockAuthServiceClient := api_mock.NewMockAuthServiceApiClient(mockCtrl)
+		clients.authService = mockAuthServiceClient
+	*/
 	// s := userManagementServer{}
 
 	// TODO: without payload
@@ -455,6 +537,12 @@ func TestUpdateBirthDateEndpoint(t *testing.T) {
 }
 
 func TestUpdateChildrenEndpoint(t *testing.T) {
+	/*
+		mockCtrl := gomock.NewController(t)
+		defer mockCtrl.Finish()
+		mockAuthServiceClient := api_mock.NewMockAuthServiceApiClient(mockCtrl)
+		clients.authService = mockAuthServiceClient
+	*/
 	// s := userManagementServer{}
 
 	// TODO: without payload
@@ -465,6 +553,11 @@ func TestUpdateChildrenEndpoint(t *testing.T) {
 }
 
 func TestAddSubprofileEndpoint(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockAuthServiceClient := api_mock.NewMockAuthServiceApiClient(mockCtrl)
+	clients.authService = mockAuthServiceClient
+
 	s := userManagementServer{}
 
 	testUsers, err := addTestUsers([]User{
@@ -492,7 +585,7 @@ func TestAddSubprofileEndpoint(t *testing.T) {
 	})
 
 	t.Run("with empty payload", func(t *testing.T) {
-		req := &user_api.SubProfileRequest{}
+		req := &api.SubProfileRequest{}
 		resp, err := s.AddSubprofile(context.Background(), req)
 		if err == nil {
 			t.Errorf("or response: %s", resp)
@@ -504,16 +597,20 @@ func TestAddSubprofileEndpoint(t *testing.T) {
 	})
 
 	t.Run("with wrong user id", func(t *testing.T) {
-		req := &user_api.SubProfileRequest{
-			Auth: &influenzanet.ParsedToken{
-				UserId:     testUsers[0].ID.Hex() + "w",
-				InstanceId: testInstanceID,
-			},
-			SubProfile: &user_api.SubProfile{
+		req := &api.SubProfileRequest{
+			Token: "mock_token",
+			SubProfile: &api.SubProfile{
 				Name:      "Testname",
 				BirthYear: 1911,
 			},
 		}
+		mockAuthServiceClient.EXPECT().ValidateJWT(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(&api.TokenInfos{
+			Id:         testUsers[0].ID.Hex() + "w",
+			InstanceId: testInstanceID,
+		}, nil)
 		resp, err := s.AddSubprofile(context.Background(), req)
 		if err == nil {
 			t.Errorf("or response: %s", resp)
@@ -525,16 +622,20 @@ func TestAddSubprofileEndpoint(t *testing.T) {
 	})
 
 	t.Run("with own user id", func(t *testing.T) {
-		req := &user_api.SubProfileRequest{
-			Auth: &influenzanet.ParsedToken{
-				UserId:     testUsers[0].ID.Hex(),
-				InstanceId: testInstanceID,
-			},
-			SubProfile: &user_api.SubProfile{
+		req := &api.SubProfileRequest{
+			Token: "mock_token",
+			SubProfile: &api.SubProfile{
 				Name:      "Testname",
 				BirthYear: 1911,
 			},
 		}
+		mockAuthServiceClient.EXPECT().ValidateJWT(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(&api.TokenInfos{
+			Id:         testUsers[0].ID.Hex(),
+			InstanceId: testInstanceID,
+		}, nil)
 		resp, err := s.AddSubprofile(context.Background(), req)
 		if err != nil {
 			t.Errorf("unexpected error: %s", err.Error())
@@ -547,6 +648,11 @@ func TestAddSubprofileEndpoint(t *testing.T) {
 }
 
 func TestEditSubprofileEndpoint(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockAuthServiceClient := api_mock.NewMockAuthServiceApiClient(mockCtrl)
+	clients.authService = mockAuthServiceClient
+
 	s := userManagementServer{}
 
 	testUsers, err := addTestUsers([]User{
@@ -581,7 +687,7 @@ func TestEditSubprofileEndpoint(t *testing.T) {
 	})
 
 	t.Run("with empty payload", func(t *testing.T) {
-		req := &user_api.SubProfileRequest{}
+		req := &api.SubProfileRequest{}
 		resp, err := s.EditSubprofile(context.Background(), req)
 		if err == nil {
 			t.Errorf("or response: %s", resp)
@@ -593,17 +699,22 @@ func TestEditSubprofileEndpoint(t *testing.T) {
 	})
 
 	t.Run("with wrong user id", func(t *testing.T) {
-		req := &user_api.SubProfileRequest{
-			Auth: &influenzanet.ParsedToken{
-				UserId:     testUsers[0].ID.Hex() + "w",
-				InstanceId: testInstanceID,
-			},
-			SubProfile: &user_api.SubProfile{
+		req := &api.SubProfileRequest{
+			Token: "mock_token",
+			SubProfile: &api.SubProfile{
 				Id:        testUsers[0].SubProfiles[0].ID.Hex(),
 				Name:      "Testname",
 				BirthYear: 1911,
 			},
 		}
+
+		mockAuthServiceClient.EXPECT().ValidateJWT(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(&api.TokenInfos{
+			Id:         testUsers[0].ID.Hex() + "w",
+			InstanceId: testInstanceID,
+		}, nil)
 		resp, err := s.EditSubprofile(context.Background(), req)
 		if err == nil {
 			t.Errorf("or response: %s", resp)
@@ -615,17 +726,21 @@ func TestEditSubprofileEndpoint(t *testing.T) {
 	})
 
 	t.Run("with wrong subprofile id", func(t *testing.T) {
-		req := &user_api.SubProfileRequest{
-			Auth: &influenzanet.ParsedToken{
-				UserId:     testUsers[0].ID.Hex(),
-				InstanceId: testInstanceID,
-			},
-			SubProfile: &user_api.SubProfile{
+		req := &api.SubProfileRequest{
+			Token: "mock_token",
+			SubProfile: &api.SubProfile{
 				Id:        testUsers[0].SubProfiles[0].ID.Hex() + "1",
 				Name:      "Testname",
 				BirthYear: 1911,
 			},
 		}
+		mockAuthServiceClient.EXPECT().ValidateJWT(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(&api.TokenInfos{
+			Id:         testUsers[0].ID.Hex(),
+			InstanceId: testInstanceID,
+		}, nil)
 		resp, err := s.EditSubprofile(context.Background(), req)
 		if err == nil {
 			t.Errorf("or response: %s", resp)
@@ -637,17 +752,21 @@ func TestEditSubprofileEndpoint(t *testing.T) {
 	})
 
 	t.Run("with own user id", func(t *testing.T) {
-		req := &user_api.SubProfileRequest{
-			Auth: &influenzanet.ParsedToken{
-				UserId:     testUsers[0].ID.Hex(),
-				InstanceId: testInstanceID,
-			},
-			SubProfile: &user_api.SubProfile{
+		req := &api.SubProfileRequest{
+			Token: "mock_token",
+			SubProfile: &api.SubProfile{
 				Id:        testUsers[0].SubProfiles[0].ID.Hex(),
 				Name:      "Testname",
 				BirthYear: 1911,
 			},
 		}
+		mockAuthServiceClient.EXPECT().ValidateJWT(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(&api.TokenInfos{
+			Id:         testUsers[0].ID.Hex(),
+			InstanceId: testInstanceID,
+		}, nil)
 		resp, err := s.EditSubprofile(context.Background(), req)
 		if err != nil {
 			t.Errorf("unexpected error: %s", err.Error())
@@ -660,6 +779,11 @@ func TestEditSubprofileEndpoint(t *testing.T) {
 }
 
 func TestRemoveSubprofileEndpoint(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockAuthServiceClient := api_mock.NewMockAuthServiceApiClient(mockCtrl)
+	clients.authService = mockAuthServiceClient
+
 	s := userManagementServer{}
 
 	testUsers, err := addTestUsers([]User{
@@ -694,7 +818,7 @@ func TestRemoveSubprofileEndpoint(t *testing.T) {
 	})
 
 	t.Run("with empty payload", func(t *testing.T) {
-		req := &user_api.SubProfileRequest{}
+		req := &api.SubProfileRequest{}
 		resp, err := s.RemoveSubprofile(context.Background(), req)
 		if err == nil {
 			t.Errorf("or response: %s", resp)
@@ -706,15 +830,19 @@ func TestRemoveSubprofileEndpoint(t *testing.T) {
 	})
 
 	t.Run("with wrong user id", func(t *testing.T) {
-		req := &user_api.SubProfileRequest{
-			Auth: &influenzanet.ParsedToken{
-				UserId:     testUsers[0].ID.Hex() + "w",
-				InstanceId: testInstanceID,
-			},
-			SubProfile: &user_api.SubProfile{
+		req := &api.SubProfileRequest{
+			Token: "mock_token",
+			SubProfile: &api.SubProfile{
 				Id: testUsers[0].SubProfiles[0].ID.Hex(),
 			},
 		}
+		mockAuthServiceClient.EXPECT().ValidateJWT(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(&api.TokenInfos{
+			Id:         testUsers[0].ID.Hex() + "w",
+			InstanceId: testInstanceID,
+		}, nil)
 		resp, err := s.RemoveSubprofile(context.Background(), req)
 		if err == nil {
 			t.Errorf("or response: %s", resp)
@@ -726,15 +854,19 @@ func TestRemoveSubprofileEndpoint(t *testing.T) {
 	})
 
 	t.Run("with wrong subprofile id", func(t *testing.T) {
-		req := &user_api.SubProfileRequest{
-			Auth: &influenzanet.ParsedToken{
-				UserId:     testUsers[0].ID.Hex(),
-				InstanceId: testInstanceID,
-			},
-			SubProfile: &user_api.SubProfile{
+		req := &api.SubProfileRequest{
+			Token: "mock_token",
+			SubProfile: &api.SubProfile{
 				Id: testUsers[0].SubProfiles[0].ID.Hex() + "1",
 			},
 		}
+		mockAuthServiceClient.EXPECT().ValidateJWT(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(&api.TokenInfos{
+			Id:         testUsers[0].ID.Hex(),
+			InstanceId: testInstanceID,
+		}, nil)
 		resp, err := s.RemoveSubprofile(context.Background(), req)
 		if err == nil {
 			t.Errorf("or response: %s", resp)
@@ -746,15 +878,19 @@ func TestRemoveSubprofileEndpoint(t *testing.T) {
 	})
 
 	t.Run("with own user id", func(t *testing.T) {
-		req := &user_api.SubProfileRequest{
-			Auth: &influenzanet.ParsedToken{
-				UserId:     testUsers[0].ID.Hex(),
-				InstanceId: testInstanceID,
-			},
-			SubProfile: &user_api.SubProfile{
+		req := &api.SubProfileRequest{
+			Token: "mock_token",
+			SubProfile: &api.SubProfile{
 				Id: testUsers[0].SubProfiles[0].ID.Hex(),
 			},
 		}
+		mockAuthServiceClient.EXPECT().ValidateJWT(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(&api.TokenInfos{
+			Id:         testUsers[0].ID.Hex(),
+			InstanceId: testInstanceID,
+		}, nil)
 		resp, err := s.RemoveSubprofile(context.Background(), req)
 		if err != nil {
 			t.Errorf("unexpected error: %s", err.Error())

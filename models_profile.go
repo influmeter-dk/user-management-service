@@ -1,7 +1,7 @@
 package main
 
 import (
-	user_api "github.com/influenzanet/api/dist/go/user-management"
+	api "github.com/influenzanet/user-management-service/api"
 )
 
 // Profile describes personal profile information for a User
@@ -15,7 +15,7 @@ type Profile struct {
 	ChildrenUpdatedAt int64    `bson:"childrenUpdatedAt"`
 }
 
-func profileFromAPI(p *user_api.Profile) Profile {
+func profileFromAPI(p *api.Profile) Profile {
 	return Profile{
 		BirthYear:          p.BirthYear,
 		BirthMonth:         p.BirthMonth,
@@ -27,8 +27,8 @@ func profileFromAPI(p *user_api.Profile) Profile {
 }
 
 // ToAPI converts a person from DB format into the API format
-func (p Profile) ToAPI() *user_api.Profile {
-	return &user_api.Profile{
+func (p Profile) ToAPI() *api.Profile {
+	return &api.Profile{
 		BirthYear:          p.BirthYear,
 		BirthMonth:         p.BirthMonth,
 		BirthDay:           p.BirthDay,
@@ -48,14 +48,14 @@ type Child struct {
 type Children []Child
 
 // ToAPI converts a child object from DB format into the API format
-func (o Child) ToAPI() *user_api.Child {
-	return &user_api.Child{
+func (o Child) ToAPI() *api.Child {
+	return &api.Child{
 		BirthYear: o.BirthYear,
 		Gender:    o.Gender,
 	}
 }
 
-func childFromAPI(o *user_api.Child) Child {
+func childFromAPI(o *api.Child) Child {
 	return Child{
 		BirthYear: o.BirthYear,
 		Gender:    o.Gender,
@@ -63,15 +63,15 @@ func childFromAPI(o *user_api.Child) Child {
 }
 
 // ToAPI converts a list of child object from DB to API format
-func (children Children) ToAPI() []*user_api.Child {
-	res := make([]*user_api.Child, len(children))
+func (children Children) ToAPI() []*api.Child {
+	res := make([]*api.Child, len(children))
 	for i, v := range children {
 		res[i] = v.ToAPI()
 	}
 	return res
 }
 
-func childrenFromAPI(children []*user_api.Child) []Child {
+func childrenFromAPI(children []*api.Child) []Child {
 	res := make([]Child, len(children))
 	for i, v := range children {
 		res[i] = childFromAPI(v)

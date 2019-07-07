@@ -4,7 +4,8 @@ import (
 	"context"
 	"testing"
 
-	influenzanet "github.com/influenzanet/api/dist/go"
+	api "github.com/influenzanet/user-management-service/api"
+	utils "github.com/influenzanet/user-management-service/utils"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc/status"
 )
@@ -14,7 +15,7 @@ func TestLogin(t *testing.T) {
 
 	// Create Test User
 	currentPw := "SuperSecurePassword123!§$"
-	hashedPw, err := hashPassword(currentPw)
+	hashedPw, err := utils.HashPassword(currentPw)
 	if err != nil {
 		t.Errorf("error creating user for testing login")
 		return
@@ -51,7 +52,7 @@ func TestLogin(t *testing.T) {
 	})
 
 	t.Run("with empty payload", func(t *testing.T) {
-		req := &influenzanet.UserCredentials{}
+		req := &api.UserCredentials{}
 
 		resp, err := s.LoginWithEmail(context.Background(), req)
 		if err == nil || status.Convert(err).Message() != "invalid username and/or password" || resp != nil {
@@ -62,7 +63,7 @@ func TestLogin(t *testing.T) {
 	})
 
 	t.Run("with wrong email", func(t *testing.T) {
-		req := &influenzanet.UserCredentials{
+		req := &api.UserCredentials{
 			Email:      "wrong@test.com",
 			Password:   currentPw,
 			InstanceId: testInstanceID,
@@ -80,7 +81,7 @@ func TestLogin(t *testing.T) {
 	})
 
 	t.Run("with wrong password", func(t *testing.T) {
-		req := &influenzanet.UserCredentials{
+		req := &api.UserCredentials{
 			Email:      testUser.Account.Email,
 			Password:   currentPw + "w",
 			InstanceId: testInstanceID,
@@ -98,7 +99,7 @@ func TestLogin(t *testing.T) {
 	})
 
 	t.Run("with valid fields", func(t *testing.T) {
-		req := &influenzanet.UserCredentials{
+		req := &api.UserCredentials{
 			Email:      testUser.Account.Email,
 			Password:   currentPw,
 			InstanceId: testInstanceID,
@@ -120,18 +121,18 @@ func TestLogin(t *testing.T) {
 func TestSignup(t *testing.T) {
 	s := userManagementServer{}
 
-	wrongEmailFormatNewUserReq := &influenzanet.UserCredentials{
+	wrongEmailFormatNewUserReq := &api.UserCredentials{
 		Email:      "test-signup",
 		Password:   "SuperSecurePassword123!§$",
 		InstanceId: testInstanceID,
 	}
 
-	wrongPasswordFormatNewUserReq := &influenzanet.UserCredentials{
+	wrongPasswordFormatNewUserReq := &api.UserCredentials{
 		Email:      "test-signup@test.com",
 		Password:   "short",
 		InstanceId: testInstanceID,
 	}
-	validNewUserReq := &influenzanet.UserCredentials{
+	validNewUserReq := &api.UserCredentials{
 		Email:      "test-signup@test.com",
 		Password:   "SuperSecurePassword123!§$",
 		InstanceId: testInstanceID,
@@ -147,7 +148,7 @@ func TestSignup(t *testing.T) {
 	})
 
 	t.Run("with empty payload", func(t *testing.T) {
-		req := &influenzanet.UserCredentials{}
+		req := &api.UserCredentials{}
 		resp, err := s.SignupWithEmail(context.Background(), req)
 		st, ok := status.FromError(err)
 		if !ok || st == nil || st.Message() != "email not valid" || resp != nil {
@@ -188,7 +189,7 @@ func TestSignup(t *testing.T) {
 	})
 
 	t.Run("with duplicate user (same email)", func(t *testing.T) {
-		req := &influenzanet.UserCredentials{
+		req := &api.UserCredentials{
 			Email:      "test-signup-1@test.com",
 			Password:   "SuperSecurePassword123!§$",
 			InstanceId: testInstanceID,
@@ -206,6 +207,10 @@ func TestSignup(t *testing.T) {
 			return
 		}
 	})
+}
+
+func TestCheckRefreshTokenEndpoint(t *testing.T) {
+	t.Error("test not implemented")
 }
 
 func TestTokenRefreshedEndpoint(t *testing.T) {

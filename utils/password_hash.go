@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"crypto/rand"
@@ -20,7 +20,9 @@ const (
 )
 
 var (
-	ErrInvalidHash         = errors.New("the encoded hash is not in the correct format")
+	// ErrInvalidHash when hash is not in the correct formant
+	ErrInvalidHash = errors.New("the encoded hash is not in the correct format")
+	// ErrIncompatibleVersion in case of version incompatibility
 	ErrIncompatibleVersion = errors.New("incompatible version of argon2")
 )
 
@@ -32,7 +34,8 @@ type hashParams struct {
 	keyLength   uint32
 }
 
-func hashPassword(password string) (encodedHash string, err error) {
+// HashPassword to create password hash
+func HashPassword(password string) (encodedHash string, err error) {
 	// Generate a cryptographically secure random salt.
 	salt, err := generateRandomBytes(argon2SaltLength)
 	if err != nil {
@@ -63,7 +66,8 @@ func generateRandomBytes(n uint32) ([]byte, error) {
 	return b, nil
 }
 
-func comparePasswordWithHash(encodedHash string, password string) (match bool, err error) {
+// ComparePasswordWithHash to check password string with hash password
+func ComparePasswordWithHash(encodedHash string, password string) (match bool, err error) {
 	// Extract the parameters, salt and derived key from the encoded password
 	// hash.
 	p, salt, hash, err := decodeHash(encodedHash)

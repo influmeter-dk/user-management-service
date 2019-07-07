@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"net"
 	"strconv"
@@ -12,56 +11,22 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"google.golang.org/grpc"
-	yaml "gopkg.in/yaml.v2"
 
-	user_api "github.com/influenzanet/api/dist/go/user-management"
+	api "github.com/influenzanet/user-management-service/api"
 )
-
-type dbConf struct {
-	CredentialsPath string `yaml:"credentials_path"`
-	Address         string `yaml:"address"`
-	Timeout         int    `yaml:"timeout"`
-}
-
-type config struct {
-	Port int
-	DB   dbConf
-}
-
-type dbCredentials struct {
-	Username string `yaml:"username"`
-	Password string `yaml:"password"`
-}
 
 type userManagementServer struct {
 }
 
+// APIClients holds the service clients to the internal services
+type APIClients struct {
+	authService api.AuthServiceApiClient
+}
+
+var clients = APIClients{}
+
 var dbClient *mongo.Client
 var conf config
-
-func readConfig() {
-	data, err := ioutil.ReadFile("./configs.yaml")
-	if err != nil {
-		log.Fatal(err)
-	}
-	err = yaml.Unmarshal([]byte(data), &conf)
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
-func readDBcredentials(path string) (dbCredentials, error) {
-	var dbCreds dbCredentials
-	data, err := ioutil.ReadFile(path)
-	if err != nil {
-		return dbCreds, err
-	}
-	err = yaml.Unmarshal([]byte(data), &dbCreds)
-	if err != nil {
-		return dbCreds, err
-	}
-	return dbCreds, nil
-}
 
 func dbInit() {
 	dbCreds, err := readDBcredentials(conf.DB.CredentialsPath)
@@ -86,12 +51,25 @@ func dbInit() {
 	}
 }
 
+func connectToAuthService() *grpc.ClientConn {
+	conn, err := grpc.Dial(conf.ServiceURLs.AuthService, grpc.WithInsecure())
+	if err != nil {
+		log.Fatalf("failed to connect: %v", err)
+	}
+	return conn
+}
+
 func init() {
 	readConfig()
 	dbInit()
 }
 
 func main() {
+	// Connect to authentication service
+	authenticationServerConn := connectToAuthService()
+	defer authenticationServerConn.Close()
+	clients.authService = api.NewAuthServiceApiClient(authenticationServerConn)
+
 	lis, err := net.Listen("tcp", ":"+strconv.Itoa(conf.Port))
 	log.Println("wait connections on port " + strconv.Itoa(conf.Port))
 
@@ -99,6 +77,6 @@ func main() {
 		log.Fatalf("failed to listen: %v", err)
 	}
 	grpcServer := grpc.NewServer()
-	user_api.RegisterUserManagementApiServer(grpcServer, &userManagementServer{})
+	api.RegisterUserManagementApiServer(grpcServer, &userManagementServer{})
 	grpcServer.Serve(lis)
 }

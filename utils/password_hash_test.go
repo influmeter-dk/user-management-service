@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"testing"
@@ -6,12 +6,12 @@ import (
 
 func TestPasswordHashingMethods(t *testing.T) {
 	t.Run("try to hash empty string", func(t *testing.T) {
-		hPw, err := hashPassword("")
+		hPw, err := HashPassword("")
 		if err != nil {
 			t.Errorf("unexpected error: %s", err.Error())
 			return
 		}
-		match, err := comparePasswordWithHash(hPw, "")
+		match, err := ComparePasswordWithHash(hPw, "")
 		if err != nil {
 			t.Errorf("unexpected error: %s", err.Error())
 			return
@@ -22,12 +22,12 @@ func TestPasswordHashingMethods(t *testing.T) {
 	})
 
 	t.Run("hash and compare strings", func(t *testing.T) {
-		hPw, err := hashPassword("testPassword")
+		hPw, err := HashPassword("testPassword")
 		if err != nil {
 			t.Errorf("unexpected error: %s", err.Error())
 			return
 		}
-		match, err := comparePasswordWithHash(hPw, "testPassword")
+		match, err := ComparePasswordWithHash(hPw, "testPassword")
 		if err != nil {
 			t.Errorf("unexpected error: %s", err.Error())
 			return

@@ -3,7 +3,7 @@ package main
 import (
 	"errors"
 
-	user_api "github.com/influenzanet/api/dist/go/user-management"
+	api "github.com/influenzanet/user-management-service/api"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -16,8 +16,8 @@ type ObjectInfos struct {
 }
 
 // ToAPI converts the object from DB to API format
-func (o ObjectInfos) ToAPI() *user_api.User_Infos {
-	return &user_api.User_Infos{
+func (o ObjectInfos) ToAPI() *api.User_Infos {
+	return &api.User_Infos{
 		LastTokenRefresh: o.LastTokenRefresh,
 		LastLogin:        o.LastLogin,
 		CreatedAt:        o.CreatedAt,
@@ -36,8 +36,8 @@ type User struct {
 }
 
 // ToAPI converts the object from DB to API format
-func (u User) ToAPI() *user_api.User {
-	return &user_api.User{
+func (u User) ToAPI() *api.User {
+	return &api.User{
 		Id:          u.ID.Hex(),
 		Account:     u.Account.ToAPI(),
 		Roles:       u.Roles,

@@ -1,7 +1,7 @@
 package main
 
 import (
-	user_api "github.com/influenzanet/api/dist/go/user-management"
+	api "github.com/influenzanet/user-management-service/api"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -15,7 +15,7 @@ type SubProfile struct {
 // SubProfiles is a slice of SubProfile objects
 type SubProfiles []SubProfile
 
-func subProfileFromAPI(a *user_api.SubProfile) SubProfile {
+func subProfileFromAPI(a *api.SubProfile) SubProfile {
 	if a == nil {
 		return SubProfile{}
 	}
@@ -28,8 +28,8 @@ func subProfileFromAPI(a *user_api.SubProfile) SubProfile {
 }
 
 // ToAPI converts the object from DB to API format
-func (sp SubProfile) ToAPI() *user_api.SubProfile {
-	return &user_api.SubProfile{
+func (sp SubProfile) ToAPI() *api.SubProfile {
+	return &api.SubProfile{
 		Id:        sp.ID.Hex(),
 		Name:      sp.Name,
 		BirthYear: sp.BirthYear,
@@ -37,8 +37,8 @@ func (sp SubProfile) ToAPI() *user_api.SubProfile {
 }
 
 // ToAPI converts a list of object from DB to API format
-func (sps SubProfiles) ToAPI() []*user_api.SubProfile {
-	res := make([]*user_api.SubProfile, len(sps))
+func (sps SubProfiles) ToAPI() []*api.SubProfile {
+	res := make([]*api.SubProfile, len(sps))
 	for i, v := range sps {
 		res[i] = v.ToAPI()
 	}
