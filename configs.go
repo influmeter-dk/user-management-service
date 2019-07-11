@@ -28,7 +28,12 @@ type dbCredentials struct {
 }
 
 func readConfig() {
-	data, err := ioutil.ReadFile("./configs.yaml")
+	file := os.Getenv("CONFIG_FILE")
+	if file == "" {
+		file = "./configs.yaml"
+	}
+
+	data, err := ioutil.ReadFile(file)
 	if err != nil {
 		log.Fatal(err)
 	}
