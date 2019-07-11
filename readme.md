@@ -4,7 +4,7 @@ This is a Go implementation of the [User Management Service](https://github.com/
 
 It provides operations to manage User accounts and profiles for an InfluenzaNet platform
 
-It follows [common Go organzization](https://github.com/influenzanet/influenzanet/wiki/Go-based-service-organisation)
+It follows [common Go organization](https://github.com/influenzanet/influenzanet/wiki/Go-based-service-organisation)
 
 ## TODO API docs (link)
 
@@ -12,8 +12,8 @@ It follows [common Go organzization](https://github.com/influenzanet/influenzane
 
 Make targets :
 
- - build
- - install-dev 
+ - build: build service locally
+ - install-dev : install dev dependencies (to make & run test)
  - docker: build docker image
  - test: run test suites
 
