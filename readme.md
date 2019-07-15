@@ -1,17 +1,25 @@
 # User management service for the Influenzanet system
 
-## TODO: General description what this service is doing
+This is a Go implementation of the [User Management Service](https://github.com/influenzanet/influenzanet/wiki/Services#user-management-service)
+
+It provides operations to manage User accounts and profiles for an InfluenzaNet platform
+
+It follows [common Go organization](https://github.com/influenzanet/influenzanet/wiki/Go-based-service-organisation)
 
 ## TODO API docs (link)
 
+## Dev operations
+
+Make targets :
+
+ - build: build service locally
+ - install-dev : install dev dependencies (to make & run test)
+ - docker: build docker image
+ - test: run test suites
+
 ## Test
 
-The tests use the gomock library. To install this use:
-
-```sh
-go get github.com/golang/mock/gomock
-go install github.com/golang/mock/mockgen
-```
+install dev dependencies using `make install-dev`
 
 Then generate mock client for the authentication-service:
 

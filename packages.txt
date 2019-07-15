@@ -1,4 +1,4 @@
-golang.org/x/crypto/bcrypt
+golang.org/x/crypto/argo2
 github.com/influenzanet/api/dist/go
 github.com/dgrijalva/jwt-go
 google.golang.org/grpc
