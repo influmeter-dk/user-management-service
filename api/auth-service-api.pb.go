@@ -9,6 +9,8 @@ import (
 	proto "github.com/golang/protobuf/proto"
 	empty "github.com/golang/protobuf/ptypes/empty"
 	grpc "google.golang.org/grpc"
+	codes "google.golang.org/grpc/codes"
+	status "google.golang.org/grpc/status"
 	math "math"
 )
 
@@ -512,6 +514,41 @@ type AuthServiceApiServer interface {
 	GetTempTokens(context.Context, *TempTokenInfo) (*TempTokenInfos, error)
 	DeleteTempToken(context.Context, *TempToken) (*Status, error)
 	PurgeUserTempTokens(context.Context, *TempTokenInfo) (*Status, error)
+}
+
+// UnimplementedAuthServiceApiServer can be embedded to have forward compatible implementations.
+type UnimplementedAuthServiceApiServer struct {
+}
+
+func (*UnimplementedAuthServiceApiServer) Status(ctx context.Context, req *empty.Empty) (*Status, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Status not implemented")
+}
+func (*UnimplementedAuthServiceApiServer) LoginWithEmail(ctx context.Context, req *UserCredentials) (*TokenResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LoginWithEmail not implemented")
+}
+func (*UnimplementedAuthServiceApiServer) SignupWithEmail(ctx context.Context, req *UserCredentials) (*TokenResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SignupWithEmail not implemented")
+}
+func (*UnimplementedAuthServiceApiServer) ValidateJWT(ctx context.Context, req *JWTRequest) (*TokenInfos, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ValidateJWT not implemented")
+}
+func (*UnimplementedAuthServiceApiServer) RenewJWT(ctx context.Context, req *RefreshJWTRequest) (*TokenResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RenewJWT not implemented")
+}
+func (*UnimplementedAuthServiceApiServer) GenerateTempToken(ctx context.Context, req *TempTokenInfo) (*TempToken, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GenerateTempToken not implemented")
+}
+func (*UnimplementedAuthServiceApiServer) ValidateTempToken(ctx context.Context, req *TempToken) (*TempTokenInfo, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ValidateTempToken not implemented")
+}
+func (*UnimplementedAuthServiceApiServer) GetTempTokens(ctx context.Context, req *TempTokenInfo) (*TempTokenInfos, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTempTokens not implemented")
+}
+func (*UnimplementedAuthServiceApiServer) DeleteTempToken(ctx context.Context, req *TempToken) (*Status, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteTempToken not implemented")
+}
+func (*UnimplementedAuthServiceApiServer) PurgeUserTempTokens(ctx context.Context, req *TempTokenInfo) (*Status, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method PurgeUserTempTokens not implemented")
 }
 
 func RegisterAuthServiceApiServer(s *grpc.Server, srv AuthServiceApiServer) {

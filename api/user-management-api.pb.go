@@ -9,6 +9,8 @@ import (
 	proto "github.com/golang/protobuf/proto"
 	empty "github.com/golang/protobuf/ptypes/empty"
 	grpc "google.golang.org/grpc"
+	codes "google.golang.org/grpc/codes"
+	status "google.golang.org/grpc/status"
 	math "math"
 )
 
@@ -1112,6 +1114,56 @@ type UserManagementApiServer interface {
 	AddSubprofile(context.Context, *SubProfileRequest) (*User, error)
 	EditSubprofile(context.Context, *SubProfileRequest) (*User, error)
 	RemoveSubprofile(context.Context, *SubProfileRequest) (*User, error)
+}
+
+// UnimplementedUserManagementApiServer can be embedded to have forward compatible implementations.
+type UnimplementedUserManagementApiServer struct {
+}
+
+func (*UnimplementedUserManagementApiServer) Status(ctx context.Context, req *empty.Empty) (*Status, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Status not implemented")
+}
+func (*UnimplementedUserManagementApiServer) LoginWithEmail(ctx context.Context, req *UserCredentials) (*UserAuthInfo, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method LoginWithEmail not implemented")
+}
+func (*UnimplementedUserManagementApiServer) SignupWithEmail(ctx context.Context, req *UserCredentials) (*UserAuthInfo, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SignupWithEmail not implemented")
+}
+func (*UnimplementedUserManagementApiServer) CheckRefreshToken(ctx context.Context, req *UserReference) (*Status, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CheckRefreshToken not implemented")
+}
+func (*UnimplementedUserManagementApiServer) TokenRefreshed(ctx context.Context, req *UserReference) (*Status, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method TokenRefreshed not implemented")
+}
+func (*UnimplementedUserManagementApiServer) GetUser(ctx context.Context, req *UserReference) (*User, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetUser not implemented")
+}
+func (*UnimplementedUserManagementApiServer) ChangePassword(ctx context.Context, req *PasswordChangeMsg) (*Status, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ChangePassword not implemented")
+}
+func (*UnimplementedUserManagementApiServer) ChangeEmail(ctx context.Context, req *EmailChangeMsg) (*User, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ChangeEmail not implemented")
+}
+func (*UnimplementedUserManagementApiServer) UpdateName(ctx context.Context, req *NameUpdateRequest) (*User, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateName not implemented")
+}
+func (*UnimplementedUserManagementApiServer) DeleteAccount(ctx context.Context, req *UserReference) (*Status, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method DeleteAccount not implemented")
+}
+func (*UnimplementedUserManagementApiServer) UpdateBirthDate(ctx context.Context, req *ProfileRequest) (*User, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateBirthDate not implemented")
+}
+func (*UnimplementedUserManagementApiServer) UpdateChildren(ctx context.Context, req *ProfileRequest) (*User, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateChildren not implemented")
+}
+func (*UnimplementedUserManagementApiServer) AddSubprofile(ctx context.Context, req *SubProfileRequest) (*User, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddSubprofile not implemented")
+}
+func (*UnimplementedUserManagementApiServer) EditSubprofile(ctx context.Context, req *SubProfileRequest) (*User, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method EditSubprofile not implemented")
+}
+func (*UnimplementedUserManagementApiServer) RemoveSubprofile(ctx context.Context, req *SubProfileRequest) (*User, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemoveSubprofile not implemented")
 }
 
 func RegisterUserManagementApiServer(s *grpc.Server, srv UserManagementApiServer) {

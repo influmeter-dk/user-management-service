@@ -6,11 +6,12 @@ package mock_api
 
 import (
 	context "context"
+	reflect "reflect"
+
 	gomock "github.com/golang/mock/gomock"
 	empty "github.com/golang/protobuf/ptypes/empty"
 	api "github.com/influenzanet/user-management-service/api"
 	grpc "google.golang.org/grpc"
-	reflect "reflect"
 )
 
 // MockAuthServiceApiClient is a mock of AuthServiceApiClient interface

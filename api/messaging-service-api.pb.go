@@ -9,6 +9,8 @@ import (
 	proto "github.com/golang/protobuf/proto"
 	empty "github.com/golang/protobuf/ptypes/empty"
 	grpc "google.golang.org/grpc"
+	codes "google.golang.org/grpc/codes"
+	status "google.golang.org/grpc/status"
 	math "math"
 )
 
@@ -211,6 +213,17 @@ func (c *messagingServiceApiClient) InitiateMessage(ctx context.Context, in *Mes
 type MessagingServiceApiServer interface {
 	Status(context.Context, *empty.Empty) (*Status, error)
 	InitiateMessage(context.Context, *MessagingRequest) (*Status, error)
+}
+
+// UnimplementedMessagingServiceApiServer can be embedded to have forward compatible implementations.
+type UnimplementedMessagingServiceApiServer struct {
+}
+
+func (*UnimplementedMessagingServiceApiServer) Status(ctx context.Context, req *empty.Empty) (*Status, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method Status not implemented")
+}
+func (*UnimplementedMessagingServiceApiServer) InitiateMessage(ctx context.Context, req *MessagingRequest) (*Status, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method InitiateMessage not implemented")
 }
 
 func RegisterMessagingServiceApiServer(s *grpc.Server, srv MessagingServiceApiServer) {

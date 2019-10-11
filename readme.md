@@ -24,7 +24,7 @@ install dev dependencies using `make install-dev`
 Then generate mock client for the authentication-service:
 
 ```sh
-mockgen -source=./api/auth-service.pb.go AuthServiceApiClient > mocks/auth-service-api.go
+mockgen -source=./api/auth-service-api.pb.go AuthServiceApiClient > mocks/auth-service-api.go
 ```
 
 For more information about testing grpc clients with go check: <https://github.com/grpc/grpc-go/blob/master/Documentation/gomock-example.md>
