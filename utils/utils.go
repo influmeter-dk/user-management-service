@@ -2,6 +2,8 @@ package utils
 
 import (
 	"regexp"
+
+	"github.com/influenzanet/user-management-service/api"
 )
 
 // CheckEmailFormat to check if input string is a correct email address
@@ -38,4 +40,12 @@ func CheckPasswordFormat(password string) bool {
 	}
 
 	return res >= 3
+}
+
+// IsTokenEmpty check a token from api if it's empty
+func IsTokenEmpty(t *api.TokenInfos) bool {
+	if t == nil || t.Id == "" || t.InstanceId == "" {
+		return true
+	}
+	return false
 }

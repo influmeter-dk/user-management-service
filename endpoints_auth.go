@@ -99,8 +99,8 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, u *api.UserC
 	return response, nil
 }
 
-func (s *userManagementServer) CheckRefreshToken(ctx context.Context, req *api.UserReference) (*api.Status, error) {
-	if req == nil || req.Token == "" || req.UserId == "" || req.InstanceId == "" {
+func (s *userManagementServer) CheckRefreshToken(ctx context.Context, req *api.RefreshTokenRequest) (*api.Status, error) {
+	if req == nil || req.RefreshToken == "" || req.UserId == "" || req.InstanceId == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
 	user, err := getUserByIDFromDB(req.InstanceId, req.UserId)
@@ -108,7 +108,7 @@ func (s *userManagementServer) CheckRefreshToken(ctx context.Context, req *api.U
 		return nil, status.Error(codes.Internal, "user not found")
 	}
 
-	err = user.RemoveRefreshToken(req.Token)
+	err = user.RemoveRefreshToken(req.RefreshToken)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "token not found")
 	}
@@ -125,8 +125,8 @@ func (s *userManagementServer) CheckRefreshToken(ctx context.Context, req *api.U
 	}, nil
 }
 
-func (s *userManagementServer) TokenRefreshed(ctx context.Context, req *api.UserReference) (*api.Status, error) {
-	if req == nil || req.Token == "" || req.UserId == "" || req.InstanceId == "" {
+func (s *userManagementServer) TokenRefreshed(ctx context.Context, req *api.RefreshTokenRequest) (*api.Status, error) {
+	if req == nil || req.RefreshToken == "" || req.UserId == "" || req.InstanceId == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
 
@@ -134,7 +134,7 @@ func (s *userManagementServer) TokenRefreshed(ctx context.Context, req *api.User
 	if err != nil {
 		return nil, status.Error(codes.Internal, "user not found")
 	}
-	user.AddRefreshToken(req.Token)
+	user.AddRefreshToken(req.RefreshToken)
 	user.ObjectInfos.LastTokenRefresh = time.Now().Unix()
 
 	user, err = updateUserInDB(req.InstanceId, user)

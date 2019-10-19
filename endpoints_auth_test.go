@@ -244,7 +244,7 @@ func TestCheckRefreshTokenEndpoint(t *testing.T) {
 	})
 
 	t.Run("with empty payload", func(t *testing.T) {
-		req := &api.UserReference{}
+		req := &api.RefreshTokenRequest{}
 		resp, err := s.CheckRefreshToken(context.Background(), req)
 		if err == nil {
 			t.Error("should return error")
@@ -257,10 +257,10 @@ func TestCheckRefreshTokenEndpoint(t *testing.T) {
 	})
 
 	t.Run("with no tokens for the user", func(t *testing.T) {
-		req := &api.UserReference{
-			Token:      "test-token",
-			InstanceId: testInstanceID,
-			UserId:     testUsers[0].ID.Hex(),
+		req := &api.RefreshTokenRequest{
+			RefreshToken: "test-token",
+			InstanceId:   testInstanceID,
+			UserId:       testUsers[0].ID.Hex(),
 		}
 		_, err := s.CheckRefreshToken(context.Background(), req)
 		if err == nil {
@@ -269,10 +269,10 @@ func TestCheckRefreshTokenEndpoint(t *testing.T) {
 	})
 
 	t.Run("with wrong token for the user", func(t *testing.T) {
-		req := &api.UserReference{
-			Token:      "wrong-test-token",
-			InstanceId: testInstanceID,
-			UserId:     testUsers[1].ID.Hex(),
+		req := &api.RefreshTokenRequest{
+			RefreshToken: "wrong-test-token",
+			InstanceId:   testInstanceID,
+			UserId:       testUsers[1].ID.Hex(),
 		}
 		_, err := s.CheckRefreshToken(context.Background(), req)
 		if err == nil {
@@ -281,10 +281,10 @@ func TestCheckRefreshTokenEndpoint(t *testing.T) {
 	})
 
 	t.Run("with token for the user", func(t *testing.T) {
-		req := &api.UserReference{
-			Token:      "test-token",
-			InstanceId: testInstanceID,
-			UserId:     testUsers[1].ID.Hex(),
+		req := &api.RefreshTokenRequest{
+			RefreshToken: "test-token",
+			InstanceId:   testInstanceID,
+			UserId:       testUsers[1].ID.Hex(),
 		}
 		_, err := s.CheckRefreshToken(context.Background(), req)
 		if err != nil {
@@ -333,7 +333,7 @@ func TestTokenRefreshedEndpoint(t *testing.T) {
 	})
 
 	t.Run("with empty payload", func(t *testing.T) {
-		req := &api.UserReference{}
+		req := &api.RefreshTokenRequest{}
 		resp, err := s.TokenRefreshed(context.Background(), req)
 		if err == nil {
 			t.Error("should return error")
@@ -346,10 +346,10 @@ func TestTokenRefreshedEndpoint(t *testing.T) {
 	})
 
 	t.Run("with new token for the user", func(t *testing.T) {
-		req := &api.UserReference{
-			Token:      "new-test-token",
-			InstanceId: testInstanceID,
-			UserId:     testUsers[0].ID.Hex(),
+		req := &api.RefreshTokenRequest{
+			RefreshToken: "new-test-token",
+			InstanceId:   testInstanceID,
+			UserId:       testUsers[0].ID.Hex(),
 		}
 		_, err := s.TokenRefreshed(context.Background(), req)
 		if err != nil {

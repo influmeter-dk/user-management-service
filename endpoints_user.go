@@ -11,26 +11,20 @@ import (
 )
 
 func (s *userManagementServer) GetUser(ctx context.Context, req *api.UserReference) (*api.User, error) {
-	if req == nil || req.Token == "" {
+	if req == nil || utils.IsTokenEmpty(req.Token) {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
-	}
-	parsedToken, err := clients.authService.ValidateJWT(context.Background(), &api.JWTRequest{
-		Token: req.Token,
-	})
-	if err != nil {
-		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
 
 	if req.UserId == "" {
-		req.UserId = parsedToken.Id
+		req.UserId = req.Token.Id
 	}
 
-	if parsedToken.Id != req.UserId { // Later can be overwritten
-		log.Printf("not authorized GetUser(): %s tried to access %s", parsedToken.Id, req.UserId)
+	if req.Token.Id != req.UserId { // Later can be overwritten
+		log.Printf("not authorized GetUser(): %s tried to access %s", req.Token.Id, req.UserId)
 		return nil, status.Error(codes.PermissionDenied, "not authorized")
 	}
 
-	user, err := getUserByIDFromDB(parsedToken.InstanceId, req.UserId)
+	user, err := getUserByIDFromDB(req.Token.InstanceId, req.UserId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "not found")
 	}
@@ -38,21 +32,15 @@ func (s *userManagementServer) GetUser(ctx context.Context, req *api.UserReferen
 }
 
 func (s *userManagementServer) ChangePassword(ctx context.Context, req *api.PasswordChangeMsg) (*api.Status, error) {
-	if req == nil || req.Token == "" {
+	if req == nil || utils.IsTokenEmpty(req.Token) {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
-	}
-	parsedToken, err := clients.authService.ValidateJWT(context.Background(), &api.JWTRequest{
-		Token: req.Token,
-	})
-	if err != nil {
-		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
 
 	if !utils.CheckPasswordFormat(req.NewPassword) {
 		return nil, status.Error(codes.InvalidArgument, "new password too weak")
 	}
 
-	user, err := getUserByIDFromDB(parsedToken.InstanceId, parsedToken.Id)
+	user, err := getUserByIDFromDB(req.Token.InstanceId, req.Token.Id)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid user and/or password")
 	}
@@ -67,11 +55,11 @@ func (s *userManagementServer) ChangePassword(ctx context.Context, req *api.Pass
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	err = updateUserPasswordInDB(parsedToken.InstanceId, parsedToken.Id, newHashedPw)
+	err = updateUserPasswordInDB(req.Token.InstanceId, req.Token.Id, newHashedPw)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	log.Printf("user %s initiated password change", parsedToken.Id)
+	log.Printf("user %s initiated password change", req.Token.Id)
 
 	// TODO: initiate email notification for user about password update
 
@@ -86,23 +74,17 @@ func (s *userManagementServer) ChangeEmail(ctx context.Context, req *api.EmailCh
 }
 
 func (s *userManagementServer) UpdateName(ctx context.Context, req *api.NameUpdateRequest) (*api.User, error) {
-	if req == nil || req.Token == "" || req.Name == nil {
+	if req == nil || utils.IsTokenEmpty(req.Token) || req.Name == nil {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
-	parsedToken, err := clients.authService.ValidateJWT(context.Background(), &api.JWTRequest{
-		Token: req.Token,
-	})
-	if err != nil {
-		return nil, status.Error(codes.Unauthenticated, err.Error())
-	}
 
-	user, err := getUserByIDFromDB(parsedToken.InstanceId, parsedToken.Id)
+	user, err := getUserByIDFromDB(req.Token.InstanceId, req.Token.Id)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "not found")
 	}
 
 	user.Account.Name = nameFromAPI(req.Name)
-	user, err = updateUserInDB(parsedToken.InstanceId, user)
+	user, err = updateUserInDB(req.Token.InstanceId, user)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "not found")
 	}
@@ -111,31 +93,25 @@ func (s *userManagementServer) UpdateName(ctx context.Context, req *api.NameUpda
 }
 
 func (s *userManagementServer) DeleteAccount(ctx context.Context, req *api.UserReference) (*api.Status, error) {
-	if req == nil || req.Token == "" || req.UserId == "" {
+	if req == nil || utils.IsTokenEmpty(req.Token) || req.UserId == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
-	}
-	parsedToken, err := clients.authService.ValidateJWT(context.Background(), &api.JWTRequest{
-		Token: req.Token,
-	})
-	if err != nil {
-		return nil, status.Error(codes.Unauthenticated, err.Error())
 	}
 
 	// TODO: check if user auth is from admin - to remove user by admin
-	if parsedToken.Id != req.UserId {
-		log.Printf("unauthorized request: user %s initiated account removal for user id %s", parsedToken.Id, req.UserId)
+	if req.Token.Id != req.UserId {
+		log.Printf("unauthorized request: user %s initiated account removal for user id %s", req.Token.Id, req.UserId)
 		return nil, status.Error(codes.PermissionDenied, "not authorized")
 	}
-	log.Printf("user %s initiated account removal for user id %s", parsedToken.Id, req.UserId)
+	log.Printf("user %s initiated account removal for user id %s", req.Token.Id, req.UserId)
 
-	if err := deleteUserFromDB(parsedToken.InstanceId, req.UserId); err != nil {
+	if err := deleteUserFromDB(req.Token.InstanceId, req.UserId); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	// remove all TempTokens for the given user ID using auth-service
 	if _, err := clients.authService.PurgeUserTempTokens(context.Background(), &api.TempTokenInfo{
-		UserId:     parsedToken.Id,
-		InstanceId: parsedToken.InstanceId,
+		UserId:     req.Token.Id,
+		InstanceId: req.Token.InstanceId,
 	}); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -179,23 +155,17 @@ func (s *userManagementServer) UpdateProfile(ctx context.Context, req *api.Profi
 }*/
 
 func (s *userManagementServer) AddSubprofile(ctx context.Context, req *api.SubProfileRequest) (*api.User, error) {
-	if req == nil || req.Token == "" || req.SubProfile == nil {
+	if req == nil || utils.IsTokenEmpty(req.Token) || req.SubProfile == nil {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
-	parsedToken, err := clients.authService.ValidateJWT(context.Background(), &api.JWTRequest{
-		Token: req.Token,
-	})
-	if err != nil {
-		return nil, status.Error(codes.Unauthenticated, err.Error())
-	}
 
-	user, err := getUserByIDFromDB(parsedToken.InstanceId, parsedToken.Id)
+	user, err := getUserByIDFromDB(req.Token.InstanceId, req.Token.Id)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "not found")
 	}
 
 	user.AddSubProfile(subProfileFromAPI(req.SubProfile))
-	user, err = updateUserInDB(parsedToken.InstanceId, user)
+	user, err = updateUserInDB(req.Token.InstanceId, user)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -204,17 +174,11 @@ func (s *userManagementServer) AddSubprofile(ctx context.Context, req *api.SubPr
 }
 
 func (s *userManagementServer) EditSubprofile(ctx context.Context, req *api.SubProfileRequest) (*api.User, error) {
-	if req == nil || req.Token == "" || req.SubProfile == nil || req.SubProfile.Id == "" {
+	if req == nil || utils.IsTokenEmpty(req.Token) || req.SubProfile == nil || req.SubProfile.Id == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
-	parsedToken, err := clients.authService.ValidateJWT(context.Background(), &api.JWTRequest{
-		Token: req.Token,
-	})
-	if err != nil {
-		return nil, status.Error(codes.Unauthenticated, err.Error())
-	}
 
-	user, err := getUserByIDFromDB(parsedToken.InstanceId, parsedToken.Id)
+	user, err := getUserByIDFromDB(req.Token.InstanceId, req.Token.Id)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "not found")
 	}
@@ -223,7 +187,7 @@ func (s *userManagementServer) EditSubprofile(ctx context.Context, req *api.SubP
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	user, err = updateUserInDB(parsedToken.InstanceId, user)
+	user, err = updateUserInDB(req.Token.InstanceId, user)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -232,17 +196,11 @@ func (s *userManagementServer) EditSubprofile(ctx context.Context, req *api.SubP
 }
 
 func (s *userManagementServer) RemoveSubprofile(ctx context.Context, req *api.SubProfileRequest) (*api.User, error) {
-	if req == nil || req.Token == "" || req.SubProfile == nil || req.SubProfile.Id == "" {
+	if req == nil || utils.IsTokenEmpty(req.Token) || req.SubProfile == nil || req.SubProfile.Id == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
-	parsedToken, err := clients.authService.ValidateJWT(context.Background(), &api.JWTRequest{
-		Token: req.Token,
-	})
-	if err != nil {
-		return nil, status.Error(codes.Unauthenticated, err.Error())
-	}
 
-	user, err := getUserByIDFromDB(parsedToken.InstanceId, parsedToken.Id)
+	user, err := getUserByIDFromDB(req.Token.InstanceId, req.Token.Id)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "not found")
 	}
@@ -251,7 +209,7 @@ func (s *userManagementServer) RemoveSubprofile(ctx context.Context, req *api.Su
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	user, err = updateUserInDB(parsedToken.InstanceId, user)
+	user, err = updateUserInDB(req.Token.InstanceId, user)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}

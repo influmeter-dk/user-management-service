@@ -14,11 +14,6 @@ import (
 )
 
 func TestGetUserEndpoint(t *testing.T) {
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-	mockAuthServiceClient := api_mock.NewMockAuthServiceApiClient(mockCtrl)
-	clients.authService = mockAuthServiceClient
-
 	s := userManagementServer{}
 
 	testUsers, err := addTestUsers([]User{
@@ -65,17 +60,12 @@ func TestGetUserEndpoint(t *testing.T) {
 
 	t.Run("with wrong user id", func(t *testing.T) {
 		req := &api.UserReference{
-			Token:  "mck_token",
+			Token: &api.TokenInfos{
+				Id:         testUsers[0].ID.Hex() + "w",
+				InstanceId: testInstanceID,
+			},
 			UserId: testUsers[0].ID.Hex() + "w",
 		}
-
-		mockAuthServiceClient.EXPECT().ValidateJWT(
-			gomock.Any(),
-			gomock.Any(),
-		).Return(&api.TokenInfos{
-			Id:         testUsers[0].ID.Hex() + "w",
-			InstanceId: testInstanceID,
-		}, nil)
 
 		resp, err := s.GetUser(context.Background(), req)
 		if err == nil {
@@ -89,16 +79,13 @@ func TestGetUserEndpoint(t *testing.T) {
 
 	t.Run("with other user id", func(t *testing.T) {
 		req := &api.UserReference{
-			Token:  "mck_token",
+			Token: &api.TokenInfos{
+				Id:         testUsers[0].ID.Hex(),
+				InstanceId: testInstanceID,
+			},
 			UserId: testUsers[1].ID.Hex(),
 		}
-		mockAuthServiceClient.EXPECT().ValidateJWT(
-			gomock.Any(),
-			gomock.Any(),
-		).Return(&api.TokenInfos{
-			Id:         testUsers[0].ID.Hex(),
-			InstanceId: testInstanceID,
-		}, nil)
+
 		resp, err := s.GetUser(context.Background(), req)
 		if err == nil {
 			t.Errorf("or response: %s", resp)
@@ -111,16 +98,13 @@ func TestGetUserEndpoint(t *testing.T) {
 
 	t.Run("with own user id", func(t *testing.T) {
 		req := &api.UserReference{
-			Token:  "mck_token",
+			Token: &api.TokenInfos{
+				Id:         testUsers[1].ID.Hex(),
+				InstanceId: testInstanceID,
+			},
 			UserId: testUsers[1].ID.Hex(),
 		}
-		mockAuthServiceClient.EXPECT().ValidateJWT(
-			gomock.Any(),
-			gomock.Any(),
-		).Return(&api.TokenInfos{
-			Id:         testUsers[1].ID.Hex(),
-			InstanceId: testInstanceID,
-		}, nil)
+
 		resp, err := s.GetUser(context.Background(), req)
 		if err != nil {
 			t.Errorf("unexpected error: %s", err.Error())
@@ -133,11 +117,6 @@ func TestGetUserEndpoint(t *testing.T) {
 }
 
 func TestChangePasswordEndpoint(t *testing.T) {
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-	mockAuthServiceClient := api_mock.NewMockAuthServiceApiClient(mockCtrl)
-	clients.authService = mockAuthServiceClient
-
 	s := userManagementServer{}
 
 	oldPassword := "SuperSecurePassword123!§$"
@@ -187,22 +166,13 @@ func TestChangePasswordEndpoint(t *testing.T) {
 
 	t.Run("with wrong user id", func(t *testing.T) {
 		req := &api.PasswordChangeMsg{
-			Token: "mck_token",
-			/*Auth: &influenzanet.ParsedToken{
-				UserId:     "test-wrong-id",
-				Roles:      []string{"PARTICIPANT"},
+			Token: &api.TokenInfos{
+				Id:         "wrong-id",
 				InstanceId: testInstanceID,
-			},*/
+			},
 			OldPassword: oldPassword,
 			NewPassword: newPassword,
 		}
-		mockAuthServiceClient.EXPECT().ValidateJWT(
-			gomock.Any(),
-			gomock.Any(),
-		).Return(&api.TokenInfos{
-			Id:         "wrong-id",
-			InstanceId: testInstanceID,
-		}, nil)
 
 		resp, err := s.ChangePassword(context.Background(), req)
 		st, ok := status.FromError(err)
@@ -214,17 +184,13 @@ func TestChangePasswordEndpoint(t *testing.T) {
 
 	t.Run("with wrong old password", func(t *testing.T) {
 		req := &api.PasswordChangeMsg{
-			Token:       "mck_token",
+			Token: &api.TokenInfos{
+				Id:         id,
+				InstanceId: testInstanceID,
+			},
 			OldPassword: oldPassword + "wrong",
 			NewPassword: newPassword,
 		}
-		mockAuthServiceClient.EXPECT().ValidateJWT(
-			gomock.Any(),
-			gomock.Any(),
-		).Return(&api.TokenInfos{
-			Id:         id,
-			InstanceId: testInstanceID,
-		}, nil)
 
 		resp, err := s.ChangePassword(context.Background(), req)
 		st, ok := status.FromError(err)
@@ -236,17 +202,13 @@ func TestChangePasswordEndpoint(t *testing.T) {
 
 	t.Run("with too weak new password", func(t *testing.T) {
 		req := &api.PasswordChangeMsg{
-			Token:       "mck_token",
+			Token: &api.TokenInfos{
+				Id:         id,
+				InstanceId: testInstanceID,
+			},
 			OldPassword: oldPassword,
 			NewPassword: "short",
 		}
-		mockAuthServiceClient.EXPECT().ValidateJWT(
-			gomock.Any(),
-			gomock.Any(),
-		).Return(&api.TokenInfos{
-			Id:         id,
-			InstanceId: testInstanceID,
-		}, nil)
 
 		resp, err := s.ChangePassword(context.Background(), req)
 		st, ok := status.FromError(err)
@@ -258,17 +220,14 @@ func TestChangePasswordEndpoint(t *testing.T) {
 
 	t.Run("with valid data and new password", func(t *testing.T) {
 		req := &api.PasswordChangeMsg{
-			Token:       "mck_token",
+			Token: &api.TokenInfos{
+				Id:         id,
+				InstanceId: testInstanceID,
+			},
 			OldPassword: oldPassword,
 			NewPassword: newPassword,
 		}
-		mockAuthServiceClient.EXPECT().ValidateJWT(
-			gomock.Any(),
-			gomock.Any(),
-		).Return(&api.TokenInfos{
-			Id:         id,
-			InstanceId: testInstanceID,
-		}, nil)
+
 		resp, err := s.ChangePassword(context.Background(), req)
 		if err != nil || resp == nil {
 			st, _ := status.FromError(err)
@@ -314,11 +273,6 @@ func TestChangeEmailEndpoint(t *testing.T) {
 }
 
 func TestUpdateNameEndpoint(t *testing.T) {
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-	mockAuthServiceClient := api_mock.NewMockAuthServiceApiClient(mockCtrl)
-	clients.authService = mockAuthServiceClient
-
 	s := userManagementServer{}
 
 	// Create Test User
@@ -367,7 +321,10 @@ func TestUpdateNameEndpoint(t *testing.T) {
 
 	t.Run("with wrong user id", func(t *testing.T) {
 		req := &api.NameUpdateRequest{
-			Token: "mock-token",
+			Token: &api.TokenInfos{
+				Id:         "wrong-id",
+				InstanceId: testInstanceID,
+			},
 			Name: &api.Name{
 				Gender:    "Female",
 				FirstName: "First2",
@@ -376,13 +333,6 @@ func TestUpdateNameEndpoint(t *testing.T) {
 			},
 		}
 
-		mockAuthServiceClient.EXPECT().ValidateJWT(
-			gomock.Any(),
-			gomock.Any(),
-		).Return(&api.TokenInfos{
-			Id:         "wrong-id",
-			InstanceId: testInstanceID,
-		}, nil)
 		resp, err := s.UpdateName(context.Background(), req)
 		st, ok := status.FromError(err)
 		if !ok || st == nil || st.Message() != "not found" || resp != nil {
@@ -399,16 +349,13 @@ func TestUpdateNameEndpoint(t *testing.T) {
 			Title:     "Dr.",
 		}
 		req := &api.NameUpdateRequest{
-			Token: "mock_token",
-			Name:  &newName,
+			Token: &api.TokenInfos{
+				Id:         testUser.ID.Hex(),
+				InstanceId: testInstanceID,
+			},
+			Name: &newName,
 		}
-		mockAuthServiceClient.EXPECT().ValidateJWT(
-			gomock.Any(),
-			gomock.Any(),
-		).Return(&api.TokenInfos{
-			Id:         testUser.ID.Hex(),
-			InstanceId: testInstanceID,
-		}, nil)
+
 		resp, err := s.UpdateName(context.Background(), req)
 		if err != nil {
 			t.Errorf("unexpected error: %s", err.Error())
@@ -475,16 +422,13 @@ func TestDeleteAccountEndpoint(t *testing.T) {
 
 	t.Run("with other user", func(t *testing.T) {
 		req := &api.UserReference{
-			Token:  "mock_token",
+			Token: &api.TokenInfos{
+				Id:         testUsers[0].ID.Hex(),
+				InstanceId: testInstanceID,
+			},
 			UserId: testUsers[1].ID.Hex(),
 		}
-		mockAuthServiceClient.EXPECT().ValidateJWT(
-			gomock.Any(),
-			gomock.Any(),
-		).Return(&api.TokenInfos{
-			Id:         testUsers[0].ID.Hex(),
-			InstanceId: testInstanceID,
-		}, nil)
+
 		resp, err := s.DeleteAccount(context.Background(), req)
 		if err == nil {
 			t.Error("should return error")
@@ -498,16 +442,13 @@ func TestDeleteAccountEndpoint(t *testing.T) {
 
 	t.Run("with same user", func(t *testing.T) {
 		req := &api.UserReference{
-			Token:  "mock_token",
+			Token: &api.TokenInfos{
+				Id:         testUsers[0].ID.Hex(),
+				InstanceId: testInstanceID,
+			},
 			UserId: testUsers[0].ID.Hex(),
 		}
-		mockAuthServiceClient.EXPECT().ValidateJWT(
-			gomock.Any(),
-			gomock.Any(),
-		).Return(&api.TokenInfos{
-			Id:         testUsers[0].ID.Hex(),
-			InstanceId: testInstanceID,
-		}, nil)
+
 		mockAuthServiceClient.EXPECT().PurgeUserTempTokens(
 			gomock.Any(),
 			gomock.Any(),
@@ -603,19 +544,16 @@ func TestAddSubprofileEndpoint(t *testing.T) {
 
 	t.Run("with wrong user id", func(t *testing.T) {
 		req := &api.SubProfileRequest{
-			Token: "mock_token",
+			Token: &api.TokenInfos{
+				Id:         testUsers[0].ID.Hex() + "w",
+				InstanceId: testInstanceID,
+			},
 			SubProfile: &api.SubProfile{
 				Name:      "Testname",
 				BirthYear: 1911,
 			},
 		}
-		mockAuthServiceClient.EXPECT().ValidateJWT(
-			gomock.Any(),
-			gomock.Any(),
-		).Return(&api.TokenInfos{
-			Id:         testUsers[0].ID.Hex() + "w",
-			InstanceId: testInstanceID,
-		}, nil)
+
 		resp, err := s.AddSubprofile(context.Background(), req)
 		if err == nil {
 			t.Errorf("or response: %s", resp)
@@ -628,19 +566,16 @@ func TestAddSubprofileEndpoint(t *testing.T) {
 
 	t.Run("with own user id", func(t *testing.T) {
 		req := &api.SubProfileRequest{
-			Token: "mock_token",
+			Token: &api.TokenInfos{
+				Id:         testUsers[0].ID.Hex(),
+				InstanceId: testInstanceID,
+			},
 			SubProfile: &api.SubProfile{
 				Name:      "Testname",
 				BirthYear: 1911,
 			},
 		}
-		mockAuthServiceClient.EXPECT().ValidateJWT(
-			gomock.Any(),
-			gomock.Any(),
-		).Return(&api.TokenInfos{
-			Id:         testUsers[0].ID.Hex(),
-			InstanceId: testInstanceID,
-		}, nil)
+
 		resp, err := s.AddSubprofile(context.Background(), req)
 		if err != nil {
 			t.Errorf("unexpected error: %s", err.Error())
@@ -705,7 +640,10 @@ func TestEditSubprofileEndpoint(t *testing.T) {
 
 	t.Run("with wrong user id", func(t *testing.T) {
 		req := &api.SubProfileRequest{
-			Token: "mock_token",
+			Token: &api.TokenInfos{
+				Id:         testUsers[0].ID.Hex() + "w",
+				InstanceId: testInstanceID,
+			},
 			SubProfile: &api.SubProfile{
 				Id:        testUsers[0].SubProfiles[0].ID.Hex(),
 				Name:      "Testname",
@@ -713,13 +651,6 @@ func TestEditSubprofileEndpoint(t *testing.T) {
 			},
 		}
 
-		mockAuthServiceClient.EXPECT().ValidateJWT(
-			gomock.Any(),
-			gomock.Any(),
-		).Return(&api.TokenInfos{
-			Id:         testUsers[0].ID.Hex() + "w",
-			InstanceId: testInstanceID,
-		}, nil)
 		resp, err := s.EditSubprofile(context.Background(), req)
 		if err == nil {
 			t.Errorf("or response: %s", resp)
@@ -732,20 +663,17 @@ func TestEditSubprofileEndpoint(t *testing.T) {
 
 	t.Run("with wrong subprofile id", func(t *testing.T) {
 		req := &api.SubProfileRequest{
-			Token: "mock_token",
+			Token: &api.TokenInfos{
+				Id:         testUsers[0].ID.Hex(),
+				InstanceId: testInstanceID,
+			},
 			SubProfile: &api.SubProfile{
 				Id:        testUsers[0].SubProfiles[0].ID.Hex() + "1",
 				Name:      "Testname",
 				BirthYear: 1911,
 			},
 		}
-		mockAuthServiceClient.EXPECT().ValidateJWT(
-			gomock.Any(),
-			gomock.Any(),
-		).Return(&api.TokenInfos{
-			Id:         testUsers[0].ID.Hex(),
-			InstanceId: testInstanceID,
-		}, nil)
+
 		resp, err := s.EditSubprofile(context.Background(), req)
 		if err == nil {
 			t.Errorf("or response: %s", resp)
@@ -758,20 +686,17 @@ func TestEditSubprofileEndpoint(t *testing.T) {
 
 	t.Run("with own user id", func(t *testing.T) {
 		req := &api.SubProfileRequest{
-			Token: "mock_token",
+			Token: &api.TokenInfos{
+				Id:         testUsers[0].ID.Hex(),
+				InstanceId: testInstanceID,
+			},
 			SubProfile: &api.SubProfile{
 				Id:        testUsers[0].SubProfiles[0].ID.Hex(),
 				Name:      "Testname",
 				BirthYear: 1911,
 			},
 		}
-		mockAuthServiceClient.EXPECT().ValidateJWT(
-			gomock.Any(),
-			gomock.Any(),
-		).Return(&api.TokenInfos{
-			Id:         testUsers[0].ID.Hex(),
-			InstanceId: testInstanceID,
-		}, nil)
+
 		resp, err := s.EditSubprofile(context.Background(), req)
 		if err != nil {
 			t.Errorf("unexpected error: %s", err.Error())
@@ -836,18 +761,15 @@ func TestRemoveSubprofileEndpoint(t *testing.T) {
 
 	t.Run("with wrong user id", func(t *testing.T) {
 		req := &api.SubProfileRequest{
-			Token: "mock_token",
+			Token: &api.TokenInfos{
+				Id:         testUsers[0].ID.Hex() + "w",
+				InstanceId: testInstanceID,
+			},
 			SubProfile: &api.SubProfile{
 				Id: testUsers[0].SubProfiles[0].ID.Hex(),
 			},
 		}
-		mockAuthServiceClient.EXPECT().ValidateJWT(
-			gomock.Any(),
-			gomock.Any(),
-		).Return(&api.TokenInfos{
-			Id:         testUsers[0].ID.Hex() + "w",
-			InstanceId: testInstanceID,
-		}, nil)
+
 		resp, err := s.RemoveSubprofile(context.Background(), req)
 		if err == nil {
 			t.Errorf("or response: %s", resp)
@@ -860,18 +782,15 @@ func TestRemoveSubprofileEndpoint(t *testing.T) {
 
 	t.Run("with wrong subprofile id", func(t *testing.T) {
 		req := &api.SubProfileRequest{
-			Token: "mock_token",
+			Token: &api.TokenInfos{
+				Id:         testUsers[0].ID.Hex(),
+				InstanceId: testInstanceID,
+			},
 			SubProfile: &api.SubProfile{
 				Id: testUsers[0].SubProfiles[0].ID.Hex() + "1",
 			},
 		}
-		mockAuthServiceClient.EXPECT().ValidateJWT(
-			gomock.Any(),
-			gomock.Any(),
-		).Return(&api.TokenInfos{
-			Id:         testUsers[0].ID.Hex(),
-			InstanceId: testInstanceID,
-		}, nil)
+
 		resp, err := s.RemoveSubprofile(context.Background(), req)
 		if err == nil {
 			t.Errorf("or response: %s", resp)
@@ -884,18 +803,15 @@ func TestRemoveSubprofileEndpoint(t *testing.T) {
 
 	t.Run("with own user id", func(t *testing.T) {
 		req := &api.SubProfileRequest{
-			Token: "mock_token",
+			Token: &api.TokenInfos{
+				Id:         testUsers[0].ID.Hex(),
+				InstanceId: testInstanceID,
+			},
 			SubProfile: &api.SubProfile{
 				Id: testUsers[0].SubProfiles[0].ID.Hex(),
 			},
 		}
-		mockAuthServiceClient.EXPECT().ValidateJWT(
-			gomock.Any(),
-			gomock.Any(),
-		).Return(&api.TokenInfos{
-			Id:         testUsers[0].ID.Hex(),
-			InstanceId: testInstanceID,
-		}, nil)
+
 		resp, err := s.RemoveSubprofile(context.Background(), req)
 		if err != nil {
 			t.Errorf("unexpected error: %s", err.Error())
