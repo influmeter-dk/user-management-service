@@ -499,11 +499,6 @@ func TestUpdateChildrenEndpoint(t *testing.T) {
 }
 
 func TestAddSubprofileEndpoint(t *testing.T) {
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-	mockAuthServiceClient := api_mock.NewMockAuthServiceApiClient(mockCtrl)
-	clients.authService = mockAuthServiceClient
-
 	s := userManagementServer{}
 
 	testUsers, err := addTestUsers([]User{
@@ -588,11 +583,6 @@ func TestAddSubprofileEndpoint(t *testing.T) {
 }
 
 func TestEditSubprofileEndpoint(t *testing.T) {
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-	mockAuthServiceClient := api_mock.NewMockAuthServiceApiClient(mockCtrl)
-	clients.authService = mockAuthServiceClient
-
 	s := userManagementServer{}
 
 	testUsers, err := addTestUsers([]User{
@@ -709,11 +699,6 @@ func TestEditSubprofileEndpoint(t *testing.T) {
 }
 
 func TestRemoveSubprofileEndpoint(t *testing.T) {
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-	mockAuthServiceClient := api_mock.NewMockAuthServiceApiClient(mockCtrl)
-	clients.authService = mockAuthServiceClient
-
 	s := userManagementServer{}
 
 	testUsers, err := addTestUsers([]User{
