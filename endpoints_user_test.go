@@ -573,19 +573,134 @@ func TestUpdateBirthDateEndpoint(t *testing.T) {
 }
 
 func TestUpdateChildrenEndpoint(t *testing.T) {
-	/*
-		mockCtrl := gomock.NewController(t)
-		defer mockCtrl.Finish()
-		mockAuthServiceClient := api_mock.NewMockAuthServiceApiClient(mockCtrl)
-		clients.authService = mockAuthServiceClient
-	*/
-	// s := userManagementServer{}
+	s := userManagementServer{}
 
-	// TODO: without payload
-	// TODO: with empty payload
-	// TODO: with other user id
-	// TODO: with own user id - check if values updated
-	t.Error("test not implemented")
+	testUsers, err := addTestUsers([]User{
+		User{
+			Account: Account{
+				Type:  "email",
+				Email: "update_children_1@test.com",
+			},
+			Profile: Profile{
+				Children: Children{
+					Child{BirthYear: 2014},
+				},
+				BirthYear: 1999,
+			},
+		},
+	})
+	if err != nil {
+		t.Errorf("failed to create testusers: %s", err.Error())
+		return
+	}
+
+	t.Run("without payload", func(t *testing.T) {
+		resp, err := s.UpdateChildren(context.Background(), nil)
+		if err == nil {
+			t.Errorf("or response: %s", resp)
+			return
+		}
+		if status.Convert(err).Message() != "missing argument" {
+			t.Errorf("wrong error: %s", err.Error())
+		}
+	})
+
+	t.Run("with empty payload", func(t *testing.T) {
+		req := &api.ProfileRequest{}
+		resp, err := s.UpdateChildren(context.Background(), req)
+		if err == nil {
+			t.Errorf("or response: %s", resp)
+			return
+		}
+		if status.Convert(err).Message() != "missing argument" {
+			t.Errorf("wrong error: %s", err.Error())
+		}
+	})
+
+	t.Run("with wrong user id", func(t *testing.T) {
+		req := &api.ProfileRequest{
+			Token: &api.TokenInfos{
+				Id:         testUsers[0].ID.Hex() + "w",
+				InstanceId: testInstanceID,
+			},
+			Profile: &api.Profile{
+				Children: []*api.Child{
+					&api.Child{BirthYear: 2010},
+					&api.Child{BirthYear: 2011},
+				},
+			},
+		}
+
+		resp, err := s.UpdateChildren(context.Background(), req)
+		if err == nil {
+			t.Errorf("or response: %s", resp)
+			return
+		}
+		if status.Convert(err).Message() != "not found" {
+			t.Errorf("wrong error: %s", err.Error())
+		}
+	})
+
+	t.Run("with correct user", func(t *testing.T) {
+		req := &api.ProfileRequest{
+			Token: &api.TokenInfos{
+				Id:         testUsers[0].ID.Hex(),
+				InstanceId: testInstanceID,
+			},
+			Profile: &api.Profile{
+				Children: []*api.Child{
+					&api.Child{BirthYear: 2010},
+					&api.Child{BirthYear: 2011},
+				},
+			},
+		}
+
+		_, err := s.UpdateChildren(context.Background(), req)
+		if err != nil {
+			t.Errorf("unexpected error: %s", err.Error())
+			return
+		}
+		user, err := getUserByIDFromDB(testInstanceID, testUsers[0].ID.Hex())
+		if err != nil {
+			t.Errorf("unexpected error: %s", err.Error())
+			return
+		}
+		if user.Profile.BirthYear != testUsers[0].Profile.BirthYear ||
+			len(user.Profile.Children) != 2 {
+			t.Error("user not updated as expected:")
+			t.Error(user)
+			return
+		}
+	})
+
+	t.Run("with correct user to empty children list", func(t *testing.T) {
+		req := &api.ProfileRequest{
+			Token: &api.TokenInfos{
+				Id:         testUsers[0].ID.Hex(),
+				InstanceId: testInstanceID,
+			},
+			Profile: &api.Profile{
+				Children: []*api.Child{},
+			},
+		}
+
+		_, err := s.UpdateChildren(context.Background(), req)
+		if err != nil {
+			t.Errorf("unexpected error: %s", err.Error())
+			return
+		}
+		user, err := getUserByIDFromDB(testInstanceID, testUsers[0].ID.Hex())
+		if err != nil {
+			t.Errorf("unexpected error: %s", err.Error())
+			return
+		}
+		if user.Profile.BirthYear != testUsers[0].Profile.BirthYear ||
+			len(user.Profile.Children) > 0 {
+			t.Error("user not updated as expected:")
+			t.Error(user)
+			return
+		}
+	})
 }
 
 func TestAddSubprofileEndpoint(t *testing.T) {
