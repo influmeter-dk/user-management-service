@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"time"
 
 	api "github.com/influenzanet/user-management-service/api"
 	utils "github.com/influenzanet/user-management-service/utils"
@@ -124,13 +125,47 @@ func (s *userManagementServer) DeleteAccount(ctx context.Context, req *api.UserR
 }
 
 func (s *userManagementServer) UpdateBirthDate(ctx context.Context, req *api.ProfileRequest) (*api.User, error) {
-	// TODO: Update updated at time as well
-	return nil, status.Error(codes.Unimplemented, "not implemented")
+	if req == nil || utils.IsTokenEmpty(req.Token) || req.Profile == nil {
+		return nil, status.Error(codes.InvalidArgument, "missing argument")
+	}
+
+	user, err := getUserByIDFromDB(req.Token.InstanceId, req.Token.Id)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "not found")
+	}
+
+	user.Profile.BirthDateUpdatedAt = time.Now().Unix()
+	user.Profile.BirthDay = req.Profile.BirthDay
+	user.Profile.BirthMonth = req.Profile.BirthMonth
+	user.Profile.BirthYear = req.Profile.BirthYear
+
+	user, err = updateUserInDB(req.Token.InstanceId, user)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "not found")
+	}
+
+	return user.ToAPI(), nil
 }
 
 func (s *userManagementServer) UpdateChildren(ctx context.Context, req *api.ProfileRequest) (*api.User, error) {
-	// TODO: Update updated at time as well
-	return nil, status.Error(codes.Unimplemented, "not implemented")
+	if req == nil || utils.IsTokenEmpty(req.Token) || req.Profile == nil || req.Profile.Children == nil {
+		return nil, status.Error(codes.InvalidArgument, "missing argument")
+	}
+
+	user, err := getUserByIDFromDB(req.Token.InstanceId, req.Token.Id)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "not found")
+	}
+
+	user.Profile.ChildrenUpdatedAt = time.Now().Unix()
+	user.Profile.Children = childrenFromAPI(req.Profile.Children)
+
+	user, err = updateUserInDB(req.Token.InstanceId, user)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "not found")
+	}
+
+	return user.ToAPI(), nil
 }
 
 /*
