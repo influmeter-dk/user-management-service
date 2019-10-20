@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/golang/mock/gomock"
 	"github.com/influenzanet/user-management-service/utils"
@@ -467,19 +468,108 @@ func TestDeleteAccountEndpoint(t *testing.T) {
 }
 
 func TestUpdateBirthDateEndpoint(t *testing.T) {
-	/*
-		mockCtrl := gomock.NewController(t)
-		defer mockCtrl.Finish()
-		mockAuthServiceClient := api_mock.NewMockAuthServiceApiClient(mockCtrl)
-		clients.authService = mockAuthServiceClient
-	*/
-	// s := userManagementServer{}
+	s := userManagementServer{}
 
-	// TODO: without payload
-	// TODO: with empty payload
-	// TODO: with other user id
-	// TODO: with own user id - check if values really updated
-	t.Error("test not implemented")
+	testUsers, err := addTestUsers([]User{
+		User{
+			Account: Account{
+				Type:  "email",
+				Email: "update_birthday_1@test.com",
+			},
+			Profile: Profile{
+				Children: Children{
+					Child{BirthYear: 2014},
+				},
+				BirthYear:          1999,
+				BirthMonth:         1,
+				BirthDay:           21,
+				BirthDateUpdatedAt: time.Now().Unix(),
+			},
+		},
+	})
+	if err != nil {
+		t.Errorf("failed to create testusers: %s", err.Error())
+		return
+	}
+
+	t.Run("without payload", func(t *testing.T) {
+		resp, err := s.UpdateBirthDate(context.Background(), nil)
+		if err == nil {
+			t.Errorf("or response: %s", resp)
+			return
+		}
+		if status.Convert(err).Message() != "missing argument" {
+			t.Errorf("wrong error: %s", err.Error())
+		}
+	})
+
+	t.Run("with empty payload", func(t *testing.T) {
+		req := &api.ProfileRequest{}
+		resp, err := s.UpdateBirthDate(context.Background(), req)
+		if err == nil {
+			t.Errorf("or response: %s", resp)
+			return
+		}
+		if status.Convert(err).Message() != "missing argument" {
+			t.Errorf("wrong error: %s", err.Error())
+		}
+	})
+
+	t.Run("with wrong user id", func(t *testing.T) {
+		req := &api.ProfileRequest{
+			Token: &api.TokenInfos{
+				Id:         testUsers[0].ID.Hex() + "w",
+				InstanceId: testInstanceID,
+			},
+			Profile: &api.Profile{
+				BirthYear:  1990,
+				BirthMonth: 2,
+				BirthDay:   12,
+			},
+		}
+
+		resp, err := s.UpdateBirthDate(context.Background(), req)
+		if err == nil {
+			t.Errorf("or response: %s", resp)
+			return
+		}
+		if status.Convert(err).Message() != "not found" {
+			t.Errorf("wrong error: %s", err.Error())
+		}
+	})
+
+	t.Run("with same user", func(t *testing.T) {
+		req := &api.ProfileRequest{
+			Token: &api.TokenInfos{
+				Id:         testUsers[0].ID.Hex(),
+				InstanceId: testInstanceID,
+			},
+			Profile: &api.Profile{
+				BirthYear:  1990,
+				BirthMonth: 2,
+				BirthDay:   12,
+			},
+		}
+
+		_, err := s.UpdateBirthDate(context.Background(), req)
+		if err != nil {
+			t.Errorf("unexpected error: %s", err.Error())
+			return
+		}
+		user, err := getUserByIDFromDB(testInstanceID, testUsers[0].ID.Hex())
+		if err != nil {
+			t.Errorf("unexpected error: %s", err.Error())
+			return
+		}
+		if user.Profile.BirthYear != req.Profile.BirthYear ||
+			user.Profile.BirthMonth != req.Profile.BirthMonth ||
+			user.Profile.BirthDay != req.Profile.BirthDay ||
+			len(user.Profile.Children) < 1 {
+			t.Error("user not updated as expected:")
+			t.Error(user)
+			return
+		}
+	})
 }
 
 func TestUpdateChildrenEndpoint(t *testing.T) {
