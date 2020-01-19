@@ -1,58 +1,57 @@
 package main
 
 import (
-	"io/ioutil"
+	"fmt"
 	"log"
 	"os"
-
-	yaml "gopkg.in/yaml.v2"
+	"strconv"
 )
 
-type config struct {
-	Port        int
-	DB          dbConf
+// Config is the structure that holds all global configuration data
+type Config struct {
+	Port string
+	DB   struct {
+		URI             string
+		DBNamePrefix    string
+		Timeout         int
+		MaxPoolSize     uint64
+		IdleConnTimeout int
+	}
 	ServiceURLs struct {
 		AuthService string
 	}
 }
 
-type dbConf struct {
-	CredentialsPath string `yaml:"credentials_path"`
-	Address         string `yaml:"address"`
-	Timeout         int    `yaml:"timeout"`
+func initConfig() {
+	conf.Port = os.Getenv("USER_MANAGEMENT_LISTEN_PORT")
+	conf.ServiceURLs.AuthService = os.Getenv("ADDR_AUTH_SERVICE")
+	getDBConfig()
 }
 
-type dbCredentials struct {
-	Username string `yaml:"username"`
-	Password string `yaml:"password"`
-}
+func getDBConfig() {
+	connStr := os.Getenv("DB_CONNECTION_STR")
+	username := os.Getenv("DB_USERNAME")
+	password := os.Getenv("DB_PASSWORD")
+	prefix := os.Getenv("DB_PREFIX") // Used in test mode
+	if connStr == "" || username == "" || password == "" {
+		log.Fatal("Couldn't read DB credentials.")
+	}
+	conf.DB.URI = fmt.Sprintf(`mongodb%s://%s:%s@%s`, prefix, username, password, connStr)
 
-func readConfig() {
-	file := os.Getenv("CONFIG_FILE")
-	if file == "" {
-		file = "./configs.yaml"
+	var err error
+	conf.DB.Timeout, err = strconv.Atoi(os.Getenv("DB_TIMEOUT"))
+	if err != nil {
+		log.Fatal("DB_TIMEOUT: " + err.Error())
+	}
+	conf.DB.IdleConnTimeout, err = strconv.Atoi(os.Getenv("DB_IDLE_CONN_TIMEOUT"))
+	if err != nil {
+		log.Fatal("DB_IDLE_CONN_TIMEOUT" + err.Error())
+	}
+	mps, err := strconv.Atoi(os.Getenv("DB_MAX_POOL_SIZE"))
+	conf.DB.MaxPoolSize = uint64(mps)
+	if err != nil {
+		log.Fatal("DB_MAX_POOL_SIZE: " + err.Error())
 	}
 
-	data, err := ioutil.ReadFile(file)
-	if err != nil {
-		log.Fatal(err)
-	}
-	err = yaml.Unmarshal([]byte(data), &conf)
-	if err != nil {
-		log.Fatal(err)
-	}
-	conf.ServiceURLs.AuthService = os.Getenv("AUTH_SERVICE")
-}
-
-func readDBcredentials(path string) (dbCredentials, error) {
-	var dbCreds dbCredentials
-	data, err := ioutil.ReadFile(path)
-	if err != nil {
-		return dbCreds, err
-	}
-	err = yaml.Unmarshal([]byte(data), &dbCreds)
-	if err != nil {
-		return dbCreds, err
-	}
-	return dbCreds, nil
+	conf.DB.DBNamePrefix = os.Getenv("DB_DB_NAME_PREFIX")
 }

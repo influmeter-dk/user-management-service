@@ -16,7 +16,7 @@ build:
 	go build .
 
 test:
-	 go test $(TEST_ARGS) ./...
+	go test $(TEST_ARGS) ./...
 
 install-dev:
 	go get github.com/golang/mock/gomock

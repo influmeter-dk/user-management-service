@@ -90,7 +90,12 @@ func TestDbInterfaceMethods(t *testing.T) {
 	t.Run("Testing updating not existing user's attributes", func(t *testing.T) {
 		testUser.Account.EmailConfirmed = false
 		currentUser := testUser
-		id, err := primitive.ObjectIDFromHex(testUser.ID.Hex() + "1")
+		wrongID := testUser.ID.Hex()[:len(testUser.ID.Hex())-2] + "00"
+		id, err := primitive.ObjectIDFromHex(wrongID)
+		if err != nil {
+			t.Error(err)
+			return
+		}
 		currentUser.ID = id
 		_, err = updateUserInDB(testInstanceID, currentUser)
 		if err == nil {

@@ -23,8 +23,8 @@ func CheckPasswordFormat(password string) bool {
 
 	lowercase := regexp.MustCompile("[a-z]")
 	uppercase := regexp.MustCompile("[A-Z]")
-	number := regexp.MustCompile("\\d") //"^(?:(?=.*[a-z])(?:(?=.*[A-Z])(?=.*[\\d\\W])|(?=.*\\W)(?=.*\d))|(?=.*\W)(?=.*[A-Z])(?=.*\d)).{8,}$")
-	symbol := regexp.MustCompile("\\W")
+	number := regexp.MustCompile(`\d`) //"^(?:(?=.*[a-z])(?:(?=.*[A-Z])(?=.*[\\d\\W])|(?=.*\\W)(?=.*\d))|(?=.*\W)(?=.*[A-Z])(?=.*\d)).{8,}$")
+	symbol := regexp.MustCompile(`\W`)
 
 	if lowercase.MatchString(password) {
 		res++

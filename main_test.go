@@ -11,14 +11,14 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-var testInstanceID = "test-db-" + strconv.FormatInt(time.Now().Unix(), 10)
+var testInstanceID = strconv.FormatInt(time.Now().Unix(), 10)
 
 func dropTestDB() {
 	log.Println("Drop test database")
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	err := dbClient.Database(testInstanceID).Drop(ctx)
+	err := dbClient.Database(conf.DB.DBNamePrefix + testInstanceID + "_users").Drop(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -43,4 +43,3 @@ func TestMain(m *testing.M) {
 	dropTestDB()
 	os.Exit(result)
 }
-

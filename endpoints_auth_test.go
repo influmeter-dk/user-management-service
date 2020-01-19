@@ -194,14 +194,14 @@ func TestSignup(t *testing.T) {
 			Password:   "SuperSecurePassword123!§$",
 			InstanceId: testInstanceID,
 		}
-		resp, err := s.SignupWithEmail(context.Background(), req)
+		_, err := s.SignupWithEmail(context.Background(), req)
 		if err != nil {
 			t.Errorf("unexpected error: %s", err.Error())
 			return
 		}
 
 		// Try to signup again:
-		resp, err = s.SignupWithEmail(context.Background(), req)
+		resp, err := s.SignupWithEmail(context.Background(), req)
 		if err == nil || resp != nil {
 			t.Errorf("should fail, when user exists already, wrong response: %s", resp)
 			return

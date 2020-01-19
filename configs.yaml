@@ -1,5 +1,0 @@
-port: 3200
-db:
-  address: influenzanettestdbcluster-pwvbz.mongodb.net/test?retryWrites=true
-  credentials_path: ./secret/db.yaml
-  timeout: 10
