@@ -6,12 +6,11 @@ package mock_api
 
 import (
 	context "context"
-	reflect "reflect"
-
 	gomock "github.com/golang/mock/gomock"
 	empty "github.com/golang/protobuf/ptypes/empty"
 	api "github.com/influenzanet/user-management-service/api"
 	grpc "google.golang.org/grpc"
+	reflect "reflect"
 )
 
 // MockAuthServiceApiClient is a mock of AuthServiceApiClient interface
@@ -135,6 +134,26 @@ func (mr *MockAuthServiceApiClientMockRecorder) RenewJWT(ctx, in interface{}, op
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RenewJWT", reflect.TypeOf((*MockAuthServiceApiClient)(nil).RenewJWT), varargs...)
+}
+
+// ValidateAppToken mocks base method
+func (m *MockAuthServiceApiClient) ValidateAppToken(ctx context.Context, in *api.AppTokenRequest, opts ...grpc.CallOption) (*api.AppTokenValidation, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "ValidateAppToken", varargs...)
+	ret0, _ := ret[0].(*api.AppTokenValidation)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ValidateAppToken indicates an expected call of ValidateAppToken
+func (mr *MockAuthServiceApiClientMockRecorder) ValidateAppToken(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateAppToken", reflect.TypeOf((*MockAuthServiceApiClient)(nil).ValidateAppToken), varargs...)
 }
 
 // GenerateTempToken mocks base method
@@ -333,6 +352,21 @@ func (m *MockAuthServiceApiServer) RenewJWT(arg0 context.Context, arg1 *api.Refr
 func (mr *MockAuthServiceApiServerMockRecorder) RenewJWT(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "RenewJWT", reflect.TypeOf((*MockAuthServiceApiServer)(nil).RenewJWT), arg0, arg1)
+}
+
+// ValidateAppToken mocks base method
+func (m *MockAuthServiceApiServer) ValidateAppToken(arg0 context.Context, arg1 *api.AppTokenRequest) (*api.AppTokenValidation, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "ValidateAppToken", arg0, arg1)
+	ret0, _ := ret[0].(*api.AppTokenValidation)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// ValidateAppToken indicates an expected call of ValidateAppToken
+func (mr *MockAuthServiceApiServerMockRecorder) ValidateAppToken(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "ValidateAppToken", reflect.TypeOf((*MockAuthServiceApiServer)(nil).ValidateAppToken), arg0, arg1)
 }
 
 // GenerateTempToken mocks base method
