@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/golang/protobuf/ptypes/empty"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
@@ -41,10 +42,17 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, creds *api.Us
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
+	var username string
+	if len(user.Roles) > 1 || len(user.Roles) == 1 && user.Roles[0] != "PARTICIPANT" {
+		username = user.Account.Email
+	}
+
 	response := &api.UserAuthInfo{
 		UserId:     user.ID.Hex(),
 		Roles:      user.Roles,
 		InstanceId: instanceID,
+		Username:   username,
+		ProfileId:  user.Profiles[0].ID.Hex(),
 	}
 	return response, nil
 }
@@ -74,6 +82,11 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, u *api.UserC
 			Password:       password,
 		},
 		Roles: []string{"PARTICIPANT"},
+		Profiles: []Profile{
+			Profile{
+				ID: primitive.NewObjectID(),
+			},
+		},
 	}
 
 	instanceID := u.InstanceId
@@ -90,11 +103,17 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, u *api.UserC
 	log.Println("new user created")
 	// TODO: generate email confirmation token
 	// TODO: send email with confirmation request
+	var username string
+	if len(newUser.Roles) > 1 || len(newUser.Roles) == 1 && newUser.Roles[0] != "PARTICIPANT" {
+		username = newUser.Account.Email
+	}
 
 	response := &api.UserAuthInfo{
 		UserId:     id,
 		Roles:      newUser.Roles,
 		InstanceId: instanceID,
+		Username:   username,
+		ProfileId:  newUser.Profiles[0].ID.Hex(),
 	}
 	return response, nil
 }

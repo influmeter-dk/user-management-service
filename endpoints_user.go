@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"log"
-	"time"
 
 	api "github.com/influenzanet/user-management-service/api"
 	utils "github.com/influenzanet/user-management-service/utils"
@@ -129,43 +128,24 @@ func (s *userManagementServer) UpdateBirthDate(ctx context.Context, req *api.Pro
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
 
-	user, err := getUserByIDFromDB(req.Token.InstanceId, req.Token.Id)
+	_, err := getUserByIDFromDB(req.Token.InstanceId, req.Token.Id)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "not found")
 	}
-
-	user.Profile.BirthDateUpdatedAt = time.Now().Unix()
-	user.Profile.BirthDay = req.Profile.BirthDay
-	user.Profile.BirthMonth = req.Profile.BirthMonth
-	user.Profile.BirthYear = req.Profile.BirthYear
-
-	user, err = updateUserInDB(req.Token.InstanceId, user)
-	if err != nil {
-		return nil, status.Error(codes.Internal, "not found")
-	}
-
-	return user.ToAPI(), nil
+	// TODO: handle profile and config
+	return nil, status.Error(codes.Unimplemented, "not implemented")
 }
 
 func (s *userManagementServer) UpdateChildren(ctx context.Context, req *api.ProfileRequest) (*api.User, error) {
 	if req == nil || utils.IsTokenEmpty(req.Token) || req.Profile == nil || req.Profile.Children == nil {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
-
-	user, err := getUserByIDFromDB(req.Token.InstanceId, req.Token.Id)
+	_, err := getUserByIDFromDB(req.Token.InstanceId, req.Token.Id)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "not found")
 	}
-
-	user.Profile.ChildrenUpdatedAt = time.Now().Unix()
-	user.Profile.Children = childrenFromAPI(req.Profile.Children)
-
-	user, err = updateUserInDB(req.Token.InstanceId, user)
-	if err != nil {
-		return nil, status.Error(codes.Internal, "not found")
-	}
-
-	return user.ToAPI(), nil
+	// TODO: handle profile and config
+	return nil, status.Error(codes.Unimplemented, "not implemented")
 }
 
 /*
@@ -194,18 +174,12 @@ func (s *userManagementServer) AddSubprofile(ctx context.Context, req *api.SubPr
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
 
-	user, err := getUserByIDFromDB(req.Token.InstanceId, req.Token.Id)
+	_, err := getUserByIDFromDB(req.Token.InstanceId, req.Token.Id)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "not found")
 	}
-
-	user.AddSubProfile(subProfileFromAPI(req.SubProfile))
-	user, err = updateUserInDB(req.Token.InstanceId, user)
-	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	return user.ToAPI(), nil
+	// TODO: handle profile and config
+	return nil, status.Error(codes.Unimplemented, "not implemented")
 }
 
 func (s *userManagementServer) EditSubprofile(ctx context.Context, req *api.SubProfileRequest) (*api.User, error) {
@@ -213,21 +187,12 @@ func (s *userManagementServer) EditSubprofile(ctx context.Context, req *api.SubP
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
 
-	user, err := getUserByIDFromDB(req.Token.InstanceId, req.Token.Id)
+	_, err := getUserByIDFromDB(req.Token.InstanceId, req.Token.Id)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "not found")
 	}
-
-	if err := user.UpdateSubProfile(subProfileFromAPI(req.SubProfile)); err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	user, err = updateUserInDB(req.Token.InstanceId, user)
-	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	return user.ToAPI(), nil
+	// TODO: handle profile and config
+	return nil, status.Error(codes.Unimplemented, "not implemented")
 }
 
 func (s *userManagementServer) RemoveSubprofile(ctx context.Context, req *api.SubProfileRequest) (*api.User, error) {
@@ -235,19 +200,10 @@ func (s *userManagementServer) RemoveSubprofile(ctx context.Context, req *api.Su
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
 
-	user, err := getUserByIDFromDB(req.Token.InstanceId, req.Token.Id)
+	_, err := getUserByIDFromDB(req.Token.InstanceId, req.Token.Id)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "not found")
 	}
-
-	if err := user.RemoveSubProfile(req.SubProfile.Id); err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	user, err = updateUserInDB(req.Token.InstanceId, user)
-	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	return user.ToAPI(), nil
+	// TODO: handle profile and config
+	return nil, status.Error(codes.Unimplemented, "not implemented")
 }

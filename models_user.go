@@ -31,19 +31,20 @@ type User struct {
 	Account     Account            `bson:"account"`
 	Roles       []string           `bson:"roles" json:"roles"`
 	ObjectInfos ObjectInfos        `bson:"objectInfos"`
-	Profile     Profile            `bson:"profile"`
-	SubProfiles SubProfiles        `bson:"subProfiles"` // earlier referred as 'household member'
+	Profiles    []Profile          `bson:"profiles"`
 }
 
 // ToAPI converts the object from DB to API format
 func (u User) ToAPI() *api.User {
 	return &api.User{
-		Id:          u.ID.Hex(),
-		Account:     u.Account.ToAPI(),
-		Roles:       u.Roles,
-		Profile:     u.Profile.ToAPI(),
-		SubProfiles: u.SubProfiles.ToAPI(),
-		Infos:       u.ObjectInfos.ToAPI(),
+		Id:      u.ID.Hex(),
+		Account: u.Account.ToAPI(),
+		Roles:   u.Roles,
+		/*
+			Profile:     u.Profile.ToAPI(),
+			SubProfiles: u.SubProfiles.ToAPI(),
+		*/
+		Infos: u.ObjectInfos.ToAPI(),
 	}
 }
 
@@ -57,6 +58,7 @@ func (u User) HasRole(role string) bool {
 	return false
 }
 
+/*
 // AddSubProfile generates unique ID and adds sub-profile to the user's array
 func (u *User) AddSubProfile(sp SubProfile) {
 	sp.ID = primitive.NewObjectID()
@@ -84,6 +86,7 @@ func (u *User) RemoveSubProfile(id string) error {
 	}
 	return errors.New("item with given ID not found")
 }
+*/
 
 // AddRefreshToken add a new refresh token to the user's list
 func (u *User) AddRefreshToken(token string) {

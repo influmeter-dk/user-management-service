@@ -2,14 +2,16 @@ package main
 
 import (
 	api "github.com/influenzanet/user-management-service/api"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // Profile describes personal profile information for a User
 type Profile struct {
-	BirthYear          int32 `bson:"birthYear"`
-	BirthMonth         int32 `bson:"birthMonth"`
-	BirthDay           int32 `bson:"birthDay"`
-	BirthDateUpdatedAt int64 `bson:"birthDateUpdatedAt"`
+	ID                 primitive.ObjectID `bson:"_id,omitempty"`
+	BirthYear          int32              `bson:"birthYear"`
+	BirthMonth         int32              `bson:"birthMonth"`
+	BirthDay           int32              `bson:"birthDay"`
+	BirthDateUpdatedAt int64              `bson:"birthDateUpdatedAt"`
 
 	Children          Children `bson:"children"`
 	ChildrenUpdatedAt int64    `bson:"childrenUpdatedAt"`

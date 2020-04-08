@@ -28,6 +28,9 @@ func TestLogin(t *testing.T) {
 			Password: hashedPw,
 		},
 		Roles: []string{"PARTICIPANT"},
+		Profiles: []Profile{
+			Profile{ID: primitive.NewObjectID()},
+		},
 	}
 
 	id, err := addUserToDB(testInstanceID, testUser)

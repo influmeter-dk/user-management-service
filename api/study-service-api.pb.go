@@ -25,99 +25,318 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
-type Study struct {
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *Study) Reset()         { *m = Study{} }
-func (m *Study) String() string { return proto.CompactTextString(m) }
-func (*Study) ProtoMessage()    {}
-func (*Study) Descriptor() ([]byte, []int) {
-	return fileDescriptor_81f0d8f98f9be15c, []int{0}
-}
-
-func (m *Study) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_Study.Unmarshal(m, b)
-}
-func (m *Study) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_Study.Marshal(b, m, deterministic)
-}
-func (m *Study) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Study.Merge(m, src)
-}
-func (m *Study) XXX_Size() int {
-	return xxx_messageInfo_Study.Size(m)
-}
-func (m *Study) XXX_DiscardUnknown() {
-	xxx_messageInfo_Study.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_Study proto.InternalMessageInfo
-
-type CreateSurveyReq struct {
+type NewStudyRequest struct {
 	Token                *TokenInfos `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
-	SurveyDef            *SurveyItem `protobuf:"bytes,2,opt,name=surveyDef,proto3" json:"surveyDef,omitempty"`
+	Study                *Study      `protobuf:"bytes,2,opt,name=study,proto3" json:"study,omitempty"`
 	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
 	XXX_unrecognized     []byte      `json:"-"`
 	XXX_sizecache        int32       `json:"-"`
 }
 
-func (m *CreateSurveyReq) Reset()         { *m = CreateSurveyReq{} }
-func (m *CreateSurveyReq) String() string { return proto.CompactTextString(m) }
-func (*CreateSurveyReq) ProtoMessage()    {}
-func (*CreateSurveyReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_81f0d8f98f9be15c, []int{1}
+func (m *NewStudyRequest) Reset()         { *m = NewStudyRequest{} }
+func (m *NewStudyRequest) String() string { return proto.CompactTextString(m) }
+func (*NewStudyRequest) ProtoMessage()    {}
+func (*NewStudyRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_81f0d8f98f9be15c, []int{0}
 }
 
-func (m *CreateSurveyReq) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_CreateSurveyReq.Unmarshal(m, b)
+func (m *NewStudyRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_NewStudyRequest.Unmarshal(m, b)
 }
-func (m *CreateSurveyReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_CreateSurveyReq.Marshal(b, m, deterministic)
+func (m *NewStudyRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_NewStudyRequest.Marshal(b, m, deterministic)
 }
-func (m *CreateSurveyReq) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_CreateSurveyReq.Merge(m, src)
+func (m *NewStudyRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_NewStudyRequest.Merge(m, src)
 }
-func (m *CreateSurveyReq) XXX_Size() int {
-	return xxx_messageInfo_CreateSurveyReq.Size(m)
+func (m *NewStudyRequest) XXX_Size() int {
+	return xxx_messageInfo_NewStudyRequest.Size(m)
 }
-func (m *CreateSurveyReq) XXX_DiscardUnknown() {
-	xxx_messageInfo_CreateSurveyReq.DiscardUnknown(m)
+func (m *NewStudyRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_NewStudyRequest.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_CreateSurveyReq proto.InternalMessageInfo
+var xxx_messageInfo_NewStudyRequest proto.InternalMessageInfo
 
-func (m *CreateSurveyReq) GetToken() *TokenInfos {
+func (m *NewStudyRequest) GetToken() *TokenInfos {
 	if m != nil {
 		return m.Token
 	}
 	return nil
 }
 
-func (m *CreateSurveyReq) GetSurveyDef() *SurveyItem {
+func (m *NewStudyRequest) GetStudy() *Study {
 	if m != nil {
-		return m.SurveyDef
+		return m.Study
+	}
+	return nil
+}
+
+type SurveyAndContext struct {
+	Survey               *Survey         `protobuf:"bytes,1,opt,name=survey,proto3" json:"survey,omitempty"`
+	Context              *SurveyContext  `protobuf:"bytes,2,opt,name=context,proto3" json:"context,omitempty"`
+	Prefill              *SurveyResponse `protobuf:"bytes,3,opt,name=prefill,proto3" json:"prefill,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
+	XXX_unrecognized     []byte          `json:"-"`
+	XXX_sizecache        int32           `json:"-"`
+}
+
+func (m *SurveyAndContext) Reset()         { *m = SurveyAndContext{} }
+func (m *SurveyAndContext) String() string { return proto.CompactTextString(m) }
+func (*SurveyAndContext) ProtoMessage()    {}
+func (*SurveyAndContext) Descriptor() ([]byte, []int) {
+	return fileDescriptor_81f0d8f98f9be15c, []int{1}
+}
+
+func (m *SurveyAndContext) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_SurveyAndContext.Unmarshal(m, b)
+}
+func (m *SurveyAndContext) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_SurveyAndContext.Marshal(b, m, deterministic)
+}
+func (m *SurveyAndContext) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SurveyAndContext.Merge(m, src)
+}
+func (m *SurveyAndContext) XXX_Size() int {
+	return xxx_messageInfo_SurveyAndContext.Size(m)
+}
+func (m *SurveyAndContext) XXX_DiscardUnknown() {
+	xxx_messageInfo_SurveyAndContext.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_SurveyAndContext proto.InternalMessageInfo
+
+func (m *SurveyAndContext) GetSurvey() *Survey {
+	if m != nil {
+		return m.Survey
+	}
+	return nil
+}
+
+func (m *SurveyAndContext) GetContext() *SurveyContext {
+	if m != nil {
+		return m.Context
+	}
+	return nil
+}
+
+func (m *SurveyAndContext) GetPrefill() *SurveyResponse {
+	if m != nil {
+		return m.Prefill
+	}
+	return nil
+}
+
+type StudyReferenceReq struct {
+	Token                *TokenInfos `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
+	StudyKey             string      `protobuf:"bytes,2,opt,name=study_key,json=studyKey,proto3" json:"study_key,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
+	XXX_unrecognized     []byte      `json:"-"`
+	XXX_sizecache        int32       `json:"-"`
+}
+
+func (m *StudyReferenceReq) Reset()         { *m = StudyReferenceReq{} }
+func (m *StudyReferenceReq) String() string { return proto.CompactTextString(m) }
+func (*StudyReferenceReq) ProtoMessage()    {}
+func (*StudyReferenceReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_81f0d8f98f9be15c, []int{2}
+}
+
+func (m *StudyReferenceReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_StudyReferenceReq.Unmarshal(m, b)
+}
+func (m *StudyReferenceReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_StudyReferenceReq.Marshal(b, m, deterministic)
+}
+func (m *StudyReferenceReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_StudyReferenceReq.Merge(m, src)
+}
+func (m *StudyReferenceReq) XXX_Size() int {
+	return xxx_messageInfo_StudyReferenceReq.Size(m)
+}
+func (m *StudyReferenceReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_StudyReferenceReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_StudyReferenceReq proto.InternalMessageInfo
+
+func (m *StudyReferenceReq) GetToken() *TokenInfos {
+	if m != nil {
+		return m.Token
+	}
+	return nil
+}
+
+func (m *StudyReferenceReq) GetStudyKey() string {
+	if m != nil {
+		return m.StudyKey
+	}
+	return ""
+}
+
+type SurveyInfoResp struct {
+	Infos                []*SurveyInfoResp_SurveyInfo `protobuf:"bytes,1,rep,name=infos,proto3" json:"infos,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}                     `json:"-"`
+	XXX_unrecognized     []byte                       `json:"-"`
+	XXX_sizecache        int32                        `json:"-"`
+}
+
+func (m *SurveyInfoResp) Reset()         { *m = SurveyInfoResp{} }
+func (m *SurveyInfoResp) String() string { return proto.CompactTextString(m) }
+func (*SurveyInfoResp) ProtoMessage()    {}
+func (*SurveyInfoResp) Descriptor() ([]byte, []int) {
+	return fileDescriptor_81f0d8f98f9be15c, []int{3}
+}
+
+func (m *SurveyInfoResp) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_SurveyInfoResp.Unmarshal(m, b)
+}
+func (m *SurveyInfoResp) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_SurveyInfoResp.Marshal(b, m, deterministic)
+}
+func (m *SurveyInfoResp) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SurveyInfoResp.Merge(m, src)
+}
+func (m *SurveyInfoResp) XXX_Size() int {
+	return xxx_messageInfo_SurveyInfoResp.Size(m)
+}
+func (m *SurveyInfoResp) XXX_DiscardUnknown() {
+	xxx_messageInfo_SurveyInfoResp.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_SurveyInfoResp proto.InternalMessageInfo
+
+func (m *SurveyInfoResp) GetInfos() []*SurveyInfoResp_SurveyInfo {
+	if m != nil {
+		return m.Infos
+	}
+	return nil
+}
+
+type SurveyInfoResp_SurveyInfo struct {
+	Key                  string             `protobuf:"bytes,1,opt,name=key,proto3" json:"key,omitempty"`
+	Name                 []*LocalisedObject `protobuf:"bytes,2,rep,name=name,proto3" json:"name,omitempty"`
+	Description          []*LocalisedObject `protobuf:"bytes,3,rep,name=description,proto3" json:"description,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}           `json:"-"`
+	XXX_unrecognized     []byte             `json:"-"`
+	XXX_sizecache        int32              `json:"-"`
+}
+
+func (m *SurveyInfoResp_SurveyInfo) Reset()         { *m = SurveyInfoResp_SurveyInfo{} }
+func (m *SurveyInfoResp_SurveyInfo) String() string { return proto.CompactTextString(m) }
+func (*SurveyInfoResp_SurveyInfo) ProtoMessage()    {}
+func (*SurveyInfoResp_SurveyInfo) Descriptor() ([]byte, []int) {
+	return fileDescriptor_81f0d8f98f9be15c, []int{3, 0}
+}
+
+func (m *SurveyInfoResp_SurveyInfo) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_SurveyInfoResp_SurveyInfo.Unmarshal(m, b)
+}
+func (m *SurveyInfoResp_SurveyInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_SurveyInfoResp_SurveyInfo.Marshal(b, m, deterministic)
+}
+func (m *SurveyInfoResp_SurveyInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_SurveyInfoResp_SurveyInfo.Merge(m, src)
+}
+func (m *SurveyInfoResp_SurveyInfo) XXX_Size() int {
+	return xxx_messageInfo_SurveyInfoResp_SurveyInfo.Size(m)
+}
+func (m *SurveyInfoResp_SurveyInfo) XXX_DiscardUnknown() {
+	xxx_messageInfo_SurveyInfoResp_SurveyInfo.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_SurveyInfoResp_SurveyInfo proto.InternalMessageInfo
+
+func (m *SurveyInfoResp_SurveyInfo) GetKey() string {
+	if m != nil {
+		return m.Key
+	}
+	return ""
+}
+
+func (m *SurveyInfoResp_SurveyInfo) GetName() []*LocalisedObject {
+	if m != nil {
+		return m.Name
+	}
+	return nil
+}
+
+func (m *SurveyInfoResp_SurveyInfo) GetDescription() []*LocalisedObject {
+	if m != nil {
+		return m.Description
+	}
+	return nil
+}
+
+type AddSurveyReq struct {
+	Token                *TokenInfos `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
+	StudyKey             string      `protobuf:"bytes,2,opt,name=study_key,json=studyKey,proto3" json:"study_key,omitempty"`
+	Survey               *Survey     `protobuf:"bytes,3,opt,name=survey,proto3" json:"survey,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
+	XXX_unrecognized     []byte      `json:"-"`
+	XXX_sizecache        int32       `json:"-"`
+}
+
+func (m *AddSurveyReq) Reset()         { *m = AddSurveyReq{} }
+func (m *AddSurveyReq) String() string { return proto.CompactTextString(m) }
+func (*AddSurveyReq) ProtoMessage()    {}
+func (*AddSurveyReq) Descriptor() ([]byte, []int) {
+	return fileDescriptor_81f0d8f98f9be15c, []int{4}
+}
+
+func (m *AddSurveyReq) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_AddSurveyReq.Unmarshal(m, b)
+}
+func (m *AddSurveyReq) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_AddSurveyReq.Marshal(b, m, deterministic)
+}
+func (m *AddSurveyReq) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_AddSurveyReq.Merge(m, src)
+}
+func (m *AddSurveyReq) XXX_Size() int {
+	return xxx_messageInfo_AddSurveyReq.Size(m)
+}
+func (m *AddSurveyReq) XXX_DiscardUnknown() {
+	xxx_messageInfo_AddSurveyReq.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_AddSurveyReq proto.InternalMessageInfo
+
+func (m *AddSurveyReq) GetToken() *TokenInfos {
+	if m != nil {
+		return m.Token
+	}
+	return nil
+}
+
+func (m *AddSurveyReq) GetStudyKey() string {
+	if m != nil {
+		return m.StudyKey
+	}
+	return ""
+}
+
+func (m *AddSurveyReq) GetSurvey() *Survey {
+	if m != nil {
+		return m.Survey
 	}
 	return nil
 }
 
 type SubmitResponseReq struct {
-	Token                *TokenInfos         `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
-	StudyId              string              `protobuf:"bytes,2,opt,name=study_id,json=studyId,proto3" json:"study_id,omitempty"`
-	ProfileId            string              `protobuf:"bytes,3,opt,name=profile_id,json=profileId,proto3" json:"profile_id,omitempty"`
-	Responses            *SurveyItemResponse `protobuf:"bytes,4,opt,name=responses,proto3" json:"responses,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}            `json:"-"`
-	XXX_unrecognized     []byte              `json:"-"`
-	XXX_sizecache        int32               `json:"-"`
+	Token                *TokenInfos     `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
+	StudyKey             string          `protobuf:"bytes,2,opt,name=study_key,json=studyKey,proto3" json:"study_key,omitempty"`
+	Response             *SurveyResponse `protobuf:"bytes,3,opt,name=response,proto3" json:"response,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
+	XXX_unrecognized     []byte          `json:"-"`
+	XXX_sizecache        int32           `json:"-"`
 }
 
 func (m *SubmitResponseReq) Reset()         { *m = SubmitResponseReq{} }
 func (m *SubmitResponseReq) String() string { return proto.CompactTextString(m) }
 func (*SubmitResponseReq) ProtoMessage()    {}
 func (*SubmitResponseReq) Descriptor() ([]byte, []int) {
-	return fileDescriptor_81f0d8f98f9be15c, []int{2}
+	return fileDescriptor_81f0d8f98f9be15c, []int{5}
 }
 
 func (m *SubmitResponseReq) XXX_Unmarshal(b []byte) error {
@@ -145,31 +364,180 @@ func (m *SubmitResponseReq) GetToken() *TokenInfos {
 	return nil
 }
 
-func (m *SubmitResponseReq) GetStudyId() string {
+func (m *SubmitResponseReq) GetStudyKey() string {
 	if m != nil {
-		return m.StudyId
+		return m.StudyKey
 	}
 	return ""
 }
 
-func (m *SubmitResponseReq) GetProfileId() string {
+func (m *SubmitResponseReq) GetResponse() *SurveyResponse {
 	if m != nil {
-		return m.ProfileId
+		return m.Response
+	}
+	return nil
+}
+
+type EnterStudyRequest struct {
+	Token                *TokenInfos `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
+	StudyKey             string      `protobuf:"bytes,2,opt,name=study_key,json=studyKey,proto3" json:"study_key,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
+	XXX_unrecognized     []byte      `json:"-"`
+	XXX_sizecache        int32       `json:"-"`
+}
+
+func (m *EnterStudyRequest) Reset()         { *m = EnterStudyRequest{} }
+func (m *EnterStudyRequest) String() string { return proto.CompactTextString(m) }
+func (*EnterStudyRequest) ProtoMessage()    {}
+func (*EnterStudyRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_81f0d8f98f9be15c, []int{6}
+}
+
+func (m *EnterStudyRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_EnterStudyRequest.Unmarshal(m, b)
+}
+func (m *EnterStudyRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_EnterStudyRequest.Marshal(b, m, deterministic)
+}
+func (m *EnterStudyRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_EnterStudyRequest.Merge(m, src)
+}
+func (m *EnterStudyRequest) XXX_Size() int {
+	return xxx_messageInfo_EnterStudyRequest.Size(m)
+}
+func (m *EnterStudyRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_EnterStudyRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_EnterStudyRequest proto.InternalMessageInfo
+
+func (m *EnterStudyRequest) GetToken() *TokenInfos {
+	if m != nil {
+		return m.Token
+	}
+	return nil
+}
+
+func (m *EnterStudyRequest) GetStudyKey() string {
+	if m != nil {
+		return m.StudyKey
 	}
 	return ""
 }
 
-func (m *SubmitResponseReq) GetResponses() *SurveyItemResponse {
+type GetSurveyRequest struct {
+	Token                *TokenInfos `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
+	StudyKey             string      `protobuf:"bytes,2,opt,name=study_key,json=studyKey,proto3" json:"study_key,omitempty"`
+	SurveyKey            string      `protobuf:"bytes,3,opt,name=survey_key,json=surveyKey,proto3" json:"survey_key,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
+	XXX_unrecognized     []byte      `json:"-"`
+	XXX_sizecache        int32       `json:"-"`
+}
+
+func (m *GetSurveyRequest) Reset()         { *m = GetSurveyRequest{} }
+func (m *GetSurveyRequest) String() string { return proto.CompactTextString(m) }
+func (*GetSurveyRequest) ProtoMessage()    {}
+func (*GetSurveyRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_81f0d8f98f9be15c, []int{7}
+}
+
+func (m *GetSurveyRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_GetSurveyRequest.Unmarshal(m, b)
+}
+func (m *GetSurveyRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_GetSurveyRequest.Marshal(b, m, deterministic)
+}
+func (m *GetSurveyRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_GetSurveyRequest.Merge(m, src)
+}
+func (m *GetSurveyRequest) XXX_Size() int {
+	return xxx_messageInfo_GetSurveyRequest.Size(m)
+}
+func (m *GetSurveyRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_GetSurveyRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_GetSurveyRequest proto.InternalMessageInfo
+
+func (m *GetSurveyRequest) GetToken() *TokenInfos {
 	if m != nil {
-		return m.Responses
+		return m.Token
+	}
+	return nil
+}
+
+func (m *GetSurveyRequest) GetStudyKey() string {
+	if m != nil {
+		return m.StudyKey
+	}
+	return ""
+}
+
+func (m *GetSurveyRequest) GetSurveyKey() string {
+	if m != nil {
+		return m.SurveyKey
+	}
+	return ""
+}
+
+type StatusReportRequest struct {
+	Token                *TokenInfos     `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
+	StatusSurvey         *SurveyResponse `protobuf:"bytes,2,opt,name=status_survey,json=statusSurvey,proto3" json:"status_survey,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}        `json:"-"`
+	XXX_unrecognized     []byte          `json:"-"`
+	XXX_sizecache        int32           `json:"-"`
+}
+
+func (m *StatusReportRequest) Reset()         { *m = StatusReportRequest{} }
+func (m *StatusReportRequest) String() string { return proto.CompactTextString(m) }
+func (*StatusReportRequest) ProtoMessage()    {}
+func (*StatusReportRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_81f0d8f98f9be15c, []int{8}
+}
+
+func (m *StatusReportRequest) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_StatusReportRequest.Unmarshal(m, b)
+}
+func (m *StatusReportRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_StatusReportRequest.Marshal(b, m, deterministic)
+}
+func (m *StatusReportRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_StatusReportRequest.Merge(m, src)
+}
+func (m *StatusReportRequest) XXX_Size() int {
+	return xxx_messageInfo_StatusReportRequest.Size(m)
+}
+func (m *StatusReportRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_StatusReportRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_StatusReportRequest proto.InternalMessageInfo
+
+func (m *StatusReportRequest) GetToken() *TokenInfos {
+	if m != nil {
+		return m.Token
+	}
+	return nil
+}
+
+func (m *StatusReportRequest) GetStatusSurvey() *SurveyResponse {
+	if m != nil {
+		return m.StatusSurvey
 	}
 	return nil
 }
 
 func init() {
-	proto.RegisterType((*Study)(nil), "inf.study_service_api.Study")
-	proto.RegisterType((*CreateSurveyReq)(nil), "inf.study_service_api.CreateSurveyReq")
+	proto.RegisterType((*NewStudyRequest)(nil), "inf.study_service_api.NewStudyRequest")
+	proto.RegisterType((*SurveyAndContext)(nil), "inf.study_service_api.SurveyAndContext")
+	proto.RegisterType((*StudyReferenceReq)(nil), "inf.study_service_api.StudyReferenceReq")
+	proto.RegisterType((*SurveyInfoResp)(nil), "inf.study_service_api.SurveyInfoResp")
+	proto.RegisterType((*SurveyInfoResp_SurveyInfo)(nil), "inf.study_service_api.SurveyInfoResp.SurveyInfo")
+	proto.RegisterType((*AddSurveyReq)(nil), "inf.study_service_api.AddSurveyReq")
 	proto.RegisterType((*SubmitResponseReq)(nil), "inf.study_service_api.SubmitResponseReq")
+	proto.RegisterType((*EnterStudyRequest)(nil), "inf.study_service_api.EnterStudyRequest")
+	proto.RegisterType((*GetSurveyRequest)(nil), "inf.study_service_api.GetSurveyRequest")
+	proto.RegisterType((*StatusReportRequest)(nil), "inf.study_service_api.StatusReportRequest")
 }
 
 func init() {
@@ -177,30 +545,51 @@ func init() {
 }
 
 var fileDescriptor_81f0d8f98f9be15c = []byte{
-	// 362 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x91, 0xdf, 0x4e, 0xf2, 0x30,
-	0x18, 0xc6, 0xb3, 0x8f, 0x0f, 0xf8, 0x56, 0xc8, 0x47, 0x6c, 0x02, 0xc2, 0x8c, 0x89, 0x21, 0x51,
-	0x39, 0x59, 0x49, 0xd0, 0x1b, 0xf0, 0x0f, 0x31, 0x3b, 0x74, 0x33, 0x1e, 0x78, 0x42, 0x36, 0xf7,
-	0x8e, 0x34, 0x8e, 0xb5, 0xb6, 0x1d, 0x09, 0xd7, 0xe6, 0xad, 0x78, 0x31, 0x66, 0x6d, 0x11, 0x10,
-	0x3d, 0xf0, 0xf0, 0xed, 0xf3, 0xf4, 0x7d, 0x9e, 0xfc, 0x5e, 0x74, 0x28, 0x55, 0x99, 0xae, 0x7c,
-	0x09, 0x62, 0x49, 0x9f, 0xc1, 0x8f, 0x39, 0x25, 0x5c, 0x30, 0xc5, 0x70, 0x97, 0x16, 0x19, 0xd1,
-	0xe2, 0xcc, 0x8a, 0xb3, 0x98, 0x53, 0x0f, 0xcf, 0x73, 0x96, 0xc4, 0xb9, 0xaf, 0x56, 0x1c, 0xa4,
-	0xb1, 0x7a, 0x6d, 0x59, 0x8a, 0x25, 0xac, 0xec, 0xd4, 0x35, 0x93, 0x2f, 0x40, 0x72, 0x56, 0x48,
-	0xb0, 0xcf, 0x47, 0x73, 0xc6, 0xe6, 0x39, 0x8c, 0xf5, 0x94, 0x94, 0xd9, 0x18, 0x16, 0x5c, 0xd9,
-	0x3f, 0xc3, 0x26, 0xaa, 0x47, 0x55, 0xd4, 0xb0, 0x40, 0x9d, 0x1b, 0x01, 0xb1, 0x82, 0x48, 0x2f,
-	0x09, 0xe1, 0x15, 0x9f, 0xa2, 0xba, 0x62, 0x2f, 0x50, 0xf4, 0x9d, 0x13, 0x67, 0xd4, 0x9a, 0x74,
-	0x48, 0x55, 0xec, 0xa1, 0x7a, 0x09, 0x8a, 0x8c, 0xc9, 0xd0, 0xa8, 0xf8, 0x12, 0xb9, 0x26, 0xf8,
-	0x16, 0xb2, 0xfe, 0x1f, 0x6d, 0xed, 0x69, 0xab, 0x2d, 0x67, 0x16, 0x06, 0x0a, 0x16, 0xe1, 0xc6,
-	0x38, 0x7c, 0x73, 0xd0, 0x41, 0x54, 0x26, 0x0b, 0xaa, 0x42, 0x5b, 0xf7, 0x17, 0x91, 0x03, 0xf4,
-	0xcf, 0x00, 0xa2, 0xa9, 0x4e, 0x74, 0xc3, 0xa6, 0x9e, 0x83, 0x14, 0x1f, 0x23, 0xc4, 0x05, 0xcb,
-	0x68, 0x0e, 0x95, 0x58, 0xd3, 0xa2, 0x6b, 0x5f, 0x82, 0x14, 0x4f, 0x91, 0xbb, 0xc6, 0x23, 0xfb,
-	0x7f, 0x75, 0xc8, 0xf9, 0x56, 0xd9, 0xd9, 0x27, 0xbb, 0xad, 0xd6, 0xeb, 0x7e, 0x9b, 0x9f, 0x93,
-	0x77, 0x07, 0x75, 0x34, 0xb7, 0xc8, 0x5c, 0xe8, 0x8a, 0x53, 0xec, 0xa3, 0x46, 0xa4, 0x62, 0x55,
-	0x4a, 0xdc, 0x23, 0x06, 0x39, 0x59, 0x23, 0x27, 0xd3, 0x0a, 0xb9, 0xd7, 0xd2, 0x49, 0xd6, 0x74,
-	0x8f, 0xda, 0xdb, 0xc0, 0xf1, 0x19, 0xf9, 0xf6, 0xee, 0xe4, 0xcb, 0x55, 0xbc, 0xc1, 0x3e, 0xdb,
-	0x47, 0x10, 0x92, 0xb2, 0x02, 0xdf, 0xa1, 0xff, 0xbb, 0x48, 0xf1, 0xe8, 0x87, 0xa5, 0x7b, 0xe4,
-	0x77, 0xba, 0x5d, 0xd7, 0x9f, 0x6a, 0x31, 0xa7, 0x49, 0x43, 0xf7, 0xbf, 0xf8, 0x08, 0x00, 0x00,
-	0xff, 0xff, 0x6f, 0x9c, 0xb9, 0x90, 0xab, 0x02, 0x00, 0x00,
+	// 704 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x55, 0x5b, 0x4f, 0x13, 0x51,
+	0x10, 0xce, 0x52, 0x0b, 0x74, 0x8a, 0x50, 0x0e, 0x41, 0xeb, 0x12, 0x13, 0x52, 0xc2, 0x25, 0x24,
+	0x5d, 0x0c, 0x3c, 0x13, 0x53, 0x09, 0xe2, 0x2d, 0x9a, 0x9c, 0x12, 0x4c, 0x8c, 0x49, 0xdd, 0xb6,
+	0xd3, 0xe6, 0xd8, 0xb2, 0x67, 0xd9, 0x73, 0x16, 0xe5, 0xc5, 0x47, 0x1f, 0x7d, 0xf6, 0x77, 0xf8,
+	0xaf, 0xfc, 0x0f, 0x3e, 0x98, 0x73, 0xd9, 0x65, 0x6d, 0xd9, 0x02, 0x86, 0xb7, 0x9d, 0xd9, 0xf9,
+	0x66, 0xe6, 0x7c, 0x73, 0x83, 0x87, 0x42, 0xc6, 0xdd, 0x8b, 0xba, 0xc0, 0xe8, 0x9c, 0x75, 0xb0,
+	0xee, 0x87, 0xcc, 0x0b, 0x23, 0x2e, 0x39, 0x59, 0x66, 0x41, 0xcf, 0xd3, 0x3f, 0x5b, 0xf6, 0x67,
+	0xcb, 0x0f, 0x99, 0x4b, 0xfa, 0x43, 0xde, 0xf6, 0x87, 0x75, 0x79, 0x11, 0xa2, 0x30, 0xa6, 0x6e,
+	0x59, 0x9b, 0x59, 0x61, 0x4e, 0xc4, 0xd1, 0x39, 0x26, 0xd2, 0xb2, 0x91, 0xea, 0x11, 0x8a, 0x90,
+	0x07, 0x02, 0xad, 0x7a, 0xa5, 0xcf, 0x79, 0x7f, 0x88, 0x3b, 0x5a, 0x6a, 0xc7, 0xbd, 0x1d, 0x3c,
+	0x0d, 0xa5, 0xc5, 0xd4, 0x3e, 0xc1, 0xc2, 0x5b, 0xfc, 0xd2, 0x54, 0x3e, 0x29, 0x9e, 0xc5, 0x28,
+	0x24, 0x59, 0x87, 0xa2, 0xe4, 0x03, 0x0c, 0xaa, 0xce, 0xaa, 0xb3, 0x55, 0xde, 0x5d, 0xf0, 0x54,
+	0x72, 0xc7, 0x4a, 0xf3, 0x32, 0xe8, 0x71, 0x41, 0xcd, 0x5f, 0xb2, 0x01, 0x45, 0x9d, 0x4a, 0x75,
+	0x4a, 0x9b, 0x55, 0xbc, 0xf4, 0x0d, 0x9e, 0x71, 0x67, 0x7e, 0xd7, 0x7e, 0x39, 0x50, 0x69, 0xea,
+	0xc4, 0x1a, 0x41, 0xf7, 0x80, 0x07, 0x12, 0xbf, 0x4a, 0xb2, 0x0d, 0xd3, 0x26, 0x59, 0x1b, 0x84,
+	0x18, 0xb4, 0x79, 0x8d, 0xb1, 0xa6, 0xd6, 0x82, 0xec, 0xc1, 0x4c, 0xc7, 0xc0, 0x6c, 0xa8, 0x47,
+	0xe3, 0xc6, 0xd6, 0x2f, 0x4d, 0x2c, 0xc9, 0x3e, 0xcc, 0x84, 0x11, 0xf6, 0xd8, 0x70, 0x58, 0x2d,
+	0x68, 0xd0, 0x5a, 0x06, 0xd4, 0x4a, 0x19, 0xb2, 0xa1, 0xac, 0x48, 0x13, 0x4c, 0xed, 0x3d, 0x2c,
+	0x5a, 0x4e, 0x7a, 0x18, 0x61, 0xd0, 0x41, 0x8a, 0x67, 0x37, 0x25, 0x66, 0x05, 0x4a, 0xa6, 0x94,
+	0x03, 0x34, 0xe4, 0x94, 0xe8, 0xac, 0x56, 0xbc, 0xc6, 0x8b, 0xda, 0x6f, 0x07, 0xe6, 0x4d, 0x50,
+	0x85, 0x51, 0x81, 0xc9, 0x73, 0x28, 0x32, 0x85, 0xaf, 0x3a, 0xab, 0x85, 0xad, 0xf2, 0xee, 0x13,
+	0xef, 0xca, 0x66, 0xf0, 0xfe, 0x45, 0x65, 0x45, 0x03, 0x77, 0x7f, 0x38, 0x00, 0x97, 0x5a, 0x52,
+	0x81, 0xc2, 0xc0, 0xf2, 0x5b, 0xa2, 0xea, 0x93, 0xec, 0xc0, 0xbd, 0xc0, 0x3f, 0xc5, 0xea, 0x94,
+	0x8e, 0xb3, 0x92, 0x65, 0xf1, 0x0d, 0xef, 0xf8, 0x43, 0x26, 0xb0, 0xfb, 0xae, 0xfd, 0x19, 0x3b,
+	0x92, 0x6a, 0x43, 0xb2, 0x0f, 0xe5, 0x2e, 0x8a, 0x4e, 0xc4, 0x42, 0xc9, 0x78, 0x50, 0x2d, 0x5c,
+	0x8f, 0xcb, 0xda, 0xd7, 0xbe, 0xc1, 0x5c, 0xa3, 0xdb, 0x4d, 0x28, 0xbe, 0x13, 0xfe, 0x32, 0x8d,
+	0x53, 0xb8, 0xae, 0x71, 0x6a, 0x3f, 0x1d, 0x58, 0x6c, 0xc6, 0xed, 0x53, 0x26, 0xd3, 0x02, 0xdf,
+	0x51, 0x16, 0x4f, 0x61, 0x36, 0x69, 0xa1, 0xdb, 0xb4, 0x57, 0x0a, 0x52, 0xfd, 0x75, 0x18, 0x48,
+	0x8c, 0xfe, 0x67, 0xf0, 0x26, 0xf6, 0x57, 0x0c, 0x95, 0x23, 0x94, 0x29, 0xe7, 0x77, 0xe5, 0x97,
+	0x3c, 0x06, 0xb0, 0x8f, 0x1b, 0x58, 0xee, 0x4b, 0xb4, 0x64, 0x34, 0x2a, 0xec, 0x77, 0x07, 0x96,
+	0x9a, 0xd2, 0x97, 0xb1, 0xa0, 0x18, 0xf2, 0x48, 0xde, 0x32, 0xf4, 0x0b, 0xb8, 0x2f, 0x34, 0xba,
+	0x65, 0x8b, 0x3b, 0x75, 0x73, 0x52, 0xe7, 0x0c, 0xd2, 0x68, 0x77, 0xff, 0x14, 0x61, 0x41, 0x93,
+	0xda, 0x34, 0xa3, 0xd3, 0x08, 0x19, 0xa9, 0xc3, 0xb4, 0xc9, 0x8d, 0x3c, 0xf0, 0xcc, 0x2e, 0xf4,
+	0x92, 0x5d, 0xe8, 0x1d, 0xaa, 0x5d, 0xe8, 0x96, 0x75, 0x20, 0x6b, 0x44, 0x01, 0x2e, 0x6b, 0x43,
+	0xb6, 0x72, 0xc6, 0x71, 0xac, 0x7c, 0xae, 0x9b, 0xd9, 0x80, 0x0d, 0x21, 0x58, 0x3f, 0x40, 0xdb,
+	0xfc, 0x82, 0x34, 0x80, 0x1c, 0xa1, 0x1c, 0xd5, 0x8e, 0xd2, 0x31, 0xd1, 0x05, 0xc2, 0xe2, 0x98,
+	0x0b, 0xb2, 0x99, 0x93, 0xdd, 0x68, 0x0f, 0xb8, 0x9b, 0x13, 0xb7, 0x4a, 0x66, 0x33, 0x7f, 0x04,
+	0x62, 0x66, 0x26, 0x5b, 0x4e, 0xb2, 0x9d, 0x07, 0x1f, 0xaf, 0xf9, 0xc4, 0x47, 0x9c, 0xa8, 0xed,
+	0x97, 0x9d, 0xc8, 0x5c, 0x7e, 0xc7, 0x06, 0x77, 0xa2, 0xdf, 0x57, 0x30, 0x7f, 0x10, 0xa1, 0x2f,
+	0x31, 0x39, 0x66, 0x64, 0x23, 0xc7, 0xef, 0xc8, 0xb5, 0x73, 0xc7, 0xee, 0x16, 0xa1, 0x50, 0x49,
+	0xd7, 0xd6, 0x31, 0x37, 0xba, 0xb5, 0x1c, 0x6f, 0xd9, 0xfd, 0xe6, 0x5e, 0x71, 0x97, 0x4e, 0x30,
+	0x12, 0x8c, 0x07, 0xa4, 0x07, 0x4b, 0xaa, 0x24, 0xba, 0x31, 0xd3, 0x15, 0x2d, 0xf2, 0x1f, 0x3f,
+	0x7a, 0x7b, 0xdc, 0xf5, 0x1b, 0x5d, 0x85, 0x67, 0xc5, 0x0f, 0x05, 0x3f, 0x64, 0xed, 0x69, 0xdd,
+	0xdf, 0x7b, 0x7f, 0x03, 0x00, 0x00, 0xff, 0xff, 0xbe, 0xcf, 0x5f, 0xea, 0x71, 0x08, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -216,8 +605,16 @@ const _ = grpc.SupportPackageIsVersion6
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type StudyServiceApiClient interface {
 	Status(ctx context.Context, in *empty.Empty, opts ...grpc.CallOption) (*Status, error)
-	CreateSurvey(ctx context.Context, in *CreateSurveyReq, opts ...grpc.CallOption) (*SurveyVersion, error)
-	SubmitResponse(ctx context.Context, in *SubmitResponseReq, opts ...grpc.CallOption) (*Status, error)
+	// Study flow
+	EnterStudy(ctx context.Context, in *EnterStudyRequest, opts ...grpc.CallOption) (*AssignedSurveys, error)
+	GetAssignedSurveys(ctx context.Context, in *TokenInfos, opts ...grpc.CallOption) (*AssignedSurveys, error)
+	GetAssignedSurvey(ctx context.Context, in *GetSurveyRequest, opts ...grpc.CallOption) (*SurveyAndContext, error)
+	SubmitStatusReport(ctx context.Context, in *StatusReportRequest, opts ...grpc.CallOption) (*AssignedSurveys, error)
+	SubmitResponse(ctx context.Context, in *SubmitResponseReq, opts ...grpc.CallOption) (*AssignedSurveys, error)
+	// Study management
+	CreateNewStudy(ctx context.Context, in *NewStudyRequest, opts ...grpc.CallOption) (*Study, error)
+	AddSurveyToStudy(ctx context.Context, in *AddSurveyReq, opts ...grpc.CallOption) (*SurveyVersion, error)
+	GetStudySurveyInfos(ctx context.Context, in *StudyReferenceReq, opts ...grpc.CallOption) (*SurveyInfoResp, error)
 }
 
 type studyServiceApiClient struct {
@@ -237,18 +634,72 @@ func (c *studyServiceApiClient) Status(ctx context.Context, in *empty.Empty, opt
 	return out, nil
 }
 
-func (c *studyServiceApiClient) CreateSurvey(ctx context.Context, in *CreateSurveyReq, opts ...grpc.CallOption) (*SurveyVersion, error) {
-	out := new(SurveyVersion)
-	err := c.cc.Invoke(ctx, "/inf.study_service_api.StudyServiceApi/CreateSurvey", in, out, opts...)
+func (c *studyServiceApiClient) EnterStudy(ctx context.Context, in *EnterStudyRequest, opts ...grpc.CallOption) (*AssignedSurveys, error) {
+	out := new(AssignedSurveys)
+	err := c.cc.Invoke(ctx, "/inf.study_service_api.StudyServiceApi/EnterStudy", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *studyServiceApiClient) SubmitResponse(ctx context.Context, in *SubmitResponseReq, opts ...grpc.CallOption) (*Status, error) {
-	out := new(Status)
+func (c *studyServiceApiClient) GetAssignedSurveys(ctx context.Context, in *TokenInfos, opts ...grpc.CallOption) (*AssignedSurveys, error) {
+	out := new(AssignedSurveys)
+	err := c.cc.Invoke(ctx, "/inf.study_service_api.StudyServiceApi/GetAssignedSurveys", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *studyServiceApiClient) GetAssignedSurvey(ctx context.Context, in *GetSurveyRequest, opts ...grpc.CallOption) (*SurveyAndContext, error) {
+	out := new(SurveyAndContext)
+	err := c.cc.Invoke(ctx, "/inf.study_service_api.StudyServiceApi/GetAssignedSurvey", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *studyServiceApiClient) SubmitStatusReport(ctx context.Context, in *StatusReportRequest, opts ...grpc.CallOption) (*AssignedSurveys, error) {
+	out := new(AssignedSurveys)
+	err := c.cc.Invoke(ctx, "/inf.study_service_api.StudyServiceApi/SubmitStatusReport", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *studyServiceApiClient) SubmitResponse(ctx context.Context, in *SubmitResponseReq, opts ...grpc.CallOption) (*AssignedSurveys, error) {
+	out := new(AssignedSurveys)
 	err := c.cc.Invoke(ctx, "/inf.study_service_api.StudyServiceApi/SubmitResponse", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *studyServiceApiClient) CreateNewStudy(ctx context.Context, in *NewStudyRequest, opts ...grpc.CallOption) (*Study, error) {
+	out := new(Study)
+	err := c.cc.Invoke(ctx, "/inf.study_service_api.StudyServiceApi/CreateNewStudy", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *studyServiceApiClient) AddSurveyToStudy(ctx context.Context, in *AddSurveyReq, opts ...grpc.CallOption) (*SurveyVersion, error) {
+	out := new(SurveyVersion)
+	err := c.cc.Invoke(ctx, "/inf.study_service_api.StudyServiceApi/AddSurveyToStudy", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *studyServiceApiClient) GetStudySurveyInfos(ctx context.Context, in *StudyReferenceReq, opts ...grpc.CallOption) (*SurveyInfoResp, error) {
+	out := new(SurveyInfoResp)
+	err := c.cc.Invoke(ctx, "/inf.study_service_api.StudyServiceApi/GetStudySurveyInfos", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -258,8 +709,16 @@ func (c *studyServiceApiClient) SubmitResponse(ctx context.Context, in *SubmitRe
 // StudyServiceApiServer is the server API for StudyServiceApi service.
 type StudyServiceApiServer interface {
 	Status(context.Context, *empty.Empty) (*Status, error)
-	CreateSurvey(context.Context, *CreateSurveyReq) (*SurveyVersion, error)
-	SubmitResponse(context.Context, *SubmitResponseReq) (*Status, error)
+	// Study flow
+	EnterStudy(context.Context, *EnterStudyRequest) (*AssignedSurveys, error)
+	GetAssignedSurveys(context.Context, *TokenInfos) (*AssignedSurveys, error)
+	GetAssignedSurvey(context.Context, *GetSurveyRequest) (*SurveyAndContext, error)
+	SubmitStatusReport(context.Context, *StatusReportRequest) (*AssignedSurveys, error)
+	SubmitResponse(context.Context, *SubmitResponseReq) (*AssignedSurveys, error)
+	// Study management
+	CreateNewStudy(context.Context, *NewStudyRequest) (*Study, error)
+	AddSurveyToStudy(context.Context, *AddSurveyReq) (*SurveyVersion, error)
+	GetStudySurveyInfos(context.Context, *StudyReferenceReq) (*SurveyInfoResp, error)
 }
 
 // UnimplementedStudyServiceApiServer can be embedded to have forward compatible implementations.
@@ -269,11 +728,29 @@ type UnimplementedStudyServiceApiServer struct {
 func (*UnimplementedStudyServiceApiServer) Status(ctx context.Context, req *empty.Empty) (*Status, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Status not implemented")
 }
-func (*UnimplementedStudyServiceApiServer) CreateSurvey(ctx context.Context, req *CreateSurveyReq) (*SurveyVersion, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method CreateSurvey not implemented")
+func (*UnimplementedStudyServiceApiServer) EnterStudy(ctx context.Context, req *EnterStudyRequest) (*AssignedSurveys, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method EnterStudy not implemented")
 }
-func (*UnimplementedStudyServiceApiServer) SubmitResponse(ctx context.Context, req *SubmitResponseReq) (*Status, error) {
+func (*UnimplementedStudyServiceApiServer) GetAssignedSurveys(ctx context.Context, req *TokenInfos) (*AssignedSurveys, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAssignedSurveys not implemented")
+}
+func (*UnimplementedStudyServiceApiServer) GetAssignedSurvey(ctx context.Context, req *GetSurveyRequest) (*SurveyAndContext, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetAssignedSurvey not implemented")
+}
+func (*UnimplementedStudyServiceApiServer) SubmitStatusReport(ctx context.Context, req *StatusReportRequest) (*AssignedSurveys, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SubmitStatusReport not implemented")
+}
+func (*UnimplementedStudyServiceApiServer) SubmitResponse(ctx context.Context, req *SubmitResponseReq) (*AssignedSurveys, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SubmitResponse not implemented")
+}
+func (*UnimplementedStudyServiceApiServer) CreateNewStudy(ctx context.Context, req *NewStudyRequest) (*Study, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateNewStudy not implemented")
+}
+func (*UnimplementedStudyServiceApiServer) AddSurveyToStudy(ctx context.Context, req *AddSurveyReq) (*SurveyVersion, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddSurveyToStudy not implemented")
+}
+func (*UnimplementedStudyServiceApiServer) GetStudySurveyInfos(ctx context.Context, req *StudyReferenceReq) (*SurveyInfoResp, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetStudySurveyInfos not implemented")
 }
 
 func RegisterStudyServiceApiServer(s *grpc.Server, srv StudyServiceApiServer) {
@@ -298,20 +775,74 @@ func _StudyServiceApi_Status_Handler(srv interface{}, ctx context.Context, dec f
 	return interceptor(ctx, in, info, handler)
 }
 
-func _StudyServiceApi_CreateSurvey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CreateSurveyReq)
+func _StudyServiceApi_EnterStudy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(EnterStudyRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(StudyServiceApiServer).CreateSurvey(ctx, in)
+		return srv.(StudyServiceApiServer).EnterStudy(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/inf.study_service_api.StudyServiceApi/CreateSurvey",
+		FullMethod: "/inf.study_service_api.StudyServiceApi/EnterStudy",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(StudyServiceApiServer).CreateSurvey(ctx, req.(*CreateSurveyReq))
+		return srv.(StudyServiceApiServer).EnterStudy(ctx, req.(*EnterStudyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _StudyServiceApi_GetAssignedSurveys_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(TokenInfos)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StudyServiceApiServer).GetAssignedSurveys(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/inf.study_service_api.StudyServiceApi/GetAssignedSurveys",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StudyServiceApiServer).GetAssignedSurveys(ctx, req.(*TokenInfos))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _StudyServiceApi_GetAssignedSurvey_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetSurveyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StudyServiceApiServer).GetAssignedSurvey(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/inf.study_service_api.StudyServiceApi/GetAssignedSurvey",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StudyServiceApiServer).GetAssignedSurvey(ctx, req.(*GetSurveyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _StudyServiceApi_SubmitStatusReport_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(StatusReportRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StudyServiceApiServer).SubmitStatusReport(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/inf.study_service_api.StudyServiceApi/SubmitStatusReport",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StudyServiceApiServer).SubmitStatusReport(ctx, req.(*StatusReportRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -334,6 +865,60 @@ func _StudyServiceApi_SubmitResponse_Handler(srv interface{}, ctx context.Contex
 	return interceptor(ctx, in, info, handler)
 }
 
+func _StudyServiceApi_CreateNewStudy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(NewStudyRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StudyServiceApiServer).CreateNewStudy(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/inf.study_service_api.StudyServiceApi/CreateNewStudy",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StudyServiceApiServer).CreateNewStudy(ctx, req.(*NewStudyRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _StudyServiceApi_AddSurveyToStudy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(AddSurveyReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StudyServiceApiServer).AddSurveyToStudy(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/inf.study_service_api.StudyServiceApi/AddSurveyToStudy",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StudyServiceApiServer).AddSurveyToStudy(ctx, req.(*AddSurveyReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _StudyServiceApi_GetStudySurveyInfos_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(StudyReferenceReq)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(StudyServiceApiServer).GetStudySurveyInfos(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/inf.study_service_api.StudyServiceApi/GetStudySurveyInfos",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(StudyServiceApiServer).GetStudySurveyInfos(ctx, req.(*StudyReferenceReq))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _StudyServiceApi_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "inf.study_service_api.StudyServiceApi",
 	HandlerType: (*StudyServiceApiServer)(nil),
@@ -343,12 +928,36 @@ var _StudyServiceApi_serviceDesc = grpc.ServiceDesc{
 			Handler:    _StudyServiceApi_Status_Handler,
 		},
 		{
-			MethodName: "CreateSurvey",
-			Handler:    _StudyServiceApi_CreateSurvey_Handler,
+			MethodName: "EnterStudy",
+			Handler:    _StudyServiceApi_EnterStudy_Handler,
+		},
+		{
+			MethodName: "GetAssignedSurveys",
+			Handler:    _StudyServiceApi_GetAssignedSurveys_Handler,
+		},
+		{
+			MethodName: "GetAssignedSurvey",
+			Handler:    _StudyServiceApi_GetAssignedSurvey_Handler,
+		},
+		{
+			MethodName: "SubmitStatusReport",
+			Handler:    _StudyServiceApi_SubmitStatusReport_Handler,
 		},
 		{
 			MethodName: "SubmitResponse",
 			Handler:    _StudyServiceApi_SubmitResponse_Handler,
+		},
+		{
+			MethodName: "CreateNewStudy",
+			Handler:    _StudyServiceApi_CreateNewStudy_Handler,
+		},
+		{
+			MethodName: "AddSurveyToStudy",
+			Handler:    _StudyServiceApi_AddSurveyToStudy_Handler,
+		},
+		{
+			MethodName: "GetStudySurveyInfos",
+			Handler:    _StudyServiceApi_GetStudySurveyInfos_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
