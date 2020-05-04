@@ -2,17 +2,19 @@ package main
 
 import (
 	"testing"
+	"time"
 
+	"github.com/influenzanet/user-management-service/models"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 // Testing Database Interface methods
 func TestDbInterfaceMethods(t *testing.T) {
-	testUser := User{
-		Account: Account{
-			Type:     "email",
-			Email:    "test@test.com",
-			Password: "testhashedpassword-youcantreadme",
+	testUser := models.User{
+		Account: models.Account{
+			Type:      "email",
+			AccountID: "test@test.com",
+			Password:  "testhashedpassword-youcantreadme",
 		},
 	}
 
@@ -43,7 +45,7 @@ func TestDbInterfaceMethods(t *testing.T) {
 			t.Errorf(err.Error())
 			return
 		}
-		if user.Account.Email != testUser.Account.Email {
+		if user.Account.AccountID != testUser.Account.AccountID {
 			t.Errorf("found user is not matching test user")
 			return
 		}
@@ -58,19 +60,19 @@ func TestDbInterfaceMethods(t *testing.T) {
 	})
 
 	t.Run("Testing find existing user by email", func(t *testing.T) {
-		user, err := getUserByEmailFromDB(testInstanceID, testUser.Account.Email)
+		user, err := getUserByEmailFromDB(testInstanceID, testUser.Account.AccountID)
 		if err != nil {
 			t.Errorf(err.Error())
 			return
 		}
-		if user.Account.Email != testUser.Account.Email {
+		if user.Account.AccountID != testUser.Account.AccountID {
 			t.Errorf("found user is not matching test user")
 			return
 		}
 	})
 
 	t.Run("Testing find not existing user by email", func(t *testing.T) {
-		_, err := getUserByEmailFromDB(testInstanceID, testUser.Account.Email+"1")
+		_, err := getUserByEmailFromDB(testInstanceID, testUser.Account.AccountID+"1")
 		if err == nil {
 			t.Errorf("user should not be found")
 			return
@@ -78,17 +80,16 @@ func TestDbInterfaceMethods(t *testing.T) {
 	})
 
 	t.Run("Testing updating existing user's attributes", func(t *testing.T) {
-		testUser.Account.EmailConfirmed = true
+		testUser.Account.AccountConfirmedAt = time.Now().Unix()
 		_, err := updateUserInDB(testInstanceID, testUser)
 		if err != nil {
 			t.Errorf(err.Error())
 			return
 		}
-
 	})
 
 	t.Run("Testing updating not existing user's attributes", func(t *testing.T) {
-		testUser.Account.EmailConfirmed = false
+		testUser.Account.AccountConfirmedAt = time.Now().Unix()
 		currentUser := testUser
 		wrongID := testUser.ID.Hex()[:len(testUser.ID.Hex())-2] + "00"
 		id, err := primitive.ObjectIDFromHex(wrongID)

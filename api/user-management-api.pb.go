@@ -26,15 +26,16 @@ var _ = math.Inf
 const _ = proto.ProtoPackageIsVersion3 // please upgrade the proto package
 
 type User struct {
-	Id                   string        `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Account              *User_Account `protobuf:"bytes,2,opt,name=account,proto3" json:"account,omitempty"`
-	Roles                []string      `protobuf:"bytes,3,rep,name=roles,proto3" json:"roles,omitempty"`
-	Profile              *Profile      `protobuf:"bytes,4,opt,name=profile,proto3" json:"profile,omitempty"`
-	SubProfiles          []*SubProfile `protobuf:"bytes,5,rep,name=sub_profiles,json=subProfiles,proto3" json:"sub_profiles,omitempty"`
-	Infos                *User_Infos   `protobuf:"bytes,6,opt,name=infos,proto3" json:"infos,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}      `json:"-"`
-	XXX_unrecognized     []byte        `json:"-"`
-	XXX_sizecache        int32         `json:"-"`
+	Id                   string              `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Account              *User_Account       `protobuf:"bytes,2,opt,name=account,proto3" json:"account,omitempty"`
+	Roles                []string            `protobuf:"bytes,3,rep,name=roles,proto3" json:"roles,omitempty"`
+	Timestamps           *User_Timestamps    `protobuf:"bytes,4,opt,name=timestamps,proto3" json:"timestamps,omitempty"`
+	Profiles             []*Profile          `protobuf:"bytes,5,rep,name=profiles,proto3" json:"profiles,omitempty"`
+	ContactPreferences   *ContactPreferences `protobuf:"bytes,6,opt,name=contact_preferences,json=contactPreferences,proto3" json:"contact_preferences,omitempty"`
+	ContactInfos         []*ContactInfo      `protobuf:"bytes,7,rep,name=contact_infos,json=contactInfos,proto3" json:"contact_infos,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}            `json:"-"`
+	XXX_unrecognized     []byte              `json:"-"`
+	XXX_sizecache        int32               `json:"-"`
 }
 
 func (m *User) Reset()         { *m = User{} }
@@ -83,32 +84,39 @@ func (m *User) GetRoles() []string {
 	return nil
 }
 
-func (m *User) GetProfile() *Profile {
+func (m *User) GetTimestamps() *User_Timestamps {
 	if m != nil {
-		return m.Profile
+		return m.Timestamps
 	}
 	return nil
 }
 
-func (m *User) GetSubProfiles() []*SubProfile {
+func (m *User) GetProfiles() []*Profile {
 	if m != nil {
-		return m.SubProfiles
+		return m.Profiles
 	}
 	return nil
 }
 
-func (m *User) GetInfos() *User_Infos {
+func (m *User) GetContactPreferences() *ContactPreferences {
 	if m != nil {
-		return m.Infos
+		return m.ContactPreferences
+	}
+	return nil
+}
+
+func (m *User) GetContactInfos() []*ContactInfo {
+	if m != nil {
+		return m.ContactInfos
 	}
 	return nil
 }
 
 type User_Account struct {
 	Type                 string   `protobuf:"bytes,1,opt,name=type,proto3" json:"type,omitempty"`
-	Email                string   `protobuf:"bytes,2,opt,name=email,proto3" json:"email,omitempty"`
-	EmailConfirmed       bool     `protobuf:"varint,3,opt,name=email_confirmed,json=emailConfirmed,proto3" json:"email_confirmed,omitempty"`
-	Name                 *Name    `protobuf:"bytes,4,opt,name=name,proto3" json:"name,omitempty"`
+	AccountId            string   `protobuf:"bytes,2,opt,name=account_id,json=accountId,proto3" json:"account_id,omitempty"`
+	AccountConfirmedAt   int64    `protobuf:"varint,3,opt,name=account_confirmed_at,json=accountConfirmedAt,proto3" json:"account_confirmed_at,omitempty"`
+	PreferredLanguage    string   `protobuf:"bytes,4,opt,name=preferred_language,json=preferredLanguage,proto3" json:"preferred_language,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -146,28 +154,28 @@ func (m *User_Account) GetType() string {
 	return ""
 }
 
-func (m *User_Account) GetEmail() string {
+func (m *User_Account) GetAccountId() string {
 	if m != nil {
-		return m.Email
+		return m.AccountId
 	}
 	return ""
 }
 
-func (m *User_Account) GetEmailConfirmed() bool {
+func (m *User_Account) GetAccountConfirmedAt() int64 {
 	if m != nil {
-		return m.EmailConfirmed
+		return m.AccountConfirmedAt
 	}
-	return false
+	return 0
 }
 
-func (m *User_Account) GetName() *Name {
+func (m *User_Account) GetPreferredLanguage() string {
 	if m != nil {
-		return m.Name
+		return m.PreferredLanguage
 	}
-	return nil
+	return ""
 }
 
-type User_Infos struct {
+type User_Timestamps struct {
 	CreatedAt            int64    `protobuf:"varint,1,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	UpdatedAt            int64    `protobuf:"varint,2,opt,name=updated_at,json=updatedAt,proto3" json:"updated_at,omitempty"`
 	LastLogin            int64    `protobuf:"varint,3,opt,name=last_login,json=lastLogin,proto3" json:"last_login,omitempty"`
@@ -177,57 +185,208 @@ type User_Infos struct {
 	XXX_sizecache        int32    `json:"-"`
 }
 
-func (m *User_Infos) Reset()         { *m = User_Infos{} }
-func (m *User_Infos) String() string { return proto.CompactTextString(m) }
-func (*User_Infos) ProtoMessage()    {}
-func (*User_Infos) Descriptor() ([]byte, []int) {
+func (m *User_Timestamps) Reset()         { *m = User_Timestamps{} }
+func (m *User_Timestamps) String() string { return proto.CompactTextString(m) }
+func (*User_Timestamps) ProtoMessage()    {}
+func (*User_Timestamps) Descriptor() ([]byte, []int) {
 	return fileDescriptor_23188efcd8e5ff27, []int{0, 1}
 }
 
-func (m *User_Infos) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_User_Infos.Unmarshal(m, b)
+func (m *User_Timestamps) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_User_Timestamps.Unmarshal(m, b)
 }
-func (m *User_Infos) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_User_Infos.Marshal(b, m, deterministic)
+func (m *User_Timestamps) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_User_Timestamps.Marshal(b, m, deterministic)
 }
-func (m *User_Infos) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_User_Infos.Merge(m, src)
+func (m *User_Timestamps) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_User_Timestamps.Merge(m, src)
 }
-func (m *User_Infos) XXX_Size() int {
-	return xxx_messageInfo_User_Infos.Size(m)
+func (m *User_Timestamps) XXX_Size() int {
+	return xxx_messageInfo_User_Timestamps.Size(m)
 }
-func (m *User_Infos) XXX_DiscardUnknown() {
-	xxx_messageInfo_User_Infos.DiscardUnknown(m)
+func (m *User_Timestamps) XXX_DiscardUnknown() {
+	xxx_messageInfo_User_Timestamps.DiscardUnknown(m)
 }
 
-var xxx_messageInfo_User_Infos proto.InternalMessageInfo
+var xxx_messageInfo_User_Timestamps proto.InternalMessageInfo
 
-func (m *User_Infos) GetCreatedAt() int64 {
+func (m *User_Timestamps) GetCreatedAt() int64 {
 	if m != nil {
 		return m.CreatedAt
 	}
 	return 0
 }
 
-func (m *User_Infos) GetUpdatedAt() int64 {
+func (m *User_Timestamps) GetUpdatedAt() int64 {
 	if m != nil {
 		return m.UpdatedAt
 	}
 	return 0
 }
 
-func (m *User_Infos) GetLastLogin() int64 {
+func (m *User_Timestamps) GetLastLogin() int64 {
 	if m != nil {
 		return m.LastLogin
 	}
 	return 0
 }
 
-func (m *User_Infos) GetLastTokenRefresh() int64 {
+func (m *User_Timestamps) GetLastTokenRefresh() int64 {
 	if m != nil {
 		return m.LastTokenRefresh
 	}
 	return 0
+}
+
+type ContactInfo struct {
+	Id          string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Type        string `protobuf:"bytes,2,opt,name=type,proto3" json:"type,omitempty"`
+	ConfirmedAt int64  `protobuf:"varint,3,opt,name=confirmed_at,json=confirmedAt,proto3" json:"confirmed_at,omitempty"`
+	// Types that are valid to be assigned to Address:
+	//	*ContactInfo_Email
+	//	*ContactInfo_Phone
+	Address              isContactInfo_Address `protobuf_oneof:"address"`
+	XXX_NoUnkeyedLiteral struct{}              `json:"-"`
+	XXX_unrecognized     []byte                `json:"-"`
+	XXX_sizecache        int32                 `json:"-"`
+}
+
+func (m *ContactInfo) Reset()         { *m = ContactInfo{} }
+func (m *ContactInfo) String() string { return proto.CompactTextString(m) }
+func (*ContactInfo) ProtoMessage()    {}
+func (*ContactInfo) Descriptor() ([]byte, []int) {
+	return fileDescriptor_23188efcd8e5ff27, []int{1}
+}
+
+func (m *ContactInfo) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ContactInfo.Unmarshal(m, b)
+}
+func (m *ContactInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ContactInfo.Marshal(b, m, deterministic)
+}
+func (m *ContactInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ContactInfo.Merge(m, src)
+}
+func (m *ContactInfo) XXX_Size() int {
+	return xxx_messageInfo_ContactInfo.Size(m)
+}
+func (m *ContactInfo) XXX_DiscardUnknown() {
+	xxx_messageInfo_ContactInfo.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ContactInfo proto.InternalMessageInfo
+
+func (m *ContactInfo) GetId() string {
+	if m != nil {
+		return m.Id
+	}
+	return ""
+}
+
+func (m *ContactInfo) GetType() string {
+	if m != nil {
+		return m.Type
+	}
+	return ""
+}
+
+func (m *ContactInfo) GetConfirmedAt() int64 {
+	if m != nil {
+		return m.ConfirmedAt
+	}
+	return 0
+}
+
+type isContactInfo_Address interface {
+	isContactInfo_Address()
+}
+
+type ContactInfo_Email struct {
+	Email string `protobuf:"bytes,4,opt,name=email,proto3,oneof"`
+}
+
+type ContactInfo_Phone struct {
+	Phone string `protobuf:"bytes,5,opt,name=phone,proto3,oneof"`
+}
+
+func (*ContactInfo_Email) isContactInfo_Address() {}
+
+func (*ContactInfo_Phone) isContactInfo_Address() {}
+
+func (m *ContactInfo) GetAddress() isContactInfo_Address {
+	if m != nil {
+		return m.Address
+	}
+	return nil
+}
+
+func (m *ContactInfo) GetEmail() string {
+	if x, ok := m.GetAddress().(*ContactInfo_Email); ok {
+		return x.Email
+	}
+	return ""
+}
+
+func (m *ContactInfo) GetPhone() string {
+	if x, ok := m.GetAddress().(*ContactInfo_Phone); ok {
+		return x.Phone
+	}
+	return ""
+}
+
+// XXX_OneofWrappers is for the internal use of the proto package.
+func (*ContactInfo) XXX_OneofWrappers() []interface{} {
+	return []interface{}{
+		(*ContactInfo_Email)(nil),
+		(*ContactInfo_Phone)(nil),
+	}
+}
+
+type ContactPreferences struct {
+	SubscribedToNewletter bool     `protobuf:"varint,1,opt,name=subscribed_to_newletter,json=subscribedToNewletter,proto3" json:"subscribed_to_newletter,omitempty"`
+	SendNewsletterTo      []string `protobuf:"bytes,2,rep,name=send_newsletter_to,json=sendNewsletterTo,proto3" json:"send_newsletter_to,omitempty"`
+	XXX_NoUnkeyedLiteral  struct{} `json:"-"`
+	XXX_unrecognized      []byte   `json:"-"`
+	XXX_sizecache         int32    `json:"-"`
+}
+
+func (m *ContactPreferences) Reset()         { *m = ContactPreferences{} }
+func (m *ContactPreferences) String() string { return proto.CompactTextString(m) }
+func (*ContactPreferences) ProtoMessage()    {}
+func (*ContactPreferences) Descriptor() ([]byte, []int) {
+	return fileDescriptor_23188efcd8e5ff27, []int{2}
+}
+
+func (m *ContactPreferences) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ContactPreferences.Unmarshal(m, b)
+}
+func (m *ContactPreferences) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ContactPreferences.Marshal(b, m, deterministic)
+}
+func (m *ContactPreferences) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ContactPreferences.Merge(m, src)
+}
+func (m *ContactPreferences) XXX_Size() int {
+	return xxx_messageInfo_ContactPreferences.Size(m)
+}
+func (m *ContactPreferences) XXX_DiscardUnknown() {
+	xxx_messageInfo_ContactPreferences.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ContactPreferences proto.InternalMessageInfo
+
+func (m *ContactPreferences) GetSubscribedToNewletter() bool {
+	if m != nil {
+		return m.SubscribedToNewletter
+	}
+	return false
+}
+
+func (m *ContactPreferences) GetSendNewsletterTo() []string {
+	if m != nil {
+		return m.SendNewsletterTo
+	}
+	return nil
 }
 
 type UserReference struct {
@@ -243,7 +402,7 @@ func (m *UserReference) Reset()         { *m = UserReference{} }
 func (m *UserReference) String() string { return proto.CompactTextString(m) }
 func (*UserReference) ProtoMessage()    {}
 func (*UserReference) Descriptor() ([]byte, []int) {
-	return fileDescriptor_23188efcd8e5ff27, []int{1}
+	return fileDescriptor_23188efcd8e5ff27, []int{3}
 }
 
 func (m *UserReference) XXX_Unmarshal(b []byte) error {
@@ -298,7 +457,7 @@ func (m *RefreshTokenRequest) Reset()         { *m = RefreshTokenRequest{} }
 func (m *RefreshTokenRequest) String() string { return proto.CompactTextString(m) }
 func (*RefreshTokenRequest) ProtoMessage()    {}
 func (*RefreshTokenRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_23188efcd8e5ff27, []int{2}
+	return fileDescriptor_23188efcd8e5ff27, []int{4}
 }
 
 func (m *RefreshTokenRequest) XXX_Unmarshal(b []byte) error {
@@ -340,170 +499,14 @@ func (m *RefreshTokenRequest) GetRefreshToken() string {
 	return ""
 }
 
-type Name struct {
-	Gender               string   `protobuf:"bytes,1,opt,name=gender,proto3" json:"gender,omitempty"`
-	Title                string   `protobuf:"bytes,2,opt,name=title,proto3" json:"title,omitempty"`
-	FirstName            string   `protobuf:"bytes,3,opt,name=first_name,json=firstName,proto3" json:"first_name,omitempty"`
-	LastName             string   `protobuf:"bytes,4,opt,name=last_name,json=lastName,proto3" json:"last_name,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *Name) Reset()         { *m = Name{} }
-func (m *Name) String() string { return proto.CompactTextString(m) }
-func (*Name) ProtoMessage()    {}
-func (*Name) Descriptor() ([]byte, []int) {
-	return fileDescriptor_23188efcd8e5ff27, []int{3}
-}
-
-func (m *Name) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_Name.Unmarshal(m, b)
-}
-func (m *Name) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_Name.Marshal(b, m, deterministic)
-}
-func (m *Name) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Name.Merge(m, src)
-}
-func (m *Name) XXX_Size() int {
-	return xxx_messageInfo_Name.Size(m)
-}
-func (m *Name) XXX_DiscardUnknown() {
-	xxx_messageInfo_Name.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_Name proto.InternalMessageInfo
-
-func (m *Name) GetGender() string {
-	if m != nil {
-		return m.Gender
-	}
-	return ""
-}
-
-func (m *Name) GetTitle() string {
-	if m != nil {
-		return m.Title
-	}
-	return ""
-}
-
-func (m *Name) GetFirstName() string {
-	if m != nil {
-		return m.FirstName
-	}
-	return ""
-}
-
-func (m *Name) GetLastName() string {
-	if m != nil {
-		return m.LastName
-	}
-	return ""
-}
-
-type NameUpdateRequest struct {
-	Token                *TokenInfos `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
-	Name                 *Name       `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
-	XXX_unrecognized     []byte      `json:"-"`
-	XXX_sizecache        int32       `json:"-"`
-}
-
-func (m *NameUpdateRequest) Reset()         { *m = NameUpdateRequest{} }
-func (m *NameUpdateRequest) String() string { return proto.CompactTextString(m) }
-func (*NameUpdateRequest) ProtoMessage()    {}
-func (*NameUpdateRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_23188efcd8e5ff27, []int{4}
-}
-
-func (m *NameUpdateRequest) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_NameUpdateRequest.Unmarshal(m, b)
-}
-func (m *NameUpdateRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_NameUpdateRequest.Marshal(b, m, deterministic)
-}
-func (m *NameUpdateRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_NameUpdateRequest.Merge(m, src)
-}
-func (m *NameUpdateRequest) XXX_Size() int {
-	return xxx_messageInfo_NameUpdateRequest.Size(m)
-}
-func (m *NameUpdateRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_NameUpdateRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_NameUpdateRequest proto.InternalMessageInfo
-
-func (m *NameUpdateRequest) GetToken() *TokenInfos {
-	if m != nil {
-		return m.Token
-	}
-	return nil
-}
-
-func (m *NameUpdateRequest) GetName() *Name {
-	if m != nil {
-		return m.Name
-	}
-	return nil
-}
-
-type Child struct {
-	BirthYear            int32    `protobuf:"varint,1,opt,name=birth_year,json=birthYear,proto3" json:"birth_year,omitempty"`
-	Gender               string   `protobuf:"bytes,2,opt,name=gender,proto3" json:"gender,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *Child) Reset()         { *m = Child{} }
-func (m *Child) String() string { return proto.CompactTextString(m) }
-func (*Child) ProtoMessage()    {}
-func (*Child) Descriptor() ([]byte, []int) {
-	return fileDescriptor_23188efcd8e5ff27, []int{5}
-}
-
-func (m *Child) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_Child.Unmarshal(m, b)
-}
-func (m *Child) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_Child.Marshal(b, m, deterministic)
-}
-func (m *Child) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_Child.Merge(m, src)
-}
-func (m *Child) XXX_Size() int {
-	return xxx_messageInfo_Child.Size(m)
-}
-func (m *Child) XXX_DiscardUnknown() {
-	xxx_messageInfo_Child.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_Child proto.InternalMessageInfo
-
-func (m *Child) GetBirthYear() int32 {
-	if m != nil {
-		return m.BirthYear
-	}
-	return 0
-}
-
-func (m *Child) GetGender() string {
-	if m != nil {
-		return m.Gender
-	}
-	return ""
-}
-
 type Profile struct {
-	BirthYear            int32    `protobuf:"varint,1,opt,name=birth_year,json=birthYear,proto3" json:"birth_year,omitempty"`
-	BirthMonth           int32    `protobuf:"varint,2,opt,name=birth_month,json=birthMonth,proto3" json:"birth_month,omitempty"`
-	BirthDay             int32    `protobuf:"varint,3,opt,name=birth_day,json=birthDay,proto3" json:"birth_day,omitempty"`
-	BirthDateUpdatedAt   int64    `protobuf:"varint,4,opt,name=birth_date_updated_at,json=birthDateUpdatedAt,proto3" json:"birth_date_updated_at,omitempty"`
-	Children             []*Child `protobuf:"bytes,5,rep,name=children,proto3" json:"children,omitempty"`
-	ChildrenUpdatedAt    int64    `protobuf:"varint,6,opt,name=children_updated_at,json=childrenUpdatedAt,proto3" json:"children_updated_at,omitempty"`
+	Id       string `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
+	Nickname string `protobuf:"bytes,2,opt,name=nickname,proto3" json:"nickname,omitempty"`
+	// identify the profile
+	ConsentConfirmedAt int64 `protobuf:"varint,3,opt,name=consent_confirmed_at,json=consentConfirmedAt,proto3" json:"consent_confirmed_at,omitempty"`
+	// consent to enter data for this indivildual
+	AvatarId             string   `protobuf:"bytes,4,opt,name=avatar_id,json=avatarId,proto3" json:"avatar_id,omitempty"`
+	CreatedAt            int64    `protobuf:"varint,5,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
 	XXX_NoUnkeyedLiteral struct{} `json:"-"`
 	XXX_unrecognized     []byte   `json:"-"`
 	XXX_sizecache        int32    `json:"-"`
@@ -513,7 +516,7 @@ func (m *Profile) Reset()         { *m = Profile{} }
 func (m *Profile) String() string { return proto.CompactTextString(m) }
 func (*Profile) ProtoMessage()    {}
 func (*Profile) Descriptor() ([]byte, []int) {
-	return fileDescriptor_23188efcd8e5ff27, []int{6}
+	return fileDescriptor_23188efcd8e5ff27, []int{5}
 }
 
 func (m *Profile) XXX_Unmarshal(b []byte) error {
@@ -534,148 +537,39 @@ func (m *Profile) XXX_DiscardUnknown() {
 
 var xxx_messageInfo_Profile proto.InternalMessageInfo
 
-func (m *Profile) GetBirthYear() int32 {
-	if m != nil {
-		return m.BirthYear
-	}
-	return 0
-}
-
-func (m *Profile) GetBirthMonth() int32 {
-	if m != nil {
-		return m.BirthMonth
-	}
-	return 0
-}
-
-func (m *Profile) GetBirthDay() int32 {
-	if m != nil {
-		return m.BirthDay
-	}
-	return 0
-}
-
-func (m *Profile) GetBirthDateUpdatedAt() int64 {
-	if m != nil {
-		return m.BirthDateUpdatedAt
-	}
-	return 0
-}
-
-func (m *Profile) GetChildren() []*Child {
-	if m != nil {
-		return m.Children
-	}
-	return nil
-}
-
-func (m *Profile) GetChildrenUpdatedAt() int64 {
-	if m != nil {
-		return m.ChildrenUpdatedAt
-	}
-	return 0
-}
-
-type SubProfile struct {
-	Id                   string   `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
-	Name                 string   `protobuf:"bytes,2,opt,name=name,proto3" json:"name,omitempty"`
-	BirthYear            int32    `protobuf:"varint,3,opt,name=birth_year,json=birthYear,proto3" json:"birth_year,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
-}
-
-func (m *SubProfile) Reset()         { *m = SubProfile{} }
-func (m *SubProfile) String() string { return proto.CompactTextString(m) }
-func (*SubProfile) ProtoMessage()    {}
-func (*SubProfile) Descriptor() ([]byte, []int) {
-	return fileDescriptor_23188efcd8e5ff27, []int{7}
-}
-
-func (m *SubProfile) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_SubProfile.Unmarshal(m, b)
-}
-func (m *SubProfile) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_SubProfile.Marshal(b, m, deterministic)
-}
-func (m *SubProfile) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_SubProfile.Merge(m, src)
-}
-func (m *SubProfile) XXX_Size() int {
-	return xxx_messageInfo_SubProfile.Size(m)
-}
-func (m *SubProfile) XXX_DiscardUnknown() {
-	xxx_messageInfo_SubProfile.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_SubProfile proto.InternalMessageInfo
-
-func (m *SubProfile) GetId() string {
+func (m *Profile) GetId() string {
 	if m != nil {
 		return m.Id
 	}
 	return ""
 }
 
-func (m *SubProfile) GetName() string {
+func (m *Profile) GetNickname() string {
 	if m != nil {
-		return m.Name
+		return m.Nickname
 	}
 	return ""
 }
 
-func (m *SubProfile) GetBirthYear() int32 {
+func (m *Profile) GetConsentConfirmedAt() int64 {
 	if m != nil {
-		return m.BirthYear
+		return m.ConsentConfirmedAt
 	}
 	return 0
 }
 
-type SubProfileRequest struct {
-	Token                *TokenInfos `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
-	SubProfile           *SubProfile `protobuf:"bytes,2,opt,name=sub_profile,json=subProfile,proto3" json:"sub_profile,omitempty"`
-	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
-	XXX_unrecognized     []byte      `json:"-"`
-	XXX_sizecache        int32       `json:"-"`
-}
-
-func (m *SubProfileRequest) Reset()         { *m = SubProfileRequest{} }
-func (m *SubProfileRequest) String() string { return proto.CompactTextString(m) }
-func (*SubProfileRequest) ProtoMessage()    {}
-func (*SubProfileRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_23188efcd8e5ff27, []int{8}
-}
-
-func (m *SubProfileRequest) XXX_Unmarshal(b []byte) error {
-	return xxx_messageInfo_SubProfileRequest.Unmarshal(m, b)
-}
-func (m *SubProfileRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
-	return xxx_messageInfo_SubProfileRequest.Marshal(b, m, deterministic)
-}
-func (m *SubProfileRequest) XXX_Merge(src proto.Message) {
-	xxx_messageInfo_SubProfileRequest.Merge(m, src)
-}
-func (m *SubProfileRequest) XXX_Size() int {
-	return xxx_messageInfo_SubProfileRequest.Size(m)
-}
-func (m *SubProfileRequest) XXX_DiscardUnknown() {
-	xxx_messageInfo_SubProfileRequest.DiscardUnknown(m)
-}
-
-var xxx_messageInfo_SubProfileRequest proto.InternalMessageInfo
-
-func (m *SubProfileRequest) GetToken() *TokenInfos {
+func (m *Profile) GetAvatarId() string {
 	if m != nil {
-		return m.Token
+		return m.AvatarId
 	}
-	return nil
+	return ""
 }
 
-func (m *SubProfileRequest) GetSubProfile() *SubProfile {
+func (m *Profile) GetCreatedAt() int64 {
 	if m != nil {
-		return m.SubProfile
+		return m.CreatedAt
 	}
-	return nil
+	return 0
 }
 
 type ProfileRequest struct {
@@ -690,7 +584,7 @@ func (m *ProfileRequest) Reset()         { *m = ProfileRequest{} }
 func (m *ProfileRequest) String() string { return proto.CompactTextString(m) }
 func (*ProfileRequest) ProtoMessage()    {}
 func (*ProfileRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_23188efcd8e5ff27, []int{9}
+	return fileDescriptor_23188efcd8e5ff27, []int{6}
 }
 
 func (m *ProfileRequest) XXX_Unmarshal(b []byte) error {
@@ -726,21 +620,24 @@ func (m *ProfileRequest) GetProfile() *Profile {
 }
 
 type UserAuthInfo struct {
-	UserId               string   `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
-	Roles                []string `protobuf:"bytes,2,rep,name=roles,proto3" json:"roles,omitempty"`
-	InstanceId           string   `protobuf:"bytes,3,opt,name=instance_id,json=instanceId,proto3" json:"instance_id,omitempty"`
-	Username             string   `protobuf:"bytes,4,opt,name=username,proto3" json:"username,omitempty"`
-	ProfileId            string   `protobuf:"bytes,5,opt,name=profile_id,json=profileId,proto3" json:"profile_id,omitempty"`
-	XXX_NoUnkeyedLiteral struct{} `json:"-"`
-	XXX_unrecognized     []byte   `json:"-"`
-	XXX_sizecache        int32    `json:"-"`
+	UserId               string     `protobuf:"bytes,1,opt,name=user_id,json=userId,proto3" json:"user_id,omitempty"`
+	Roles                []string   `protobuf:"bytes,2,rep,name=roles,proto3" json:"roles,omitempty"`
+	InstanceId           string     `protobuf:"bytes,3,opt,name=instance_id,json=instanceId,proto3" json:"instance_id,omitempty"`
+	AccountId            string     `protobuf:"bytes,4,opt,name=account_id,json=accountId,proto3" json:"account_id,omitempty"`
+	Profiles             []*Profile `protobuf:"bytes,5,rep,name=profiles,proto3" json:"profiles,omitempty"`
+	SelectedProfile      *Profile   `protobuf:"bytes,6,opt,name=selected_profile,json=selectedProfile,proto3" json:"selected_profile,omitempty"`
+	AccountConfirmed     bool       `protobuf:"varint,7,opt,name=account_confirmed,json=accountConfirmed,proto3" json:"account_confirmed,omitempty"`
+	PreferredLanguage    string     `protobuf:"bytes,8,opt,name=preferred_language,json=preferredLanguage,proto3" json:"preferred_language,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}   `json:"-"`
+	XXX_unrecognized     []byte     `json:"-"`
+	XXX_sizecache        int32      `json:"-"`
 }
 
 func (m *UserAuthInfo) Reset()         { *m = UserAuthInfo{} }
 func (m *UserAuthInfo) String() string { return proto.CompactTextString(m) }
 func (*UserAuthInfo) ProtoMessage()    {}
 func (*UserAuthInfo) Descriptor() ([]byte, []int) {
-	return fileDescriptor_23188efcd8e5ff27, []int{10}
+	return fileDescriptor_23188efcd8e5ff27, []int{7}
 }
 
 func (m *UserAuthInfo) XXX_Unmarshal(b []byte) error {
@@ -782,16 +679,37 @@ func (m *UserAuthInfo) GetInstanceId() string {
 	return ""
 }
 
-func (m *UserAuthInfo) GetUsername() string {
+func (m *UserAuthInfo) GetAccountId() string {
 	if m != nil {
-		return m.Username
+		return m.AccountId
 	}
 	return ""
 }
 
-func (m *UserAuthInfo) GetProfileId() string {
+func (m *UserAuthInfo) GetProfiles() []*Profile {
 	if m != nil {
-		return m.ProfileId
+		return m.Profiles
+	}
+	return nil
+}
+
+func (m *UserAuthInfo) GetSelectedProfile() *Profile {
+	if m != nil {
+		return m.SelectedProfile
+	}
+	return nil
+}
+
+func (m *UserAuthInfo) GetAccountConfirmed() bool {
+	if m != nil {
+		return m.AccountConfirmed
+	}
+	return false
+}
+
+func (m *UserAuthInfo) GetPreferredLanguage() string {
+	if m != nil {
+		return m.PreferredLanguage
 	}
 	return ""
 }
@@ -809,7 +727,7 @@ func (m *PasswordChangeMsg) Reset()         { *m = PasswordChangeMsg{} }
 func (m *PasswordChangeMsg) String() string { return proto.CompactTextString(m) }
 func (*PasswordChangeMsg) ProtoMessage()    {}
 func (*PasswordChangeMsg) Descriptor() ([]byte, []int) {
-	return fileDescriptor_23188efcd8e5ff27, []int{11}
+	return fileDescriptor_23188efcd8e5ff27, []int{8}
 }
 
 func (m *PasswordChangeMsg) XXX_Unmarshal(b []byte) error {
@@ -863,7 +781,7 @@ func (m *EmailChangeMsg) Reset()         { *m = EmailChangeMsg{} }
 func (m *EmailChangeMsg) String() string { return proto.CompactTextString(m) }
 func (*EmailChangeMsg) ProtoMessage()    {}
 func (*EmailChangeMsg) Descriptor() ([]byte, []int) {
-	return fileDescriptor_23188efcd8e5ff27, []int{12}
+	return fileDescriptor_23188efcd8e5ff27, []int{9}
 }
 
 func (m *EmailChangeMsg) XXX_Unmarshal(b []byte) error {
@@ -898,22 +816,163 @@ func (m *EmailChangeMsg) GetNewEmail() string {
 	return ""
 }
 
+type LanguageChangeMsg struct {
+	Token                *TokenInfos `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
+	LanguageCode         string      `protobuf:"bytes,2,opt,name=language_code,json=languageCode,proto3" json:"language_code,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}    `json:"-"`
+	XXX_unrecognized     []byte      `json:"-"`
+	XXX_sizecache        int32       `json:"-"`
+}
+
+func (m *LanguageChangeMsg) Reset()         { *m = LanguageChangeMsg{} }
+func (m *LanguageChangeMsg) String() string { return proto.CompactTextString(m) }
+func (*LanguageChangeMsg) ProtoMessage()    {}
+func (*LanguageChangeMsg) Descriptor() ([]byte, []int) {
+	return fileDescriptor_23188efcd8e5ff27, []int{10}
+}
+
+func (m *LanguageChangeMsg) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_LanguageChangeMsg.Unmarshal(m, b)
+}
+func (m *LanguageChangeMsg) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_LanguageChangeMsg.Marshal(b, m, deterministic)
+}
+func (m *LanguageChangeMsg) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_LanguageChangeMsg.Merge(m, src)
+}
+func (m *LanguageChangeMsg) XXX_Size() int {
+	return xxx_messageInfo_LanguageChangeMsg.Size(m)
+}
+func (m *LanguageChangeMsg) XXX_DiscardUnknown() {
+	xxx_messageInfo_LanguageChangeMsg.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_LanguageChangeMsg proto.InternalMessageInfo
+
+func (m *LanguageChangeMsg) GetToken() *TokenInfos {
+	if m != nil {
+		return m.Token
+	}
+	return nil
+}
+
+func (m *LanguageChangeMsg) GetLanguageCode() string {
+	if m != nil {
+		return m.LanguageCode
+	}
+	return ""
+}
+
+type ContactPreferencesMsg struct {
+	Token                *TokenInfos         `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
+	ContactPreferences   *ContactPreferences `protobuf:"bytes,2,opt,name=contact_preferences,json=contactPreferences,proto3" json:"contact_preferences,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}            `json:"-"`
+	XXX_unrecognized     []byte              `json:"-"`
+	XXX_sizecache        int32               `json:"-"`
+}
+
+func (m *ContactPreferencesMsg) Reset()         { *m = ContactPreferencesMsg{} }
+func (m *ContactPreferencesMsg) String() string { return proto.CompactTextString(m) }
+func (*ContactPreferencesMsg) ProtoMessage()    {}
+func (*ContactPreferencesMsg) Descriptor() ([]byte, []int) {
+	return fileDescriptor_23188efcd8e5ff27, []int{11}
+}
+
+func (m *ContactPreferencesMsg) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ContactPreferencesMsg.Unmarshal(m, b)
+}
+func (m *ContactPreferencesMsg) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ContactPreferencesMsg.Marshal(b, m, deterministic)
+}
+func (m *ContactPreferencesMsg) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ContactPreferencesMsg.Merge(m, src)
+}
+func (m *ContactPreferencesMsg) XXX_Size() int {
+	return xxx_messageInfo_ContactPreferencesMsg.Size(m)
+}
+func (m *ContactPreferencesMsg) XXX_DiscardUnknown() {
+	xxx_messageInfo_ContactPreferencesMsg.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ContactPreferencesMsg proto.InternalMessageInfo
+
+func (m *ContactPreferencesMsg) GetToken() *TokenInfos {
+	if m != nil {
+		return m.Token
+	}
+	return nil
+}
+
+func (m *ContactPreferencesMsg) GetContactPreferences() *ContactPreferences {
+	if m != nil {
+		return m.ContactPreferences
+	}
+	return nil
+}
+
+type ContactInfoMsg struct {
+	Token                *TokenInfos  `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
+	ContactInfo          *ContactInfo `protobuf:"bytes,2,opt,name=contact_info,json=contactInfo,proto3" json:"contact_info,omitempty"`
+	XXX_NoUnkeyedLiteral struct{}     `json:"-"`
+	XXX_unrecognized     []byte       `json:"-"`
+	XXX_sizecache        int32        `json:"-"`
+}
+
+func (m *ContactInfoMsg) Reset()         { *m = ContactInfoMsg{} }
+func (m *ContactInfoMsg) String() string { return proto.CompactTextString(m) }
+func (*ContactInfoMsg) ProtoMessage()    {}
+func (*ContactInfoMsg) Descriptor() ([]byte, []int) {
+	return fileDescriptor_23188efcd8e5ff27, []int{12}
+}
+
+func (m *ContactInfoMsg) XXX_Unmarshal(b []byte) error {
+	return xxx_messageInfo_ContactInfoMsg.Unmarshal(m, b)
+}
+func (m *ContactInfoMsg) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	return xxx_messageInfo_ContactInfoMsg.Marshal(b, m, deterministic)
+}
+func (m *ContactInfoMsg) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_ContactInfoMsg.Merge(m, src)
+}
+func (m *ContactInfoMsg) XXX_Size() int {
+	return xxx_messageInfo_ContactInfoMsg.Size(m)
+}
+func (m *ContactInfoMsg) XXX_DiscardUnknown() {
+	xxx_messageInfo_ContactInfoMsg.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_ContactInfoMsg proto.InternalMessageInfo
+
+func (m *ContactInfoMsg) GetToken() *TokenInfos {
+	if m != nil {
+		return m.Token
+	}
+	return nil
+}
+
+func (m *ContactInfoMsg) GetContactInfo() *ContactInfo {
+	if m != nil {
+		return m.ContactInfo
+	}
+	return nil
+}
+
 func init() {
 	proto.RegisterType((*User)(nil), "inf.user_management_api.User")
 	proto.RegisterType((*User_Account)(nil), "inf.user_management_api.User.Account")
-	proto.RegisterType((*User_Infos)(nil), "inf.user_management_api.User.Infos")
+	proto.RegisterType((*User_Timestamps)(nil), "inf.user_management_api.User.Timestamps")
+	proto.RegisterType((*ContactInfo)(nil), "inf.user_management_api.ContactInfo")
+	proto.RegisterType((*ContactPreferences)(nil), "inf.user_management_api.ContactPreferences")
 	proto.RegisterType((*UserReference)(nil), "inf.user_management_api.UserReference")
 	proto.RegisterType((*RefreshTokenRequest)(nil), "inf.user_management_api.RefreshTokenRequest")
-	proto.RegisterType((*Name)(nil), "inf.user_management_api.Name")
-	proto.RegisterType((*NameUpdateRequest)(nil), "inf.user_management_api.NameUpdateRequest")
-	proto.RegisterType((*Child)(nil), "inf.user_management_api.Child")
 	proto.RegisterType((*Profile)(nil), "inf.user_management_api.Profile")
-	proto.RegisterType((*SubProfile)(nil), "inf.user_management_api.SubProfile")
-	proto.RegisterType((*SubProfileRequest)(nil), "inf.user_management_api.SubProfileRequest")
 	proto.RegisterType((*ProfileRequest)(nil), "inf.user_management_api.ProfileRequest")
 	proto.RegisterType((*UserAuthInfo)(nil), "inf.user_management_api.UserAuthInfo")
 	proto.RegisterType((*PasswordChangeMsg)(nil), "inf.user_management_api.PasswordChangeMsg")
 	proto.RegisterType((*EmailChangeMsg)(nil), "inf.user_management_api.EmailChangeMsg")
+	proto.RegisterType((*LanguageChangeMsg)(nil), "inf.user_management_api.LanguageChangeMsg")
+	proto.RegisterType((*ContactPreferencesMsg)(nil), "inf.user_management_api.ContactPreferencesMsg")
+	proto.RegisterType((*ContactInfoMsg)(nil), "inf.user_management_api.ContactInfoMsg")
 }
 
 func init() {
@@ -921,77 +980,83 @@ func init() {
 }
 
 var fileDescriptor_23188efcd8e5ff27 = []byte{
-	// 1116 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xb4, 0x56, 0x4b, 0x6f, 0xdb, 0xc6,
-	0x13, 0x87, 0x1e, 0x94, 0xc4, 0xa1, 0x2d, 0xc7, 0x9b, 0xfc, 0x13, 0xfd, 0x65, 0xb8, 0x51, 0x69,
-	0xa4, 0x31, 0x8c, 0x58, 0x41, 0xdc, 0x53, 0x73, 0x68, 0xe1, 0xc8, 0x6e, 0x61, 0xb4, 0x4e, 0x0d,
-	0x3a, 0x46, 0x9a, 0x14, 0x05, 0xb1, 0x12, 0x47, 0xd2, 0x22, 0x14, 0xc9, 0x92, 0xcb, 0x1a, 0xbe,
-	0xf5, 0xd2, 0x73, 0x81, 0xde, 0xfa, 0xb9, 0x7a, 0xef, 0x67, 0x29, 0xf6, 0x25, 0x53, 0x6e, 0xf5,
-	0x70, 0x9b, 0x9c, 0xa4, 0x9d, 0xc7, 0x6f, 0x66, 0x7e, 0x3b, 0x9c, 0x59, 0xf8, 0x7f, 0x9e, 0x61,
-	0xba, 0x3f, 0xa1, 0x11, 0x1d, 0xe1, 0x04, 0x23, 0xbe, 0x4f, 0x13, 0xd6, 0x4d, 0xd2, 0x98, 0xc7,
-	0xe4, 0x01, 0x8b, 0x86, 0x5d, 0xa1, 0xf6, 0xaf, 0xd5, 0x3e, 0x4d, 0x58, 0x9b, 0x8c, 0xc2, 0xb8,
-	0x4f, 0xc3, 0x7d, 0x7e, 0x95, 0x60, 0xa6, 0x8c, 0xdb, 0x5b, 0xa3, 0x38, 0x1e, 0x85, 0xf8, 0x54,
-	0x9e, 0xfa, 0xf9, 0xf0, 0x29, 0x4e, 0x12, 0x7e, 0xa5, 0x94, 0xee, 0x1f, 0x55, 0xa8, 0x5e, 0x64,
-	0x98, 0x92, 0x26, 0x94, 0x59, 0xd0, 0x2a, 0x75, 0x4a, 0xbb, 0xb6, 0x57, 0x66, 0x01, 0xf9, 0x02,
-	0xea, 0x74, 0x30, 0x88, 0xf3, 0x88, 0xb7, 0xca, 0x9d, 0xd2, 0xae, 0x73, 0xf0, 0xa8, 0x3b, 0x27,
-	0x68, 0x57, 0xf8, 0x77, 0x0f, 0x95, 0xb1, 0x67, 0xbc, 0xc8, 0x3d, 0xb0, 0xd2, 0x38, 0xc4, 0xac,
-	0x55, 0xe9, 0x54, 0x76, 0x6d, 0x4f, 0x1d, 0xc8, 0x73, 0xa8, 0x27, 0x69, 0x3c, 0x64, 0x21, 0xb6,
-	0xaa, 0x12, 0xb6, 0x33, 0x17, 0xf6, 0x4c, 0xd9, 0x79, 0xc6, 0x81, 0x7c, 0x09, 0x6b, 0x59, 0xde,
-	0xf7, 0xf5, 0x31, 0x6b, 0x59, 0x9d, 0xca, 0xae, 0x73, 0xb0, 0x33, 0x17, 0xe0, 0x3c, 0xef, 0x1b,
-	0x0c, 0x27, 0x9b, 0xfe, 0xcf, 0xc8, 0x67, 0x60, 0xb1, 0x68, 0x18, 0x67, 0xad, 0x9a, 0xcc, 0x60,
-	0x67, 0x71, 0x61, 0x27, 0xc2, 0xd4, 0x53, 0x1e, 0xed, 0x5f, 0x4b, 0x50, 0xd7, 0x95, 0x12, 0x02,
-	0x55, 0x41, 0xb3, 0xe6, 0x4c, 0xfe, 0x17, 0x45, 0xe3, 0x84, 0xb2, 0x50, 0x72, 0x66, 0x7b, 0xea,
-	0x40, 0x1e, 0xc3, 0x86, 0xfc, 0xe3, 0x0f, 0xe2, 0x68, 0xc8, 0xd2, 0x09, 0x06, 0xad, 0x4a, 0xa7,
-	0xb4, 0xdb, 0xf0, 0x9a, 0x52, 0xdc, 0x33, 0x52, 0xf2, 0x0c, 0xaa, 0x11, 0x9d, 0x18, 0x6a, 0xb6,
-	0xe7, 0x26, 0xf6, 0x92, 0x4e, 0xd0, 0x93, 0xa6, 0xed, 0xdf, 0x4a, 0x60, 0xc9, 0x14, 0xc9, 0x36,
-	0xc0, 0x20, 0x45, 0xca, 0x31, 0xf0, 0x29, 0x97, 0x59, 0x55, 0x3c, 0x5b, 0x4b, 0x0e, 0xb9, 0x50,
-	0xe7, 0x49, 0x60, 0xd4, 0x65, 0xa5, 0xd6, 0x12, 0xa5, 0x0e, 0x69, 0xc6, 0xfd, 0x30, 0x1e, 0xb1,
-	0x48, 0xa6, 0x57, 0xf1, 0x6c, 0x21, 0xf9, 0x46, 0x08, 0xc8, 0x13, 0x20, 0x52, 0xcd, 0xe3, 0x77,
-	0x18, 0xf9, 0x29, 0x0e, 0x53, 0xcc, 0xc6, 0x32, 0xcf, 0x8a, 0x77, 0x47, 0x68, 0x5e, 0x09, 0x85,
-	0xa7, 0xe4, 0x6e, 0x02, 0xeb, 0x82, 0x3b, 0x0f, 0x87, 0x98, 0x62, 0x34, 0x40, 0xf2, 0x08, 0x2c,
-	0xe9, 0x29, 0xd3, 0x72, 0x0e, 0x36, 0x64, 0x65, 0xd2, 0x45, 0xd3, 0x2b, 0xb5, 0xe4, 0x01, 0xd4,
-	0x65, 0xb9, 0x2c, 0xd0, 0x04, 0xd6, 0xc4, 0xf1, 0x24, 0x20, 0x0f, 0xc1, 0x61, 0x51, 0xc6, 0x69,
-	0x34, 0x40, 0xa1, 0xac, 0x48, 0x25, 0x18, 0xd1, 0x49, 0xe0, 0x72, 0xb8, 0xab, 0x83, 0xeb, 0x44,
-	0x7e, 0xcc, 0x31, 0xe3, 0x45, 0xc0, 0xd2, 0x22, 0xc0, 0xf2, 0x4d, 0x40, 0xb2, 0x03, 0xeb, 0xba,
-	0x4a, 0x55, 0xb3, 0x8e, 0xb9, 0x96, 0x16, 0xa2, 0xb8, 0x09, 0x54, 0xc5, 0x55, 0x90, 0xfb, 0x50,
-	0x1b, 0x61, 0x14, 0x60, 0x6a, 0xa2, 0xa8, 0x93, 0x68, 0x07, 0xce, 0x78, 0x88, 0xa6, 0x1d, 0xe4,
-	0x41, 0x50, 0x3d, 0x64, 0x69, 0xc6, 0x7d, 0x79, 0xd7, 0x0a, 0xd7, 0x96, 0x12, 0x09, 0xb6, 0x05,
-	0x92, 0x77, 0x7f, 0xda, 0x09, 0xb6, 0xd7, 0x10, 0x02, 0xa1, 0x74, 0x27, 0xb0, 0x29, 0x7e, 0x2f,
-	0xe4, 0xbd, 0x99, 0x2a, 0x57, 0x64, 0xd7, 0x74, 0x57, 0x79, 0xe5, 0xee, 0x72, 0x3f, 0x07, 0xab,
-	0x37, 0x66, 0x61, 0x20, 0x72, 0xee, 0xb3, 0x94, 0x8f, 0xfd, 0x2b, 0xa4, 0xaa, 0x4a, 0xcb, 0xb3,
-	0xa5, 0xe4, 0x0d, 0xd2, 0xb4, 0x40, 0x40, 0xb9, 0x48, 0x80, 0xfb, 0x4b, 0x19, 0xea, 0xfa, 0xbb,
-	0x5b, 0x06, 0xf1, 0x10, 0x1c, 0xa5, 0x9e, 0xc4, 0x11, 0x1f, 0x4b, 0x1c, 0xcb, 0x53, 0x1e, 0xa7,
-	0x42, 0x22, 0x78, 0x51, 0x06, 0x01, 0xbd, 0x92, 0xac, 0x59, 0x5e, 0x43, 0x0a, 0x8e, 0xe8, 0x15,
-	0x79, 0x06, 0xff, 0x33, 0x4a, 0x8e, 0x7e, 0xa1, 0xd1, 0x55, 0x8b, 0x12, 0x6d, 0xc8, 0x35, 0x73,
-	0xa2, 0xe3, 0x9f, 0x43, 0x63, 0x20, 0x6a, 0x4b, 0x31, 0xd2, 0xa3, 0xe4, 0xa3, 0xb9, 0x94, 0x48,
-	0x12, 0xbc, 0xa9, 0x3d, 0xe9, 0xc2, 0x5d, 0xf3, 0xbf, 0x18, 0xac, 0x26, 0x83, 0x6d, 0x1a, 0xd5,
-	0x34, 0x96, 0xfb, 0x2d, 0xc0, 0xf5, 0x34, 0xfa, 0xdb, 0xac, 0x25, 0x85, 0x8b, 0xb1, 0x15, 0xf3,
-	0x37, 0xd8, 0xaa, 0xdc, 0x60, 0xcb, 0xfd, 0xb9, 0x04, 0x9b, 0x85, 0xf9, 0x76, 0xbb, 0x46, 0x38,
-	0x02, 0xa7, 0x30, 0x48, 0x75, 0x3f, 0xac, 0x34, 0x47, 0xe1, 0x7a, 0x8e, 0xba, 0x19, 0x34, 0xff,
-	0x5d, 0xf8, 0xc2, 0x0e, 0x28, 0xdf, 0x72, 0x07, 0xb8, 0xbf, 0x97, 0x60, 0x4d, 0x8c, 0x96, 0xc3,
-	0x9c, 0x8f, 0x05, 0xe8, 0xfc, 0x2f, 0x7c, 0xba, 0x7f, 0xca, 0xc5, 0xfd, 0xb3, 0x6c, 0x90, 0x90,
-	0x36, 0x34, 0x04, 0x40, 0xf1, 0xe3, 0x33, 0x67, 0x71, 0x27, 0x3a, 0x0f, 0xe1, 0x6b, 0xa9, 0x0f,
-	0x57, 0x4b, 0x4e, 0x02, 0x79, 0x27, 0x67, 0x34, 0xcb, 0x2e, 0xe3, 0x34, 0xe8, 0x8d, 0x69, 0x34,
-	0xc2, 0xd3, 0x6c, 0xb4, 0x2a, 0x29, 0x1f, 0xc3, 0x5a, 0x1c, 0x06, 0x7e, 0xa2, 0xfd, 0x75, 0x2f,
-	0x38, 0x71, 0x18, 0x18, 0x48, 0x61, 0x12, 0xe1, 0xe5, 0xb5, 0x89, 0x4a, 0xde, 0x89, 0xf0, 0xd2,
-	0x98, 0xb8, 0xaf, 0xa0, 0x79, 0x2c, 0x57, 0xca, 0x6d, 0xc3, 0x6f, 0x81, 0x2d, 0xb0, 0x8b, 0xcb,
-	0xab, 0x11, 0xe1, 0xa5, 0x04, 0x3b, 0xf8, 0xd3, 0x86, 0x4d, 0x41, 0xfa, 0xe9, 0xf4, 0x72, 0x0e,
-	0x13, 0x46, 0xf6, 0xa1, 0x76, 0xce, 0x29, 0xcf, 0x33, 0x72, 0xbf, 0xab, 0x9e, 0x18, 0x5d, 0xf3,
-	0xc4, 0xe8, 0x1e, 0x8b, 0x27, 0x46, 0xdb, 0x91, 0xc1, 0xb4, 0xd1, 0x29, 0x34, 0xe5, 0x2a, 0x79,
-	0xcd, 0xf8, 0x58, 0xc2, 0x92, 0x7b, 0x52, 0x2d, 0x80, 0x7b, 0x29, 0x06, 0x18, 0x71, 0x46, 0xc3,
-	0xac, 0xbd, 0xf8, 0x9d, 0x31, 0xbd, 0xf7, 0x97, 0xb0, 0x71, 0xce, 0x46, 0x51, 0x9e, 0xbc, 0x37,
-	0xbc, 0xcd, 0xde, 0x18, 0x07, 0xef, 0x8a, 0x5b, 0x84, 0x3c, 0x99, 0xeb, 0xfb, 0x0f, 0xcb, 0x66,
-	0xb6, 0xdc, 0xaf, 0xa1, 0x59, 0x5c, 0x89, 0x18, 0xfc, 0x17, 0xb0, 0x33, 0xa8, 0x7f, 0x85, 0x5c,
-	0xbe, 0xd3, 0x3e, 0x59, 0x58, 0xce, 0x74, 0xe3, 0xb6, 0xb7, 0x17, 0xda, 0x91, 0x13, 0x68, 0xaa,
-	0x1e, 0x99, 0x76, 0xd7, 0xde, 0xfc, 0x8f, 0xf0, 0x66, 0x4f, 0xcf, 0x26, 0x77, 0x01, 0x8e, 0xd2,
-	0xa8, 0x5b, 0x78, 0x3c, 0x17, 0x67, 0xb6, 0x33, 0x97, 0x65, 0xf8, 0x1a, 0x40, 0xcd, 0x4f, 0xb9,
-	0x14, 0xf7, 0x16, 0x6e, 0xab, 0x99, 0x75, 0xb8, 0x0c, 0xf8, 0x08, 0xd6, 0x8f, 0x30, 0x44, 0x8e,
-	0xe6, 0x21, 0xb7, 0x2a, 0xa5, 0x33, 0x55, 0xbf, 0x81, 0x0d, 0x15, 0xf5, 0x85, 0xd9, 0x2c, 0x0b,
-	0x2a, 0x9f, 0x9d, 0x93, 0xcb, 0x12, 0xfc, 0x0e, 0x9a, 0x0a, 0xba, 0x67, 0xd6, 0xcd, 0xfb, 0x42,
-	0x7e, 0x0b, 0xeb, 0x87, 0x41, 0x70, 0x9e, 0xf7, 0xcd, 0x93, 0x7a, 0x6f, 0x95, 0xa1, 0xbf, 0x1a,
-	0xf6, 0xf7, 0xd0, 0x3c, 0x0e, 0x18, 0xff, 0x30, 0xe0, 0x3f, 0xc0, 0x1d, 0x0f, 0x27, 0xf1, 0x4f,
-	0xf8, 0x41, 0xe0, 0x5f, 0x58, 0x6f, 0x2b, 0x34, 0x61, 0xfd, 0x9a, 0x9c, 0x5f, 0x9f, 0xfe, 0x15,
-	0x00, 0x00, 0xff, 0xff, 0xd0, 0x8c, 0x23, 0x5f, 0x7a, 0x0d, 0x00, 0x00,
+	// 1204 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xac, 0x56, 0xcd, 0x6e, 0x1b, 0x37,
+	0x10, 0xee, 0x4a, 0x96, 0x65, 0x8d, 0x7e, 0x62, 0x33, 0x4e, 0xac, 0x2a, 0x08, 0xea, 0x6c, 0x9a,
+	0xd6, 0x68, 0x62, 0xa5, 0x70, 0x81, 0x1e, 0x8a, 0x02, 0x85, 0xe3, 0x04, 0x89, 0x90, 0x1f, 0x18,
+	0x6b, 0x07, 0x01, 0x8a, 0xa2, 0x0b, 0x7a, 0x49, 0x49, 0x8b, 0xac, 0xc8, 0xed, 0x92, 0x8a, 0x90,
+	0x9e, 0xfa, 0x06, 0x3d, 0xf6, 0xd2, 0x9e, 0xfa, 0x3e, 0x3d, 0xf7, 0x01, 0xfa, 0x20, 0x05, 0xff,
+	0xa4, 0xb5, 0x14, 0xfd, 0x21, 0xbe, 0xed, 0xce, 0x47, 0x0e, 0x87, 0xdf, 0xcc, 0x7c, 0x1c, 0xf8,
+	0x74, 0x28, 0x68, 0x76, 0x38, 0xc0, 0x0c, 0xf7, 0xe8, 0x80, 0x32, 0x79, 0x88, 0xd3, 0xb8, 0x9d,
+	0x66, 0x5c, 0x72, 0xb4, 0x17, 0xb3, 0x6e, 0x5b, 0xc1, 0xe1, 0x04, 0x0e, 0x71, 0x1a, 0xb7, 0x50,
+	0x2f, 0xe1, 0x17, 0x38, 0x39, 0x94, 0xef, 0x53, 0x2a, 0xcc, 0xe2, 0xd6, 0xad, 0x1e, 0xe7, 0xbd,
+	0x84, 0x3e, 0xd4, 0x7f, 0x17, 0xc3, 0xee, 0x43, 0x3a, 0x48, 0xe5, 0x7b, 0x03, 0xfa, 0xff, 0x96,
+	0x60, 0xe3, 0xb5, 0xa0, 0x19, 0x6a, 0x40, 0x21, 0x26, 0x4d, 0x6f, 0xdf, 0x3b, 0xa8, 0x04, 0x85,
+	0x98, 0xa0, 0x1f, 0xa0, 0x8c, 0xa3, 0x88, 0x0f, 0x99, 0x6c, 0x16, 0xf6, 0xbd, 0x83, 0xea, 0xd1,
+	0xbd, 0xf6, 0x9c, 0x43, 0xdb, 0x6a, 0x7f, 0xfb, 0xd8, 0x2c, 0x0e, 0xdc, 0x2e, 0xb4, 0x0b, 0xa5,
+	0x8c, 0x27, 0x54, 0x34, 0x8b, 0xfb, 0xc5, 0x83, 0x4a, 0x60, 0x7e, 0xd0, 0x33, 0x00, 0x19, 0x0f,
+	0xa8, 0x90, 0x78, 0x90, 0x8a, 0xe6, 0x86, 0xf6, 0x7c, 0xb0, 0xd8, 0xf3, 0xf9, 0x78, 0x7d, 0x90,
+	0xdb, 0x8b, 0xbe, 0x87, 0xad, 0x34, 0xe3, 0xdd, 0x58, 0x1d, 0x51, 0xda, 0x2f, 0x1e, 0x54, 0x8f,
+	0xf6, 0xe7, 0xfa, 0x39, 0x35, 0x0b, 0x83, 0xf1, 0x0e, 0xf4, 0x13, 0x5c, 0x8f, 0x38, 0x93, 0x38,
+	0x92, 0x61, 0x9a, 0xd1, 0x2e, 0xcd, 0x28, 0x8b, 0xa8, 0x68, 0x6e, 0xea, 0x80, 0xee, 0xcf, 0x75,
+	0x74, 0x62, 0xf6, 0x9c, 0x4e, 0xb6, 0x04, 0x28, 0x9a, 0xb1, 0xa1, 0x0e, 0xd4, 0x9d, 0xf7, 0x98,
+	0x75, 0xb9, 0x68, 0x96, 0x75, 0x80, 0x9f, 0x2f, 0xf3, 0xdb, 0x61, 0x5d, 0x1e, 0xd4, 0xa2, 0xc9,
+	0x8f, 0x68, 0xfd, 0xe5, 0x41, 0xd9, 0x72, 0x8b, 0x10, 0x6c, 0xa8, 0xc4, 0xda, 0x2c, 0xe9, 0x6f,
+	0x74, 0x1b, 0xc0, 0x32, 0x1e, 0xc6, 0x44, 0xa7, 0xaa, 0x12, 0x54, 0xac, 0xa5, 0x43, 0xd0, 0xd7,
+	0xb0, 0xeb, 0xe0, 0x88, 0xb3, 0x6e, 0x9c, 0x0d, 0x28, 0x09, 0xb1, 0x6c, 0x16, 0xf7, 0xbd, 0x83,
+	0x62, 0x80, 0x2c, 0x76, 0xe2, 0xa0, 0x63, 0x89, 0x0e, 0x01, 0x19, 0x46, 0x32, 0x4a, 0xc2, 0x04,
+	0xb3, 0xde, 0x10, 0xf7, 0xa8, 0xce, 0x54, 0x25, 0xd8, 0x19, 0x23, 0x2f, 0x2c, 0xd0, 0xfa, 0xc3,
+	0x03, 0x98, 0x64, 0x48, 0x85, 0x13, 0x65, 0x14, 0x4b, 0x73, 0x8a, 0xa7, 0x4f, 0xa9, 0x58, 0xcb,
+	0xb1, 0x54, 0xf0, 0x30, 0x25, 0x0e, 0x2e, 0x18, 0xd8, 0x5a, 0x0c, 0x9c, 0x60, 0x21, 0xc3, 0x84,
+	0xf7, 0x62, 0x66, 0x63, 0xac, 0x28, 0xcb, 0x0b, 0x65, 0x40, 0x0f, 0x00, 0x69, 0x58, 0xf2, 0xb7,
+	0x94, 0x85, 0x19, 0xed, 0x66, 0x54, 0xf4, 0x75, 0x68, 0xc5, 0x60, 0x5b, 0x21, 0xe7, 0x0a, 0x08,
+	0x8c, 0xdd, 0xff, 0xdd, 0x83, 0x6a, 0x8e, 0xd7, 0x99, 0x0a, 0x77, 0x6c, 0x16, 0x72, 0x6c, 0xde,
+	0x81, 0xda, 0x07, 0x68, 0xaa, 0x46, 0x39, 0x7e, 0x6e, 0x42, 0x89, 0x0e, 0x70, 0x9c, 0x18, 0x4a,
+	0x9e, 0x7d, 0x12, 0x98, 0x5f, 0x65, 0x4f, 0xfb, 0x9c, 0xd1, 0x66, 0xc9, 0xd9, 0xf5, 0xef, 0xa3,
+	0x0a, 0x94, 0x31, 0x21, 0x19, 0x15, 0xc2, 0xff, 0x15, 0xd0, 0x6c, 0x01, 0xa1, 0x6f, 0x61, 0x4f,
+	0x0c, 0x2f, 0x44, 0x94, 0xc5, 0x17, 0x94, 0x84, 0x92, 0x87, 0x8c, 0x8e, 0x12, 0x2a, 0x25, 0xcd,
+	0x74, 0xb0, 0x5b, 0xc1, 0x8d, 0x09, 0x7c, 0xce, 0x5f, 0x39, 0x50, 0xb1, 0x21, 0x28, 0x23, 0x6a,
+	0xb9, 0x30, 0xa6, 0x50, 0xf2, 0x66, 0x41, 0x77, 0xdb, 0xb6, 0x42, 0x5e, 0x8d, 0x81, 0x73, 0xee,
+	0xa7, 0x50, 0x57, 0xdd, 0x14, 0xb8, 0x73, 0xd1, 0x3d, 0x28, 0x69, 0x1e, 0xf5, 0x21, 0xd5, 0xa3,
+	0x6b, 0xba, 0x36, 0x35, 0x81, 0xba, 0xf0, 0x02, 0x83, 0xa2, 0x3d, 0x28, 0xeb, 0x82, 0x1d, 0x17,
+	0xd7, 0xa6, 0xfa, 0xed, 0x10, 0xf4, 0x19, 0x54, 0x63, 0x26, 0x24, 0x66, 0x11, 0x55, 0x60, 0x51,
+	0x83, 0xe0, 0x4c, 0x1d, 0xe2, 0x4b, 0xb8, 0x6e, 0x53, 0x61, 0xd3, 0xf2, 0xcb, 0x90, 0x0a, 0x99,
+	0x77, 0xe8, 0x2d, 0x72, 0x58, 0x98, 0x76, 0x88, 0xee, 0x42, 0xdd, 0xe6, 0xdc, 0x54, 0x80, 0x3d,
+	0xb3, 0x96, 0xe5, 0x4e, 0xf1, 0xff, 0xf6, 0xa0, 0x6c, 0xdb, 0x7d, 0x26, 0xe3, 0x2d, 0xd8, 0x62,
+	0x71, 0xf4, 0x96, 0xe1, 0x81, 0xcb, 0xfa, 0xf8, 0x5f, 0x35, 0x4a, 0xc4, 0x99, 0xa0, 0x73, 0x1a,
+	0xc5, 0x62, 0xf9, 0x46, 0xb9, 0x05, 0x15, 0xfc, 0x0e, 0x4b, 0xac, 0xaf, 0x62, 0xfa, 0x63, 0xcb,
+	0x18, 0x3a, 0x64, 0xaa, 0x0f, 0x4a, 0x53, 0x7d, 0xe0, 0x0b, 0x68, 0x38, 0x4d, 0xb2, 0xb4, 0xac,
+	0x98, 0x8e, 0xef, 0xa0, 0x6c, 0x35, 0xcc, 0xca, 0xf2, 0x72, 0xd1, 0x73, 0x1b, 0xfc, 0xff, 0x0a,
+	0x50, 0x53, 0x35, 0x70, 0x3c, 0x94, 0x7d, 0xdd, 0x11, 0x73, 0x53, 0x31, 0xd6, 0xee, 0x42, 0x5e,
+	0xbb, 0x97, 0x65, 0x7c, 0x4a, 0x8b, 0x36, 0xa6, 0xb5, 0xe8, 0xe3, 0x14, 0xfb, 0x39, 0x6c, 0x0b,
+	0x9a, 0xd0, 0x48, 0x51, 0xea, 0x28, 0xd8, 0x5c, 0x91, 0x82, 0x6b, 0x6e, 0xa7, 0xab, 0x8c, 0xfb,
+	0xb0, 0x33, 0x23, 0x8b, 0xcd, 0xb2, 0xee, 0xb6, 0xed, 0x69, 0x4d, 0x9c, 0xa3, 0x88, 0x5b, 0x73,
+	0x14, 0xd1, 0xff, 0xcd, 0x83, 0x9d, 0x53, 0x2c, 0xc4, 0x88, 0x67, 0xe4, 0xa4, 0x8f, 0x59, 0x8f,
+	0xbe, 0x14, 0xbd, 0x55, 0xf3, 0x7b, 0x07, 0x6a, 0x3c, 0x21, 0x61, 0x6a, 0xf7, 0xdb, 0x32, 0xad,
+	0xf2, 0x84, 0x38, 0x97, 0x6a, 0x09, 0xa3, 0xa3, 0xc9, 0x12, 0x93, 0x87, 0x2a, 0xa3, 0x23, 0xb7,
+	0xc4, 0x3f, 0x87, 0xc6, 0x13, 0x25, 0x4a, 0x6b, 0x1f, 0x7f, 0x0b, 0x2a, 0xca, 0xb7, 0x11, 0x38,
+	0xd7, 0x22, 0x74, 0xa4, 0x9d, 0xf9, 0x21, 0xec, 0xb8, 0x4b, 0xae, 0xed, 0xf8, 0x2e, 0xd4, 0x1d,
+	0x73, 0x61, 0xc4, 0x89, 0xeb, 0xbf, 0x9a, 0x33, 0x9e, 0x70, 0x42, 0xfd, 0x3f, 0x3d, 0xb8, 0x31,
+	0x2b, 0x90, 0x6b, 0x9c, 0x32, 0xe7, 0x55, 0x2f, 0x5c, 0xc9, 0xab, 0xae, 0x12, 0xdb, 0xc8, 0x3d,
+	0x28, 0x6b, 0xc4, 0xf5, 0x14, 0x6a, 0xf9, 0x79, 0xc0, 0x06, 0xb4, 0xda, 0x38, 0x50, 0xcd, 0x8d,
+	0x03, 0x47, 0xff, 0x00, 0xec, 0xa8, 0x16, 0x7e, 0x39, 0x5e, 0x7f, 0x9c, 0xc6, 0xe8, 0x10, 0x36,
+	0xcf, 0x24, 0x96, 0x43, 0x81, 0x6e, 0xb6, 0xcd, 0xb0, 0xd7, 0x76, 0xc3, 0x5e, 0xfb, 0x89, 0x1a,
+	0xf6, 0x5a, 0x55, 0x7d, 0x94, 0x5d, 0xf4, 0x12, 0x1a, 0xfa, 0x3d, 0x7d, 0x13, 0xcb, 0xbe, 0xce,
+	0x2c, 0xda, 0xd5, 0xb0, 0x72, 0x7c, 0x92, 0x51, 0x42, 0x99, 0x8c, 0x71, 0x22, 0x5a, 0x8b, 0x27,
+	0xbe, 0xb1, 0x8a, 0xbc, 0x82, 0x6b, 0x67, 0x71, 0x8f, 0x0d, 0xd3, 0x2b, 0xf3, 0xb7, 0x73, 0xd2,
+	0xa7, 0xd1, 0xdb, 0xfc, 0xe3, 0x81, 0x1e, 0xcc, 0xdd, 0xfb, 0x81, 0x37, 0xe6, 0xf2, 0x75, 0x9f,
+	0x43, 0x23, 0x3f, 0x17, 0x50, 0xf2, 0x31, 0xce, 0x42, 0xa8, 0x9f, 0x8d, 0x62, 0x19, 0xf5, 0x9d,
+	0x92, 0x7c, 0xb9, 0x54, 0x7c, 0xac, 0x9b, 0x15, 0x6f, 0x7f, 0x0a, 0xe5, 0xa7, 0x54, 0xea, 0x91,
+	0xfc, 0x8b, 0x85, 0x3b, 0xc6, 0x2f, 0x79, 0xeb, 0xf6, 0xc2, 0x75, 0xa8, 0x03, 0x0d, 0xd3, 0xae,
+	0x63, 0x05, 0xf9, 0x6a, 0x7e, 0xcc, 0xd3, 0xba, 0x75, 0xf9, 0xf6, 0x3f, 0xc3, 0xae, 0x41, 0xec,
+	0x44, 0xda, 0x79, 0x6c, 0xf2, 0x3d, 0x9f, 0x84, 0xcb, 0x32, 0xb4, 0x2c, 0xd4, 0xc7, 0x50, 0x7f,
+	0x4c, 0x13, 0x2a, 0x9d, 0xff, 0x95, 0x29, 0xb8, 0x14, 0x25, 0x81, 0x3d, 0x7b, 0xe1, 0x69, 0x6d,
+	0x5e, 0x70, 0xf3, 0x19, 0x65, 0x5b, 0x16, 0xeb, 0x6b, 0xa8, 0x9e, 0xe1, 0x77, 0x74, 0xed, 0x3a,
+	0x58, 0xe2, 0xf6, 0x0d, 0xd4, 0x03, 0x3a, 0xe0, 0x57, 0xef, 0x38, 0x86, 0xe6, 0x6b, 0x3d, 0x68,
+	0x7f, 0x60, 0x04, 0x6d, 0xaf, 0x21, 0x8d, 0x2b, 0x50, 0x13, 0xc0, 0xd6, 0x31, 0x21, 0xcb, 0x4a,
+	0xe3, 0xb2, 0x94, 0xae, 0x40, 0xb7, 0xe1, 0xe5, 0x4a, 0xdd, 0x3e, 0x2a, 0xfd, 0x58, 0xc4, 0x69,
+	0x7c, 0xb1, 0xa9, 0xf5, 0xf2, 0x9b, 0xff, 0x03, 0x00, 0x00, 0xff, 0xff, 0x6b, 0xcc, 0x92, 0x55,
+	0x74, 0x0f, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -1012,19 +1077,22 @@ type UserManagementApiClient interface {
 	SignupWithEmail(ctx context.Context, in *UserCredentials, opts ...grpc.CallOption) (*UserAuthInfo, error)
 	CheckRefreshToken(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*Status, error)
 	TokenRefreshed(ctx context.Context, in *RefreshTokenRequest, opts ...grpc.CallOption) (*Status, error)
+	// send newly generated refresh token
+	SwitchProfile(ctx context.Context, in *ProfileRequest, opts ...grpc.CallOption) (*UserAuthInfo, error)
 	// User properties:
 	GetUser(ctx context.Context, in *UserReference, opts ...grpc.CallOption) (*User, error)
 	// Account methods:
 	ChangePassword(ctx context.Context, in *PasswordChangeMsg, opts ...grpc.CallOption) (*Status, error)
-	ChangeEmail(ctx context.Context, in *EmailChangeMsg, opts ...grpc.CallOption) (*User, error)
-	UpdateName(ctx context.Context, in *NameUpdateRequest, opts ...grpc.CallOption) (*User, error)
+	ChangeAccountIDEmail(ctx context.Context, in *EmailChangeMsg, opts ...grpc.CallOption) (*User, error)
 	DeleteAccount(ctx context.Context, in *UserReference, opts ...grpc.CallOption) (*Status, error)
+	ChangePreferredLanguage(ctx context.Context, in *LanguageChangeMsg, opts ...grpc.CallOption) (*User, error)
 	// Profile methods:
-	UpdateBirthDate(ctx context.Context, in *ProfileRequest, opts ...grpc.CallOption) (*User, error)
-	UpdateChildren(ctx context.Context, in *ProfileRequest, opts ...grpc.CallOption) (*User, error)
-	AddSubprofile(ctx context.Context, in *SubProfileRequest, opts ...grpc.CallOption) (*User, error)
-	EditSubprofile(ctx context.Context, in *SubProfileRequest, opts ...grpc.CallOption) (*User, error)
-	RemoveSubprofile(ctx context.Context, in *SubProfileRequest, opts ...grpc.CallOption) (*User, error)
+	SaveProfile(ctx context.Context, in *ProfileRequest, opts ...grpc.CallOption) (*User, error)
+	RemoveProfile(ctx context.Context, in *ProfileRequest, opts ...grpc.CallOption) (*User, error)
+	// Contacts:
+	UpdateContactPreferences(ctx context.Context, in *ContactPreferencesMsg, opts ...grpc.CallOption) (*User, error)
+	AddEmail(ctx context.Context, in *ContactInfoMsg, opts ...grpc.CallOption) (*User, error)
+	RemoveEmail(ctx context.Context, in *ContactInfoMsg, opts ...grpc.CallOption) (*User, error)
 }
 
 type userManagementApiClient struct {
@@ -1080,6 +1148,15 @@ func (c *userManagementApiClient) TokenRefreshed(ctx context.Context, in *Refres
 	return out, nil
 }
 
+func (c *userManagementApiClient) SwitchProfile(ctx context.Context, in *ProfileRequest, opts ...grpc.CallOption) (*UserAuthInfo, error) {
+	out := new(UserAuthInfo)
+	err := c.cc.Invoke(ctx, "/inf.user_management_api.UserManagementApi/SwitchProfile", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *userManagementApiClient) GetUser(ctx context.Context, in *UserReference, opts ...grpc.CallOption) (*User, error) {
 	out := new(User)
 	err := c.cc.Invoke(ctx, "/inf.user_management_api.UserManagementApi/GetUser", in, out, opts...)
@@ -1098,18 +1175,9 @@ func (c *userManagementApiClient) ChangePassword(ctx context.Context, in *Passwo
 	return out, nil
 }
 
-func (c *userManagementApiClient) ChangeEmail(ctx context.Context, in *EmailChangeMsg, opts ...grpc.CallOption) (*User, error) {
+func (c *userManagementApiClient) ChangeAccountIDEmail(ctx context.Context, in *EmailChangeMsg, opts ...grpc.CallOption) (*User, error) {
 	out := new(User)
-	err := c.cc.Invoke(ctx, "/inf.user_management_api.UserManagementApi/ChangeEmail", in, out, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *userManagementApiClient) UpdateName(ctx context.Context, in *NameUpdateRequest, opts ...grpc.CallOption) (*User, error) {
-	out := new(User)
-	err := c.cc.Invoke(ctx, "/inf.user_management_api.UserManagementApi/UpdateName", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/inf.user_management_api.UserManagementApi/ChangeAccountIDEmail", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1125,45 +1193,54 @@ func (c *userManagementApiClient) DeleteAccount(ctx context.Context, in *UserRef
 	return out, nil
 }
 
-func (c *userManagementApiClient) UpdateBirthDate(ctx context.Context, in *ProfileRequest, opts ...grpc.CallOption) (*User, error) {
+func (c *userManagementApiClient) ChangePreferredLanguage(ctx context.Context, in *LanguageChangeMsg, opts ...grpc.CallOption) (*User, error) {
 	out := new(User)
-	err := c.cc.Invoke(ctx, "/inf.user_management_api.UserManagementApi/UpdateBirthDate", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/inf.user_management_api.UserManagementApi/ChangePreferredLanguage", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *userManagementApiClient) UpdateChildren(ctx context.Context, in *ProfileRequest, opts ...grpc.CallOption) (*User, error) {
+func (c *userManagementApiClient) SaveProfile(ctx context.Context, in *ProfileRequest, opts ...grpc.CallOption) (*User, error) {
 	out := new(User)
-	err := c.cc.Invoke(ctx, "/inf.user_management_api.UserManagementApi/UpdateChildren", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/inf.user_management_api.UserManagementApi/SaveProfile", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *userManagementApiClient) AddSubprofile(ctx context.Context, in *SubProfileRequest, opts ...grpc.CallOption) (*User, error) {
+func (c *userManagementApiClient) RemoveProfile(ctx context.Context, in *ProfileRequest, opts ...grpc.CallOption) (*User, error) {
 	out := new(User)
-	err := c.cc.Invoke(ctx, "/inf.user_management_api.UserManagementApi/AddSubprofile", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/inf.user_management_api.UserManagementApi/RemoveProfile", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *userManagementApiClient) EditSubprofile(ctx context.Context, in *SubProfileRequest, opts ...grpc.CallOption) (*User, error) {
+func (c *userManagementApiClient) UpdateContactPreferences(ctx context.Context, in *ContactPreferencesMsg, opts ...grpc.CallOption) (*User, error) {
 	out := new(User)
-	err := c.cc.Invoke(ctx, "/inf.user_management_api.UserManagementApi/EditSubprofile", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/inf.user_management_api.UserManagementApi/UpdateContactPreferences", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *userManagementApiClient) RemoveSubprofile(ctx context.Context, in *SubProfileRequest, opts ...grpc.CallOption) (*User, error) {
+func (c *userManagementApiClient) AddEmail(ctx context.Context, in *ContactInfoMsg, opts ...grpc.CallOption) (*User, error) {
 	out := new(User)
-	err := c.cc.Invoke(ctx, "/inf.user_management_api.UserManagementApi/RemoveSubprofile", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/inf.user_management_api.UserManagementApi/AddEmail", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userManagementApiClient) RemoveEmail(ctx context.Context, in *ContactInfoMsg, opts ...grpc.CallOption) (*User, error) {
+	out := new(User)
+	err := c.cc.Invoke(ctx, "/inf.user_management_api.UserManagementApi/RemoveEmail", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -1178,19 +1255,22 @@ type UserManagementApiServer interface {
 	SignupWithEmail(context.Context, *UserCredentials) (*UserAuthInfo, error)
 	CheckRefreshToken(context.Context, *RefreshTokenRequest) (*Status, error)
 	TokenRefreshed(context.Context, *RefreshTokenRequest) (*Status, error)
+	// send newly generated refresh token
+	SwitchProfile(context.Context, *ProfileRequest) (*UserAuthInfo, error)
 	// User properties:
 	GetUser(context.Context, *UserReference) (*User, error)
 	// Account methods:
 	ChangePassword(context.Context, *PasswordChangeMsg) (*Status, error)
-	ChangeEmail(context.Context, *EmailChangeMsg) (*User, error)
-	UpdateName(context.Context, *NameUpdateRequest) (*User, error)
+	ChangeAccountIDEmail(context.Context, *EmailChangeMsg) (*User, error)
 	DeleteAccount(context.Context, *UserReference) (*Status, error)
+	ChangePreferredLanguage(context.Context, *LanguageChangeMsg) (*User, error)
 	// Profile methods:
-	UpdateBirthDate(context.Context, *ProfileRequest) (*User, error)
-	UpdateChildren(context.Context, *ProfileRequest) (*User, error)
-	AddSubprofile(context.Context, *SubProfileRequest) (*User, error)
-	EditSubprofile(context.Context, *SubProfileRequest) (*User, error)
-	RemoveSubprofile(context.Context, *SubProfileRequest) (*User, error)
+	SaveProfile(context.Context, *ProfileRequest) (*User, error)
+	RemoveProfile(context.Context, *ProfileRequest) (*User, error)
+	// Contacts:
+	UpdateContactPreferences(context.Context, *ContactPreferencesMsg) (*User, error)
+	AddEmail(context.Context, *ContactInfoMsg) (*User, error)
+	RemoveEmail(context.Context, *ContactInfoMsg) (*User, error)
 }
 
 // UnimplementedUserManagementApiServer can be embedded to have forward compatible implementations.
@@ -1212,35 +1292,38 @@ func (*UnimplementedUserManagementApiServer) CheckRefreshToken(ctx context.Conte
 func (*UnimplementedUserManagementApiServer) TokenRefreshed(ctx context.Context, req *RefreshTokenRequest) (*Status, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method TokenRefreshed not implemented")
 }
+func (*UnimplementedUserManagementApiServer) SwitchProfile(ctx context.Context, req *ProfileRequest) (*UserAuthInfo, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SwitchProfile not implemented")
+}
 func (*UnimplementedUserManagementApiServer) GetUser(ctx context.Context, req *UserReference) (*User, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUser not implemented")
 }
 func (*UnimplementedUserManagementApiServer) ChangePassword(ctx context.Context, req *PasswordChangeMsg) (*Status, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ChangePassword not implemented")
 }
-func (*UnimplementedUserManagementApiServer) ChangeEmail(ctx context.Context, req *EmailChangeMsg) (*User, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ChangeEmail not implemented")
-}
-func (*UnimplementedUserManagementApiServer) UpdateName(ctx context.Context, req *NameUpdateRequest) (*User, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateName not implemented")
+func (*UnimplementedUserManagementApiServer) ChangeAccountIDEmail(ctx context.Context, req *EmailChangeMsg) (*User, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ChangeAccountIDEmail not implemented")
 }
 func (*UnimplementedUserManagementApiServer) DeleteAccount(ctx context.Context, req *UserReference) (*Status, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method DeleteAccount not implemented")
 }
-func (*UnimplementedUserManagementApiServer) UpdateBirthDate(ctx context.Context, req *ProfileRequest) (*User, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateBirthDate not implemented")
+func (*UnimplementedUserManagementApiServer) ChangePreferredLanguage(ctx context.Context, req *LanguageChangeMsg) (*User, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ChangePreferredLanguage not implemented")
 }
-func (*UnimplementedUserManagementApiServer) UpdateChildren(ctx context.Context, req *ProfileRequest) (*User, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method UpdateChildren not implemented")
+func (*UnimplementedUserManagementApiServer) SaveProfile(ctx context.Context, req *ProfileRequest) (*User, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SaveProfile not implemented")
 }
-func (*UnimplementedUserManagementApiServer) AddSubprofile(ctx context.Context, req *SubProfileRequest) (*User, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method AddSubprofile not implemented")
+func (*UnimplementedUserManagementApiServer) RemoveProfile(ctx context.Context, req *ProfileRequest) (*User, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemoveProfile not implemented")
 }
-func (*UnimplementedUserManagementApiServer) EditSubprofile(ctx context.Context, req *SubProfileRequest) (*User, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method EditSubprofile not implemented")
+func (*UnimplementedUserManagementApiServer) UpdateContactPreferences(ctx context.Context, req *ContactPreferencesMsg) (*User, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UpdateContactPreferences not implemented")
 }
-func (*UnimplementedUserManagementApiServer) RemoveSubprofile(ctx context.Context, req *SubProfileRequest) (*User, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method RemoveSubprofile not implemented")
+func (*UnimplementedUserManagementApiServer) AddEmail(ctx context.Context, req *ContactInfoMsg) (*User, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddEmail not implemented")
+}
+func (*UnimplementedUserManagementApiServer) RemoveEmail(ctx context.Context, req *ContactInfoMsg) (*User, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RemoveEmail not implemented")
 }
 
 func RegisterUserManagementApiServer(s *grpc.Server, srv UserManagementApiServer) {
@@ -1337,6 +1420,24 @@ func _UserManagementApi_TokenRefreshed_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserManagementApi_SwitchProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ProfileRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserManagementApiServer).SwitchProfile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/inf.user_management_api.UserManagementApi/SwitchProfile",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserManagementApiServer).SwitchProfile(ctx, req.(*ProfileRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _UserManagementApi_GetUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(UserReference)
 	if err := dec(in); err != nil {
@@ -1373,38 +1474,20 @@ func _UserManagementApi_ChangePassword_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UserManagementApi_ChangeEmail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _UserManagementApi_ChangeAccountIDEmail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(EmailChangeMsg)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UserManagementApiServer).ChangeEmail(ctx, in)
+		return srv.(UserManagementApiServer).ChangeAccountIDEmail(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/inf.user_management_api.UserManagementApi/ChangeEmail",
+		FullMethod: "/inf.user_management_api.UserManagementApi/ChangeAccountIDEmail",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserManagementApiServer).ChangeEmail(ctx, req.(*EmailChangeMsg))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _UserManagementApi_UpdateName_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(NameUpdateRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(UserManagementApiServer).UpdateName(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/inf.user_management_api.UserManagementApi/UpdateName",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserManagementApiServer).UpdateName(ctx, req.(*NameUpdateRequest))
+		return srv.(UserManagementApiServer).ChangeAccountIDEmail(ctx, req.(*EmailChangeMsg))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1427,92 +1510,110 @@ func _UserManagementApi_DeleteAccount_Handler(srv interface{}, ctx context.Conte
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UserManagementApi_UpdateBirthDate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _UserManagementApi_ChangePreferredLanguage_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(LanguageChangeMsg)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserManagementApiServer).ChangePreferredLanguage(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/inf.user_management_api.UserManagementApi/ChangePreferredLanguage",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserManagementApiServer).ChangePreferredLanguage(ctx, req.(*LanguageChangeMsg))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserManagementApi_SaveProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ProfileRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UserManagementApiServer).UpdateBirthDate(ctx, in)
+		return srv.(UserManagementApiServer).SaveProfile(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/inf.user_management_api.UserManagementApi/UpdateBirthDate",
+		FullMethod: "/inf.user_management_api.UserManagementApi/SaveProfile",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserManagementApiServer).UpdateBirthDate(ctx, req.(*ProfileRequest))
+		return srv.(UserManagementApiServer).SaveProfile(ctx, req.(*ProfileRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UserManagementApi_UpdateChildren_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _UserManagementApi_RemoveProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ProfileRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UserManagementApiServer).UpdateChildren(ctx, in)
+		return srv.(UserManagementApiServer).RemoveProfile(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/inf.user_management_api.UserManagementApi/UpdateChildren",
+		FullMethod: "/inf.user_management_api.UserManagementApi/RemoveProfile",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserManagementApiServer).UpdateChildren(ctx, req.(*ProfileRequest))
+		return srv.(UserManagementApiServer).RemoveProfile(ctx, req.(*ProfileRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UserManagementApi_AddSubprofile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SubProfileRequest)
+func _UserManagementApi_UpdateContactPreferences_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ContactPreferencesMsg)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UserManagementApiServer).AddSubprofile(ctx, in)
+		return srv.(UserManagementApiServer).UpdateContactPreferences(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/inf.user_management_api.UserManagementApi/AddSubprofile",
+		FullMethod: "/inf.user_management_api.UserManagementApi/UpdateContactPreferences",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserManagementApiServer).AddSubprofile(ctx, req.(*SubProfileRequest))
+		return srv.(UserManagementApiServer).UpdateContactPreferences(ctx, req.(*ContactPreferencesMsg))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UserManagementApi_EditSubprofile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SubProfileRequest)
+func _UserManagementApi_AddEmail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ContactInfoMsg)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UserManagementApiServer).EditSubprofile(ctx, in)
+		return srv.(UserManagementApiServer).AddEmail(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/inf.user_management_api.UserManagementApi/EditSubprofile",
+		FullMethod: "/inf.user_management_api.UserManagementApi/AddEmail",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserManagementApiServer).EditSubprofile(ctx, req.(*SubProfileRequest))
+		return srv.(UserManagementApiServer).AddEmail(ctx, req.(*ContactInfoMsg))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _UserManagementApi_RemoveSubprofile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(SubProfileRequest)
+func _UserManagementApi_RemoveEmail_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ContactInfoMsg)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(UserManagementApiServer).RemoveSubprofile(ctx, in)
+		return srv.(UserManagementApiServer).RemoveEmail(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/inf.user_management_api.UserManagementApi/RemoveSubprofile",
+		FullMethod: "/inf.user_management_api.UserManagementApi/RemoveEmail",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserManagementApiServer).RemoveSubprofile(ctx, req.(*SubProfileRequest))
+		return srv.(UserManagementApiServer).RemoveEmail(ctx, req.(*ContactInfoMsg))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -1542,6 +1643,10 @@ var _UserManagementApi_serviceDesc = grpc.ServiceDesc{
 			Handler:    _UserManagementApi_TokenRefreshed_Handler,
 		},
 		{
+			MethodName: "SwitchProfile",
+			Handler:    _UserManagementApi_SwitchProfile_Handler,
+		},
+		{
 			MethodName: "GetUser",
 			Handler:    _UserManagementApi_GetUser_Handler,
 		},
@@ -1550,36 +1655,36 @@ var _UserManagementApi_serviceDesc = grpc.ServiceDesc{
 			Handler:    _UserManagementApi_ChangePassword_Handler,
 		},
 		{
-			MethodName: "ChangeEmail",
-			Handler:    _UserManagementApi_ChangeEmail_Handler,
-		},
-		{
-			MethodName: "UpdateName",
-			Handler:    _UserManagementApi_UpdateName_Handler,
+			MethodName: "ChangeAccountIDEmail",
+			Handler:    _UserManagementApi_ChangeAccountIDEmail_Handler,
 		},
 		{
 			MethodName: "DeleteAccount",
 			Handler:    _UserManagementApi_DeleteAccount_Handler,
 		},
 		{
-			MethodName: "UpdateBirthDate",
-			Handler:    _UserManagementApi_UpdateBirthDate_Handler,
+			MethodName: "ChangePreferredLanguage",
+			Handler:    _UserManagementApi_ChangePreferredLanguage_Handler,
 		},
 		{
-			MethodName: "UpdateChildren",
-			Handler:    _UserManagementApi_UpdateChildren_Handler,
+			MethodName: "SaveProfile",
+			Handler:    _UserManagementApi_SaveProfile_Handler,
 		},
 		{
-			MethodName: "AddSubprofile",
-			Handler:    _UserManagementApi_AddSubprofile_Handler,
+			MethodName: "RemoveProfile",
+			Handler:    _UserManagementApi_RemoveProfile_Handler,
 		},
 		{
-			MethodName: "EditSubprofile",
-			Handler:    _UserManagementApi_EditSubprofile_Handler,
+			MethodName: "UpdateContactPreferences",
+			Handler:    _UserManagementApi_UpdateContactPreferences_Handler,
 		},
 		{
-			MethodName: "RemoveSubprofile",
-			Handler:    _UserManagementApi_RemoveSubprofile_Handler,
+			MethodName: "AddEmail",
+			Handler:    _UserManagementApi_AddEmail_Handler,
+		},
+		{
+			MethodName: "RemoveEmail",
+			Handler:    _UserManagementApi_RemoveEmail_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

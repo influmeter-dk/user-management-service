@@ -29,10 +29,10 @@ func initConfig() {
 }
 
 func getDBConfig() {
-	connStr := os.Getenv("DB_CONNECTION_STR")
-	username := os.Getenv("DB_USERNAME")
-	password := os.Getenv("DB_PASSWORD")
-	prefix := os.Getenv("DB_PREFIX") // Used in test mode
+	connStr := os.Getenv("USER_DB_CONNECTION_STR")
+	username := os.Getenv("USER_DB_USERNAME")
+	password := os.Getenv("USER_DB_PASSWORD")
+	prefix := os.Getenv("USER_DB_CONNECTION_PREFIX") // Used in test mode
 	if connStr == "" || username == "" || password == "" {
 		log.Fatal("Couldn't read DB credentials.")
 	}

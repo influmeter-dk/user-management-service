@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	api "github.com/influenzanet/user-management-service/api"
+	"github.com/influenzanet/user-management-service/models"
 	utils "github.com/influenzanet/user-management-service/utils"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc/status"
@@ -21,15 +22,15 @@ func TestLogin(t *testing.T) {
 		return
 	}
 
-	testUser := User{
-		Account: Account{
-			Type:     "email",
-			Email:    "test-login@test.com",
-			Password: hashedPw,
+	testUser := models.User{
+		Account: models.Account{
+			Type:      "email",
+			AccountID: "test-login@test.com",
+			Password:  hashedPw,
 		},
 		Roles: []string{"PARTICIPANT"},
-		Profiles: []Profile{
-			Profile{ID: primitive.NewObjectID()},
+		Profiles: []models.Profile{
+			{ID: primitive.NewObjectID()},
 		},
 	}
 
@@ -85,7 +86,7 @@ func TestLogin(t *testing.T) {
 
 	t.Run("with wrong password", func(t *testing.T) {
 		req := &api.UserCredentials{
-			Email:      testUser.Account.Email,
+			Email:      testUser.Account.AccountID,
 			Password:   currentPw + "w",
 			InstanceId: testInstanceID,
 		}
@@ -103,7 +104,7 @@ func TestLogin(t *testing.T) {
 
 	t.Run("with valid fields", func(t *testing.T) {
 		req := &api.UserCredentials{
-			Email:      testUser.Account.Email,
+			Email:      testUser.Account.AccountID,
 			Password:   currentPw,
 			InstanceId: testInstanceID,
 		}
@@ -214,17 +215,17 @@ func TestSignup(t *testing.T) {
 
 func TestCheckRefreshTokenEndpoint(t *testing.T) {
 	s := userManagementServer{}
-	testUsers, err := addTestUsers([]User{
-		User{
-			Account: Account{
-				Type:  "email",
-				Email: "test_check_refresh_token_1@test.com",
+	testUsers, err := addTestUsers([]models.User{
+		{
+			Account: models.Account{
+				Type:      "email",
+				AccountID: "test_check_refresh_token_1@test.com",
 			},
 		},
-		User{
-			Account: Account{
+		{
+			Account: models.Account{
 				Type:          "email",
-				Email:         "test_check_refresh_token_2@test.com",
+				AccountID:     "test_check_refresh_token_2@test.com",
 				RefreshTokens: []string{"test-token"},
 			},
 		},
@@ -310,11 +311,11 @@ func TestCheckRefreshTokenEndpoint(t *testing.T) {
 
 func TestTokenRefreshedEndpoint(t *testing.T) {
 	s := userManagementServer{}
-	testUsers, err := addTestUsers([]User{
-		User{
-			Account: Account{
-				Type:  "email",
-				Email: "test_token_refreshed_1@test.com",
+	testUsers, err := addTestUsers([]models.User{
+		{
+			Account: models.Account{
+				Type:      "email",
+				AccountID: "test_token_refreshed_1@test.com",
 			},
 		},
 	})
@@ -371,4 +372,7 @@ func TestTokenRefreshedEndpoint(t *testing.T) {
 			t.Errorf("refresh token should have been added: %s", user.Account.RefreshTokens)
 		}
 	})
+}
+func TestSwitchProfileEndpoint(t *testing.T) {
+	t.Error("test unimplemented")
 }

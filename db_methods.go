@@ -4,14 +4,15 @@ import (
 	"errors"
 	"time"
 
+	"github.com/influenzanet/user-management-service/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-func addUserToDB(instanceID string, user User) (id string, err error) {
+func addUserToDB(instanceID string, user models.User) (id string, err error) {
 	if user.Account.Type == "email" {
-		_, err = getUserByEmailFromDB(instanceID, user.Account.Email)
+		_, err = getUserByEmailFromDB(instanceID, user.Account.AccountID)
 		if err == nil {
 			err = errors.New("user already exists")
 			return
@@ -21,7 +22,7 @@ func addUserToDB(instanceID string, user User) (id string, err error) {
 	ctx, cancel := getContext()
 	defer cancel()
 
-	user.ObjectInfos.CreatedAt = time.Now().Unix()
+	user.Timestamps.CreatedAt = time.Now().Unix()
 
 	res, err := collectionRefUsers(instanceID).InsertOne(ctx, user)
 	if err != nil {
@@ -32,11 +33,11 @@ func addUserToDB(instanceID string, user User) (id string, err error) {
 }
 
 // low level find and replace
-func _updateUserInDB(orgID string, user User) (User, error) {
+func _updateUserInDB(orgID string, user models.User) (models.User, error) {
 	ctx, cancel := getContext()
 	defer cancel()
 
-	elem := User{}
+	elem := models.User{}
 	filter := bson.M{"_id": user.ID}
 	rd := options.After
 	fro := options.FindOneAndReplaceOptions{
@@ -46,31 +47,31 @@ func _updateUserInDB(orgID string, user User) (User, error) {
 	return elem, err
 }
 
-func updateUserInDB(instanceID string, updatedUser User) (User, error) {
+func updateUserInDB(instanceID string, updatedUser models.User) (models.User, error) {
 	// Set last update time
-	updatedUser.ObjectInfos.UpdatedAt = time.Now().Unix()
+	updatedUser.Timestamps.UpdatedAt = time.Now().Unix()
 	return _updateUserInDB(instanceID, updatedUser)
 }
 
-func getUserByIDFromDB(instanceID string, id string) (User, error) {
+func getUserByIDFromDB(instanceID string, id string) (models.User, error) {
 	_id, _ := primitive.ObjectIDFromHex(id)
 	filter := bson.M{"_id": _id}
 
 	ctx, cancel := getContext()
 	defer cancel()
 
-	elem := User{}
+	elem := models.User{}
 	err := collectionRefUsers(instanceID).FindOne(ctx, filter).Decode(&elem)
 
 	return elem, err
 }
 
-func getUserByEmailFromDB(instanceID string, username string) (User, error) {
+func getUserByEmailFromDB(instanceID string, username string) (models.User, error) {
 	ctx, cancel := getContext()
 	defer cancel()
 
-	elem := User{}
-	filter := bson.M{"account.email": username}
+	elem := models.User{}
+	filter := bson.M{"account.accountID": username}
 	err := collectionRefUsers(instanceID).FindOne(ctx, filter).Decode(&elem)
 
 	return elem, err
@@ -96,7 +97,7 @@ func updateLoginTimeInDB(instanceID string, id string) error {
 
 	_id, _ := primitive.ObjectIDFromHex(id)
 	filter := bson.M{"_id": _id}
-	update := bson.M{"$set": bson.M{"objectInfos.lastLogin": time.Now().Unix()}}
+	update := bson.M{"$set": bson.M{"timestamps.lastLogin": time.Now().Unix()}}
 	_, err := collectionRefUsers(instanceID).UpdateOne(ctx, filter, update)
 	if err != nil {
 		return err

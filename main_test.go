@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"github.com/influenzanet/user-management-service/models"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -24,7 +25,7 @@ func dropTestDB() {
 	}
 }
 
-func addTestUsers(userDefs []User) (users []User, err error) {
+func addTestUsers(userDefs []models.User) (users []models.User, err error) {
 	for _, uc := range userDefs {
 		ID, err := addUserToDB(testInstanceID, uc)
 		if err != nil {

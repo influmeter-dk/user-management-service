@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	"github.com/influenzanet/user-management-service/models"
 	"github.com/influenzanet/user-management-service/utils"
 
 	api "github.com/influenzanet/user-management-service/api"
@@ -16,17 +17,17 @@ import (
 func TestGetUserEndpoint(t *testing.T) {
 	s := userManagementServer{}
 
-	testUsers, err := addTestUsers([]User{
-		User{
-			Account: Account{
-				Type:  "email",
-				Email: "get_user_1@test.com",
+	testUsers, err := addTestUsers([]models.User{
+		{
+			Account: models.Account{
+				Type:      "email",
+				AccountID: "get_user_1@test.com",
 			},
 		},
-		User{
-			Account: Account{
-				Type:  "email",
-				Email: "get_user_2@test.com",
+		{
+			Account: models.Account{
+				Type:      "email",
+				AccountID: "get_user_2@test.com",
 			},
 		},
 	})
@@ -110,7 +111,7 @@ func TestGetUserEndpoint(t *testing.T) {
 			t.Errorf("unexpected error: %s", err.Error())
 			return
 		}
-		if testUsers[1].Account.Email != resp.Account.Email {
+		if testUsers[1].Account.AccountID != resp.Account.AccountId {
 			t.Errorf("wrong response: %s", resp)
 		}
 	})
@@ -125,15 +126,15 @@ func TestChangePasswordEndpoint(t *testing.T) {
 	hashedOldPassword, _ := utils.HashPassword(oldPassword)
 
 	// Create Test User
-	testUser := User{
-		Account: Account{
-			Type:     "email",
-			Email:    "test-password-change@test.com",
-			Password: hashedOldPassword,
+	testUser := models.User{
+		Account: models.Account{
+			Type:      "email",
+			AccountID: "test-password-change@test.com",
+			Password:  hashedOldPassword,
 		},
 		Roles: []string{"PARTICIPANT"},
-		Profiles: []Profile{
-			Profile{ID: primitive.NewObjectID()},
+		Profiles: []models.Profile{
+			{ID: primitive.NewObjectID()},
 		},
 	}
 
@@ -240,7 +241,7 @@ func TestChangePasswordEndpoint(t *testing.T) {
 
 		// Check login with new credentials:
 		req2 := &api.UserCredentials{
-			Email:      testUser.Account.Email,
+			Email:      testUser.Account.AccountID,
 			Password:   newPassword,
 			InstanceId: testInstanceID,
 		}
@@ -258,7 +259,7 @@ func TestChangePasswordEndpoint(t *testing.T) {
 	})
 }
 
-func TestChangeEmailEndpoint(t *testing.T) {
+func TestChangeAccountIDEmailEndpoint(t *testing.T) {
 	/*
 		mockCtrl := gomock.NewController(t)
 		defer mockCtrl.Finish()
@@ -275,104 +276,6 @@ func TestChangeEmailEndpoint(t *testing.T) {
 	t.Error("test not implemented")
 }
 
-func TestUpdateNameEndpoint(t *testing.T) {
-	s := userManagementServer{}
-
-	// Create Test User
-	testUser := User{
-		Account: Account{
-			Type:  "email",
-			Email: "test-name-change@test.com",
-			Name: Name{
-				Gender:    "Male",
-				FirstName: "First",
-				LastName:  "Last",
-			},
-		},
-		Roles: []string{"PARTICIPANT"},
-		Profiles: []Profile{
-			Profile{ID: primitive.NewObjectID()},
-		},
-	}
-
-	id, err := addUserToDB(testInstanceID, testUser)
-	if err != nil {
-		t.Errorf("error creating users for testing pw change")
-		return
-	}
-	testUser.ID, err = primitive.ObjectIDFromHex(id)
-	if err != nil {
-		t.Errorf("error converting id")
-		return
-	}
-
-	t.Run("without payload", func(t *testing.T) {
-		resp, err := s.UpdateName(context.Background(), nil)
-		st, ok := status.FromError(err)
-		if !ok || st == nil || st.Message() != "missing argument" || resp != nil {
-			t.Errorf("wrong error: %s", err.Error())
-			t.Errorf("or response: %s", resp)
-		}
-	})
-
-	t.Run("without empty fields", func(t *testing.T) {
-		req := &api.NameUpdateRequest{}
-		resp, err := s.UpdateName(context.Background(), req)
-		st, ok := status.FromError(err)
-		if !ok || st == nil || st.Message() != "missing argument" || resp != nil {
-			t.Errorf("wrong error: %s", err.Error())
-			t.Errorf("or response: %s", resp)
-		}
-	})
-
-	t.Run("with wrong user id", func(t *testing.T) {
-		req := &api.NameUpdateRequest{
-			Token: &api.TokenInfos{
-				Id:         "wrong-id",
-				InstanceId: testInstanceID,
-			},
-			Name: &api.Name{
-				Gender:    "Female",
-				FirstName: "First2",
-				LastName:  "Last2",
-				Title:     "Dr.",
-			},
-		}
-
-		resp, err := s.UpdateName(context.Background(), req)
-		st, ok := status.FromError(err)
-		if !ok || st == nil || st.Message() != "not found" || resp != nil {
-			t.Errorf("wrong error: %s", err.Error())
-			t.Errorf("or response: %s", resp)
-		}
-	})
-
-	t.Run("with valid input", func(t *testing.T) {
-		newName := api.Name{
-			Gender:    "Female",
-			FirstName: "First2",
-			LastName:  "Last2",
-			Title:     "Dr.",
-		}
-		req := &api.NameUpdateRequest{
-			Token: &api.TokenInfos{
-				Id:         testUser.ID.Hex(),
-				InstanceId: testInstanceID,
-			},
-			Name: &newName,
-		}
-
-		resp, err := s.UpdateName(context.Background(), req)
-		if err != nil {
-			t.Errorf("unexpected error: %s", err.Error())
-			return
-		}
-		if resp.Account.Name == &newName {
-			t.Error("name is not updated")
-		}
-	})
-}
-
 func TestDeleteAccountEndpoint(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
@@ -382,17 +285,17 @@ func TestDeleteAccountEndpoint(t *testing.T) {
 	s := userManagementServer{}
 
 	// Create Test User
-	testUsers, err := addTestUsers([]User{
-		User{
-			Account: Account{
-				Type:  "email",
-				Email: "delete_user_1@test.com",
+	testUsers, err := addTestUsers([]models.User{
+		{
+			Account: models.Account{
+				Type:      "email",
+				AccountID: "delete_user_1@test.com",
 			},
 		},
-		User{
-			Account: Account{
-				Type:  "email",
-				Email: "delete_user_2@test.com",
+		{
+			Account: models.Account{
+				Type:      "email",
+				AccountID: "delete_user_2@test.com",
 			},
 		},
 	})
@@ -472,12 +375,39 @@ func TestDeleteAccountEndpoint(t *testing.T) {
 	})
 }
 
-func TestUpdateBirthDateEndpoint(t *testing.T) {
+func TestChangePreferredLanguageEndpoint(t *testing.T) {
+	t.Error("test unimplemented")
+}
+
+func TestSaveProfileEndpoint(t *testing.T) {
 	// TODO: use profiles
 	t.Error("test unimplemented")
 }
 
-func TestUpdateChildrenEndpoint(t *testing.T) {
+func TestRemoveProfileEndpoint(t *testing.T) {
 	// TODO: use profiles
+	// create new
+	// update profile
+	t.Error("test unimplemented")
+}
+
+func TestUpdateContactPreferencesEndpoint(t *testing.T) {
+	// TODO: use profiles
+	// create new
+	// update profile
+	t.Error("test unimplemented")
+}
+
+func TestAddEmailEndpoint(t *testing.T) {
+	// TODO: use profiles
+	// create new
+	// update profile
+	t.Error("test unimplemented")
+}
+
+func TestRemoveEmailEndpoint(t *testing.T) {
+	// TODO: use profiles
+	// create new
+	// update profile
 	t.Error("test unimplemented")
 }

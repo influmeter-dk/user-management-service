@@ -69,27 +69,8 @@ func (s *userManagementServer) ChangePassword(ctx context.Context, req *api.Pass
 	}, nil
 }
 
-func (s *userManagementServer) ChangeEmail(ctx context.Context, req *api.EmailChangeMsg) (*api.User, error) {
+func (s *userManagementServer) ChangeAccountIDEmail(ctx context.Context, req *api.EmailChangeMsg) (*api.User, error) {
 	return nil, status.Error(codes.Unimplemented, "not implemented")
-}
-
-func (s *userManagementServer) UpdateName(ctx context.Context, req *api.NameUpdateRequest) (*api.User, error) {
-	if req == nil || utils.IsTokenEmpty(req.Token) || req.Name == nil {
-		return nil, status.Error(codes.InvalidArgument, "missing argument")
-	}
-
-	user, err := getUserByIDFromDB(req.Token.InstanceId, req.Token.Id)
-	if err != nil {
-		return nil, status.Error(codes.Internal, "not found")
-	}
-
-	user.Account.Name = nameFromAPI(req.Name)
-	user, err = updateUserInDB(req.Token.InstanceId, user)
-	if err != nil {
-		return nil, status.Error(codes.Internal, "not found")
-	}
-
-	return user.ToAPI(), nil
 }
 
 func (s *userManagementServer) DeleteAccount(ctx context.Context, req *api.UserReference) (*api.Status, error) {
@@ -103,6 +84,8 @@ func (s *userManagementServer) DeleteAccount(ctx context.Context, req *api.UserR
 		return nil, status.Error(codes.PermissionDenied, "not authorized")
 	}
 	log.Printf("user %s initiated account removal for user id %s", req.Token.Id, req.UserId)
+
+	// TODO: send message to email
 
 	if err := deleteUserFromDB(req.Token.InstanceId, req.UserId); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -123,7 +106,11 @@ func (s *userManagementServer) DeleteAccount(ctx context.Context, req *api.UserR
 	}, nil
 }
 
-func (s *userManagementServer) UpdateBirthDate(ctx context.Context, req *api.ProfileRequest) (*api.User, error) {
+func (s *userManagementServer) ChangePreferredLanguage(ctx context.Context, req *api.LanguageChangeMsg) (*api.User, error) {
+	return nil, status.Error(codes.Unimplemented, "unimplemented")
+}
+
+func (s *userManagementServer) SaveProfile(ctx context.Context, req *api.ProfileRequest) (*api.User, error) {
 	if req == nil || utils.IsTokenEmpty(req.Token) || req.Profile == nil {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
@@ -136,74 +123,18 @@ func (s *userManagementServer) UpdateBirthDate(ctx context.Context, req *api.Pro
 	return nil, status.Error(codes.Unimplemented, "not implemented")
 }
 
-func (s *userManagementServer) UpdateChildren(ctx context.Context, req *api.ProfileRequest) (*api.User, error) {
-	if req == nil || utils.IsTokenEmpty(req.Token) || req.Profile == nil || req.Profile.Children == nil {
-		return nil, status.Error(codes.InvalidArgument, "missing argument")
-	}
-	_, err := getUserByIDFromDB(req.Token.InstanceId, req.Token.Id)
-	if err != nil {
-		return nil, status.Error(codes.Internal, "not found")
-	}
-	// TODO: handle profile and config
-	return nil, status.Error(codes.Unimplemented, "not implemented")
+func (s *userManagementServer) RemoveProfile(ctx context.Context, req *api.ProfileRequest) (*api.User, error) {
+	return nil, status.Error(codes.Unimplemented, "unimplemented")
 }
 
-/*
-TODO: remove
-func (s *userManagementServer) UpdateProfile(ctx context.Context, req *api.ProfileRequest) (*api.User, error) {
-	if req == nil || req.Auth == nil || req.Profile == nil {
-		return nil, status.Error(codes.InvalidArgument, "missing argument")
-	}
-
-	user, err := getUserByIDFromDB(req.Auth.InstanceId, req.Auth.UserId)
-	if err != nil {
-		return nil, status.Error(codes.Internal, "not found")
-	}
-
-	user.Profile = profileFromAPI(req.Profile)
-	user, err = updateUserInDB(req.Auth.InstanceId, user)
-	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	return user.ToAPI(), nil
-}*/
-
-func (s *userManagementServer) AddSubprofile(ctx context.Context, req *api.SubProfileRequest) (*api.User, error) {
-	if req == nil || utils.IsTokenEmpty(req.Token) || req.SubProfile == nil {
-		return nil, status.Error(codes.InvalidArgument, "missing argument")
-	}
-
-	_, err := getUserByIDFromDB(req.Token.InstanceId, req.Token.Id)
-	if err != nil {
-		return nil, status.Error(codes.Internal, "not found")
-	}
-	// TODO: handle profile and config
-	return nil, status.Error(codes.Unimplemented, "not implemented")
+func (s *userManagementServer) UpdateContactPreferences(ctx context.Context, req *api.ContactPreferencesMsg) (*api.User, error) {
+	return nil, status.Error(codes.Unimplemented, "unimplemented")
 }
 
-func (s *userManagementServer) EditSubprofile(ctx context.Context, req *api.SubProfileRequest) (*api.User, error) {
-	if req == nil || utils.IsTokenEmpty(req.Token) || req.SubProfile == nil || req.SubProfile.Id == "" {
-		return nil, status.Error(codes.InvalidArgument, "missing argument")
-	}
-
-	_, err := getUserByIDFromDB(req.Token.InstanceId, req.Token.Id)
-	if err != nil {
-		return nil, status.Error(codes.Internal, "not found")
-	}
-	// TODO: handle profile and config
-	return nil, status.Error(codes.Unimplemented, "not implemented")
+func (s *userManagementServer) AddEmail(ctx context.Context, req *api.ContactInfoMsg) (*api.User, error) {
+	return nil, status.Error(codes.Unimplemented, "unimplemented")
 }
 
-func (s *userManagementServer) RemoveSubprofile(ctx context.Context, req *api.SubProfileRequest) (*api.User, error) {
-	if req == nil || utils.IsTokenEmpty(req.Token) || req.SubProfile == nil || req.SubProfile.Id == "" {
-		return nil, status.Error(codes.InvalidArgument, "missing argument")
-	}
-
-	_, err := getUserByIDFromDB(req.Token.InstanceId, req.Token.Id)
-	if err != nil {
-		return nil, status.Error(codes.Internal, "not found")
-	}
-	// TODO: handle profile and config
-	return nil, status.Error(codes.Unimplemented, "not implemented")
+func (s *userManagementServer) RemoveEmail(ctx context.Context, req *api.ContactInfoMsg) (*api.User, error) {
+	return nil, status.Error(codes.Unimplemented, "unimplemented")
 }

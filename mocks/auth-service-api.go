@@ -96,6 +96,26 @@ func (mr *MockAuthServiceApiClientMockRecorder) SignupWithEmail(ctx, in interfac
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignupWithEmail", reflect.TypeOf((*MockAuthServiceApiClient)(nil).SignupWithEmail), varargs...)
 }
 
+// SwitchProfile mocks base method
+func (m *MockAuthServiceApiClient) SwitchProfile(ctx context.Context, in *api.ProfileRequest, opts ...grpc.CallOption) (*api.TokenResponse, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SwitchProfile", varargs...)
+	ret0, _ := ret[0].(*api.TokenResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SwitchProfile indicates an expected call of SwitchProfile
+func (mr *MockAuthServiceApiClientMockRecorder) SwitchProfile(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SwitchProfile", reflect.TypeOf((*MockAuthServiceApiClient)(nil).SwitchProfile), varargs...)
+}
+
 // ValidateJWT mocks base method
 func (m *MockAuthServiceApiClient) ValidateJWT(ctx context.Context, in *api.JWTRequest, opts ...grpc.CallOption) (*api.TokenInfos, error) {
 	m.ctrl.T.Helper()
@@ -322,6 +342,21 @@ func (m *MockAuthServiceApiServer) SignupWithEmail(arg0 context.Context, arg1 *a
 func (mr *MockAuthServiceApiServerMockRecorder) SignupWithEmail(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SignupWithEmail", reflect.TypeOf((*MockAuthServiceApiServer)(nil).SignupWithEmail), arg0, arg1)
+}
+
+// SwitchProfile mocks base method
+func (m *MockAuthServiceApiServer) SwitchProfile(arg0 context.Context, arg1 *api.ProfileRequest) (*api.TokenResponse, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SwitchProfile", arg0, arg1)
+	ret0, _ := ret[0].(*api.TokenResponse)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SwitchProfile indicates an expected call of SwitchProfile
+func (mr *MockAuthServiceApiServerMockRecorder) SwitchProfile(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SwitchProfile", reflect.TypeOf((*MockAuthServiceApiServer)(nil).SwitchProfile), arg0, arg1)
 }
 
 // ValidateJWT mocks base method
