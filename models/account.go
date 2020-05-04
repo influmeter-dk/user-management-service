@@ -11,6 +11,7 @@ type Account struct {
 	AccountConfirmedAt int64    `bson:"accountConfirmedAt"`
 	Password           string   `bson:"password"`
 	RefreshTokens      []string `bson:"refreshTokens"`
+	PreferredLanguage  string   `bson:"preferredLanguage"`
 }
 
 func AccountFromAPI(a *api.User_Account) Account {
@@ -21,6 +22,7 @@ func AccountFromAPI(a *api.User_Account) Account {
 		Type:               a.Type,
 		AccountID:          a.AccountId,
 		AccountConfirmedAt: a.AccountConfirmedAt,
+		PreferredLanguage:  a.PreferredLanguage,
 	}
 }
 
@@ -30,5 +32,6 @@ func (a Account) ToAPI() *api.User_Account {
 		Type:               a.Type,
 		AccountId:          a.AccountID,
 		AccountConfirmedAt: a.AccountConfirmedAt,
+		PreferredLanguage:  a.PreferredLanguage,
 	}
 }

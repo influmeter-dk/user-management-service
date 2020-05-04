@@ -57,7 +57,7 @@ func (mr *MockAuthServiceApiClientMockRecorder) Status(ctx, in interface{}, opts
 }
 
 // LoginWithEmail mocks base method
-func (m *MockAuthServiceApiClient) LoginWithEmail(ctx context.Context, in *api.UserCredentials, opts ...grpc.CallOption) (*api.TokenResponse, error) {
+func (m *MockAuthServiceApiClient) LoginWithEmail(ctx context.Context, in *api.LoginWithEmailMsg, opts ...grpc.CallOption) (*api.TokenResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
@@ -77,7 +77,7 @@ func (mr *MockAuthServiceApiClientMockRecorder) LoginWithEmail(ctx, in interface
 }
 
 // SignupWithEmail mocks base method
-func (m *MockAuthServiceApiClient) SignupWithEmail(ctx context.Context, in *api.UserCredentials, opts ...grpc.CallOption) (*api.TokenResponse, error) {
+func (m *MockAuthServiceApiClient) SignupWithEmail(ctx context.Context, in *api.SignupWithEmailMsg, opts ...grpc.CallOption) (*api.TokenResponse, error) {
 	m.ctrl.T.Helper()
 	varargs := []interface{}{ctx, in}
 	for _, a := range opts {
@@ -315,7 +315,7 @@ func (mr *MockAuthServiceApiServerMockRecorder) Status(arg0, arg1 interface{}) *
 }
 
 // LoginWithEmail mocks base method
-func (m *MockAuthServiceApiServer) LoginWithEmail(arg0 context.Context, arg1 *api.UserCredentials) (*api.TokenResponse, error) {
+func (m *MockAuthServiceApiServer) LoginWithEmail(arg0 context.Context, arg1 *api.LoginWithEmailMsg) (*api.TokenResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "LoginWithEmail", arg0, arg1)
 	ret0, _ := ret[0].(*api.TokenResponse)
@@ -330,7 +330,7 @@ func (mr *MockAuthServiceApiServerMockRecorder) LoginWithEmail(arg0, arg1 interf
 }
 
 // SignupWithEmail mocks base method
-func (m *MockAuthServiceApiServer) SignupWithEmail(arg0 context.Context, arg1 *api.UserCredentials) (*api.TokenResponse, error) {
+func (m *MockAuthServiceApiServer) SignupWithEmail(arg0 context.Context, arg1 *api.SignupWithEmailMsg) (*api.TokenResponse, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "SignupWithEmail", arg0, arg1)
 	ret0, _ := ret[0].(*api.TokenResponse)

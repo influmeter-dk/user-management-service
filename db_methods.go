@@ -83,7 +83,7 @@ func updateUserPasswordInDB(instanceID string, userID string, newPassword string
 
 	_id, _ := primitive.ObjectIDFromHex(userID)
 	filter := bson.M{"_id": _id}
-	update := bson.M{"$set": bson.M{"account.password": newPassword, "objectInfos.updatedAt": time.Now().Unix()}}
+	update := bson.M{"$set": bson.M{"account.password": newPassword, "timestamps.updatedAt": time.Now().Unix()}}
 	_, err := collectionRefUsers(instanceID).UpdateOne(ctx, filter, update)
 	if err != nil {
 		return err

@@ -26,20 +26,13 @@ func CheckPasswordFormat(password string) bool {
 	number := regexp.MustCompile(`\d`) //"^(?:(?=.*[a-z])(?:(?=.*[A-Z])(?=.*[\\d\\W])|(?=.*\\W)(?=.*\d))|(?=.*\W)(?=.*[A-Z])(?=.*\d)).{8,}$")
 	symbol := regexp.MustCompile(`\W`)
 
-	if lowercase.MatchString(password) {
+	if lowercase.MatchString(password) || uppercase.MatchString(password) {
 		res++
 	}
-	if uppercase.MatchString(password) {
+	if number.MatchString(password) || symbol.MatchString(password) {
 		res++
 	}
-	if number.MatchString(password) {
-		res++
-	}
-	if symbol.MatchString(password) {
-		res++
-	}
-
-	return res >= 3
+	return res == 2
 }
 
 // IsTokenEmpty check a token from api if it's empty

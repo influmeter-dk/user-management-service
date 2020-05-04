@@ -2,13 +2,16 @@ package main
 
 import (
 	"context"
+	"log"
 	"time"
 
 	"github.com/golang/protobuf/ptypes/empty"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
 	api "github.com/influenzanet/user-management-service/api"
+	"github.com/influenzanet/user-management-service/models"
 	utils "github.com/influenzanet/user-management-service/utils"
 )
 
@@ -16,7 +19,7 @@ func (s *userManagementServer) Status(ctx context.Context, _ *empty.Empty) (*api
 	return nil, status.Error(codes.Unimplemented, "not implemented")
 }
 
-func (s *userManagementServer) LoginWithEmail(ctx context.Context, creds *api.UserCredentials) (*api.UserAuthInfo, error) {
+func (s *userManagementServer) LoginWithEmail(ctx context.Context, creds *api.LoginWithEmailMsg) (*api.UserAuthInfo, error) {
 	if creds == nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
 	}
@@ -60,68 +63,77 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, creds *api.Us
 	*/
 }
 
-func (s *userManagementServer) SignupWithEmail(ctx context.Context, u *api.UserCredentials) (*api.UserAuthInfo, error) {
-	if u == nil {
+func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.SignupWithEmailMsg) (*api.UserAuthInfo, error) {
+	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
-	if !utils.CheckEmailFormat(u.Email) {
+	if !utils.CheckEmailFormat(req.Email) {
 		return nil, status.Error(codes.InvalidArgument, "email not valid")
 	}
-	if !utils.CheckPasswordFormat(u.Password) {
+	if !utils.CheckPasswordFormat(req.Password) {
 		return nil, status.Error(codes.InvalidArgument, "password too weak")
 	}
 
-	return nil, status.Error(codes.Unimplemented, "unimplemented")
+	password, err := utils.HashPassword(req.Password)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 
-	/*
-		password, err := utils.HashPassword(u.Password)
-		if err != nil {
-			return nil, status.Error(codes.Internal, err.Error())
-		}
-
-		// Create user DB object from request:
-		newUser := User{
-			Account: Account{
-				Type:           "email",
-				Email:          u.Email,
-				EmailConfirmed: false,
-				Password:       password,
+	// Create user DB object from request:
+	newUser := models.User{
+		Account: models.Account{
+			Type:               "email",
+			AccountID:          req.Email,
+			AccountConfirmedAt: 0, // not confirmed yet
+			Password:           password,
+			PreferredLanguage:  req.PreferredLanguage,
+		},
+		Roles: []string{"PARTICIPANT"},
+		Profiles: []models.Profile{
+			{
+				ID:                 primitive.NewObjectID(),
+				Nickname:           "???",
+				ConsentConfirmedAt: time.Now().Unix(),
+				AvatarID:           "default",
+				CreatedAt:          time.Now().Unix(),
 			},
-			Roles: []string{"PARTICIPANT"},
-			Profiles: []Profile{
-				Profile{
-					ID: primitive.NewObjectID(),
-				},
-			},
-		}
+		},
+	}
+	newUser.AddNewEmail(req.Email, false)
 
-		instanceID := u.InstanceId
-		if instanceID == "" {
-			instanceID = "default"
-		}
+	instanceID := req.InstanceId
+	if instanceID == "" {
+		instanceID = "default"
+	}
 
-		id, err := addUserToDB(instanceID, newUser)
+	id, err := addUserToDB(instanceID, newUser)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
 
-		if err != nil {
-			return nil, status.Error(codes.Internal, err.Error())
-		}
+	log.Println("TODO: generate account confirmation token for newly created user")
+	log.Println("TODO: send email for newly created user")
+	// TODO: generate email confirmation token
+	// TODO: send email with confirmation request
 
-		log.Println("new user created")
-		// TODO: generate email confirmation token
-		// TODO: send email with confirmation request
-		var username string
-		if len(newUser.Roles) > 1 || len(newUser.Roles) == 1 && newUser.Roles[0] != "PARTICIPANT" {
-			username = newUser.Account.Email
-		}
+	var username string
+	if len(newUser.Roles) > 1 || len(newUser.Roles) == 1 && newUser.Roles[0] != "PARTICIPANT" {
+		username = newUser.Account.AccountID
+	}
 
-		response := &api.UserAuthInfo{
-			UserId:     id,
-			Roles:      newUser.Roles,
-			InstanceId: instanceID,
-			Username:   username,
-			ProfileId:  newUser.Profiles[0].ID.Hex(),
-		}
-		return response, nil*/
+	apiUser := newUser.ToAPI()
+
+	response := &api.UserAuthInfo{
+		UserId:            id,
+		Roles:             newUser.Roles,
+		InstanceId:        instanceID,
+		AccountId:         username, // relevant for researchers
+		AccountConfirmed:  false,
+		Profiles:          apiUser.Profiles,
+		SelectedProfile:   apiUser.Profiles[0],
+		PreferredLanguage: apiUser.Account.PreferredLanguage,
+	}
+	return response, nil
 }
 
 func (s *userManagementServer) CheckRefreshToken(ctx context.Context, req *api.RefreshTokenRequest) (*api.Status, error) {

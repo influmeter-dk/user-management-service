@@ -2,6 +2,7 @@ package models
 
 import (
 	"errors"
+	"time"
 
 	api "github.com/influenzanet/user-management-service/api"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -47,6 +48,51 @@ func (u User) HasRole(role string) bool {
 		}
 	}
 	return false
+}
+
+// Add a new email address
+func (u *User) AddNewEmail(addr string, confirmed bool) {
+	contactInfo := ContactInfo{
+		ID:          primitive.NewObjectID(),
+		Type:        "email",
+		ConfirmedAt: 0,
+		Email:       addr,
+	}
+	if confirmed {
+		contactInfo.ConfirmedAt = time.Now().Unix()
+	}
+	u.ContactInfos = append(u.ContactInfos, contactInfo)
+}
+
+func (u *User) ConfirmContactInfo(id string) error {
+	for i, ci := range u.ContactInfos {
+		if ci.ID.Hex() == id {
+			u.ContactInfos[i].ConfirmedAt = time.Now().Unix()
+			return nil
+		}
+	}
+	return errors.New("item with given ID not found")
+}
+
+func (u User) FindContactInfo(t string, addr string) (ContactInfo, bool) {
+	for _, ci := range u.ContactInfos {
+		if t == "email" && ci.Email == addr {
+			return ci, true
+		} else if t == "phone" && ci.Phone == addr {
+			return ci, true
+		}
+	}
+	return ContactInfo{}, false
+}
+
+func (u *User) RemoveContactInfo(id string) error {
+	for i, ci := range u.ContactInfos {
+		if ci.ID.Hex() == id {
+			u.ContactInfos = append(u.ContactInfos[:i], u.ContactInfos[i+1:]...)
+			return nil
+		}
+	}
+	return errors.New("item with given ID not found")
 }
 
 /*

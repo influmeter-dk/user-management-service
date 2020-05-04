@@ -240,7 +240,7 @@ func TestChangePasswordEndpoint(t *testing.T) {
 		}
 
 		// Check login with new credentials:
-		req2 := &api.UserCredentials{
+		req2 := &api.LoginWithEmailMsg{
 			Email:      testUser.Account.AccountID,
 			Password:   newPassword,
 			InstanceId: testInstanceID,
@@ -318,14 +318,10 @@ func TestDeleteAccountEndpoint(t *testing.T) {
 
 	t.Run("with empty payload", func(t *testing.T) {
 		req := &api.UserReference{}
-		resp, err := s.DeleteAccount(context.Background(), req)
-		if err == nil {
-			t.Error("should return error")
-			return
-		}
-		if status.Convert(err).Message() != "missing argument" || resp != nil {
-			t.Errorf("wrong error: %s", err.Error())
-			t.Errorf("or response: %s", resp)
+		_, err := s.DeleteAccount(context.Background(), req)
+		ok, msg := shouldHaveGrpcErrorStatus(err, "missing argument")
+		if !ok {
+			t.Error(msg)
 		}
 	})
 
