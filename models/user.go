@@ -1,4 +1,4 @@
-package main
+package models
 
 import (
 	"errors"
@@ -7,44 +7,35 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-// ObjectInfos describes metadata for the User
-type ObjectInfos struct {
-	LastTokenRefresh int64 `bson:"lastTokenRefresh"`
-	LastLogin        int64 `bson:"lastLogin"`
-	CreatedAt        int64 `bson:"createdAt"`
-	UpdatedAt        int64 `bson:"updatedAt"`
-}
-
-// ToAPI converts the object from DB to API format
-func (o ObjectInfos) ToAPI() *api.User_Infos {
-	return &api.User_Infos{
-		LastTokenRefresh: o.LastTokenRefresh,
-		LastLogin:        o.LastLogin,
-		CreatedAt:        o.CreatedAt,
-		UpdatedAt:        o.UpdatedAt,
-	}
-}
-
 // User describes the user as saved in the DB
 type User struct {
-	ID          primitive.ObjectID `bson:"_id,omitempty" json:"user_id,omitempty"`
-	Account     Account            `bson:"account"`
-	Roles       []string           `bson:"roles" json:"roles"`
-	ObjectInfos ObjectInfos        `bson:"objectInfos"`
-	Profiles    []Profile          `bson:"profiles"`
+	ID                 primitive.ObjectID `bson:"_id,omitempty" json:"user_id,omitempty"`
+	Account            Account            `bson:"account"`
+	Roles              []string           `bson:"roles" json:"roles"`
+	Timestamps         Timestamps         `bson:"timestamps"`
+	Profiles           []Profile          `bson:"profiles"`
+	ContactPreferences ContactPreferences `bson:"contactPreferences"`
+	ContactInfos       []ContactInfo      `bson:"contactInfos"`
 }
 
 // ToAPI converts the object from DB to API format
 func (u User) ToAPI() *api.User {
+	profiles := make([]*api.Profile, len(u.Profiles))
+	for i, p := range u.Profiles {
+		profiles[i] = p.ToAPI()
+	}
+	contactInfos := make([]*api.ContactInfo, len(u.ContactInfos))
+	for i, c := range u.ContactInfos {
+		contactInfos[i] = c.ToAPI()
+	}
 	return &api.User{
-		Id:      u.ID.Hex(),
-		Account: u.Account.ToAPI(),
-		Roles:   u.Roles,
-		/*
-			Profile:     u.Profile.ToAPI(),
-			SubProfiles: u.SubProfiles.ToAPI(),
-		*/
-		Infos: u.ObjectInfos.ToAPI(),
+		Id:                 u.ID.Hex(),
+		Account:            u.Account.ToAPI(),
+		Roles:              u.Roles,
+		Timestamps:         u.Timestamps.ToAPI(),
+		Profiles:           profiles,
+		ContactPreferences: u.ContactPreferences.ToAPI(),
+		ContactInfos:       contactInfos,
 	}
 }
 
@@ -115,4 +106,22 @@ func (u *User) RemoveRefreshToken(token string) error {
 		}
 	}
 	return errors.New("token was missing")
+}
+
+// Timestamps describes metadata for the User
+type Timestamps struct {
+	LastTokenRefresh int64 `bson:"lastTokenRefresh"`
+	LastLogin        int64 `bson:"lastLogin"`
+	CreatedAt        int64 `bson:"createdAt"`
+	UpdatedAt        int64 `bson:"updatedAt"`
+}
+
+// ToAPI converts the object from DB to API format
+func (o Timestamps) ToAPI() *api.User_Timestamps {
+	return &api.User_Timestamps{
+		LastTokenRefresh: o.LastTokenRefresh,
+		LastLogin:        o.LastLogin,
+		CreatedAt:        o.CreatedAt,
+		UpdatedAt:        o.UpdatedAt,
+	}
 }
