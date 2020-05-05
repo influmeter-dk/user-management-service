@@ -261,20 +261,183 @@ func TestChangePasswordEndpoint(t *testing.T) {
 }
 
 func TestChangeAccountIDEmailEndpoint(t *testing.T) {
-	/*
-		mockCtrl := gomock.NewController(t)
-		defer mockCtrl.Finish()
-		mockAuthServiceClient := api_mock.NewMockAuthServiceApiClient(mockCtrl)
-		clients.authService = mockAuthServiceClient
-	*/
-	// s := userManagementServer{}
+	s := userManagementServer{}
 
-	// TODO: without payload
-	// TODO: with empty payload
-	// TODO: with other user id
-	// TODO: with wrong email format
-	// TODO: with own user id
-	t.Error("test not implemented")
+	oldEmailContantID := primitive.NewObjectID()
+	// Create Test User
+	testUsers, err := addTestUsers([]models.User{
+		{
+			Account: models.Account{
+				Type:               "email",
+				AccountID:          "change_account_id_0@test.com",
+				AccountConfirmedAt: 1231239192,
+			},
+		},
+		{
+			Account: models.Account{
+				Type:               "email",
+				AccountID:          "change_account_id_1@test.com",
+				AccountConfirmedAt: 1231239192,
+			},
+			ContactInfos: []models.ContactInfo{
+				{
+					ID:          oldEmailContantID,
+					Type:        "email",
+					Email:       "change_account_id_1@test.com",
+					ConfirmedAt: 1231239192,
+				},
+				{
+					ID:          primitive.NewObjectID(),
+					Type:        "email",
+					Email:       "change_account_id_1_new@test.com",
+					ConfirmedAt: 1231239192,
+				},
+			},
+			ContactPreferences: models.ContactPreferences{
+				SendNewsletterTo: []string{oldEmailContantID.Hex()},
+			},
+		},
+		{
+			Account: models.Account{
+				Type:               "email",
+				AccountID:          "change_account_id_2@test.com",
+				AccountConfirmedAt: 0,
+			},
+			ContactInfos: []models.ContactInfo{
+				{
+					ID:          primitive.NewObjectID(),
+					Type:        "email",
+					Email:       "change_account_id_2@test.com",
+					ConfirmedAt: 0,
+				},
+			},
+		},
+		{
+			Account: models.Account{
+				Type:               "email",
+				AccountID:          "change_account_id_3@test.com",
+				AccountConfirmedAt: 123123123,
+			},
+			ContactInfos: []models.ContactInfo{
+				{
+					ID:          primitive.NewObjectID(),
+					Type:        "email",
+					Email:       "change_account_id_3@test.com",
+					ConfirmedAt: 123123123,
+				},
+			},
+		},
+	})
+	if err != nil {
+		t.Errorf("failed to create testusers: %s", err.Error())
+		return
+	}
+
+	t.Run("without payload", func(t *testing.T) {
+		_, err := s.ChangeAccountIDEmail(context.Background(), nil)
+		ok, msg := shouldHaveGrpcErrorStatus(err, "missing argument")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	t.Run("with empty payload", func(t *testing.T) {
+		req := &api.EmailChangeMsg{}
+		_, err := s.ChangeAccountIDEmail(context.Background(), req)
+		ok, msg := shouldHaveGrpcErrorStatus(err, "missing argument")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	t.Run("try to update to an already existing email", func(t *testing.T) {
+		req := &api.EmailChangeMsg{
+			Token: &api.TokenInfos{
+				Id:         testUsers[1].ID.Hex(),
+				InstanceId: testInstanceID,
+			},
+			NewEmail: testUsers[0].Account.AccountID,
+		}
+		_, err := s.ChangeAccountIDEmail(context.Background(), req)
+		ok, msg := shouldHaveGrpcErrorStatus(err, "already in use")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	t.Run("for confirmed new email", func(t *testing.T) {
+		req := &api.EmailChangeMsg{
+			Token: &api.TokenInfos{
+				Id:         testUsers[1].ID.Hex(),
+				InstanceId: testInstanceID,
+			},
+			NewEmail: testUsers[1].ContactInfos[1].Email,
+		}
+
+		resp, err := s.ChangeAccountIDEmail(context.Background(), req)
+		if err != nil {
+			t.Errorf("unexpected error: %s", err.Error())
+			return
+		}
+		if resp.Account.AccountId != testUsers[1].ContactInfos[1].Email {
+			t.Errorf("unexpected accountID: %s", resp.Account.AccountId)
+			return
+		}
+		if resp.Account.AccountConfirmedAt <= 0 {
+			t.Errorf("unexpected AccountConfirmedAt: %d", resp.Account.AccountConfirmedAt)
+			return
+		}
+		if resp.ContactPreferences.SendNewsletterTo[0] != testUsers[1].ContactInfos[1].ID.Hex() {
+			t.Errorf("unexpected contactPreferences: %s", resp)
+			return
+		}
+	})
+
+	t.Run("for not confirmed old email", func(t *testing.T) {
+		req := &api.EmailChangeMsg{
+			Token: &api.TokenInfos{
+				Id:         testUsers[2].ID.Hex(),
+				InstanceId: testInstanceID,
+			},
+			NewEmail: "newemail@test.com",
+		}
+		resp, err := s.ChangeAccountIDEmail(context.Background(), req)
+		if err != nil {
+			t.Errorf("unexpected error: %s", err.Error())
+			return
+		}
+		if resp.Account.AccountId != req.NewEmail {
+			t.Errorf("unexpected accountID: %s", resp.Account.AccountId)
+			return
+		}
+		if resp.Account.AccountConfirmedAt > 0 {
+			t.Errorf("unexpected AccountConfirmedAt: %d", resp.Account.AccountConfirmedAt)
+			return
+		}
+	})
+
+	t.Run("for confirmed old email", func(t *testing.T) {
+		req := &api.EmailChangeMsg{
+			Token: &api.TokenInfos{
+				Id:         testUsers[3].ID.Hex(),
+				InstanceId: testInstanceID,
+			},
+			NewEmail: "newemail2@test.com",
+		}
+		resp, err := s.ChangeAccountIDEmail(context.Background(), req)
+		if err != nil {
+			t.Errorf("unexpected error: %s", err.Error())
+			return
+		}
+		if resp.Account.AccountId != req.NewEmail {
+			t.Errorf("unexpected accountID: %s", resp.Account.AccountId)
+			return
+		}
+		if resp.Account.AccountConfirmedAt > 0 {
+			t.Errorf("unexpected AccountConfirmedAt: %d", resp.Account.AccountConfirmedAt)
+			return
+		}
+	})
 }
 
 func TestDeleteAccountEndpoint(t *testing.T) {

@@ -71,7 +71,68 @@ func (s *userManagementServer) ChangePassword(ctx context.Context, req *api.Pass
 }
 
 func (s *userManagementServer) ChangeAccountIDEmail(ctx context.Context, req *api.EmailChangeMsg) (*api.User, error) {
-	return nil, status.Error(codes.Unimplemented, "not implemented")
+	if req == nil || utils.IsTokenEmpty(req.Token) || req.NewEmail == "" {
+		return nil, status.Error(codes.InvalidArgument, "missing argument")
+	}
+
+	// is email address still free to use?
+	_, err := getUserByEmailFromDB(req.Token.InstanceId, req.NewEmail)
+	if err == nil {
+		return nil, status.Error(codes.InvalidArgument, "already in use")
+	}
+
+	user, err := getUserByIDFromDB(req.Token.InstanceId, req.Token.Id)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "user not found")
+	}
+
+	if user.Account.Type != "email" {
+		return nil, status.Error(codes.Internal, "account is not email type")
+	}
+	oldCI, oldFound := user.FindContactInfoByTypeAndAddr("email", user.Account.AccountID)
+	if !oldFound {
+		return nil, status.Error(codes.Internal, "old contact info not found - unexpected error")
+	}
+
+	if user.Account.AccountConfirmedAt > 0 {
+		// Old AccountID already confirmed
+		log.Println("TODO: prepare token for restoring email address")
+		log.Println("TODO: trigger email sending to old address")
+	}
+	// if old AccountID was not confirmed probably wrong address used in the first place
+
+	user.Account.AccountID = req.NewEmail
+	user.Account.AccountConfirmedAt = 0
+
+	// Add new address to contact list if necessary:
+	ci, found := user.FindContactInfoByTypeAndAddr("email", req.NewEmail)
+	if found {
+		// new email already confirmed
+		if ci.ConfirmedAt > 0 {
+			user.Account.AccountConfirmedAt = ci.ConfirmedAt
+		}
+	} else {
+		user.AddNewEmail(req.NewEmail, false)
+	}
+
+	newCI, newFound := user.FindContactInfoByTypeAndAddr("email", req.NewEmail)
+	if !newFound {
+		return nil, status.Error(codes.Internal, "new contact info not found - unexpected error")
+	}
+	user.ReplaceContactInfoInContactPreferences(oldCI.ID.Hex(), newCI.ID.Hex())
+
+	// start confirmation workflow of necessary:
+	if user.Account.AccountConfirmedAt <= 0 {
+		log.Println("TODO: prepare token for account email confirmation")
+		log.Println("TODO: trigger email sending to new address")
+	}
+
+	// Save user:
+	updUser, err := updateUserInDB(req.Token.InstanceId, user)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	return updUser.ToAPI(), nil
 }
 
 func (s *userManagementServer) DeleteAccount(ctx context.Context, req *api.UserReference) (*api.Status, error) {
