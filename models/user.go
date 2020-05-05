@@ -98,6 +98,10 @@ func (u User) FindContactInfoById(id string) (ContactInfo, bool) {
 func (u *User) RemoveContactInfo(id string) error {
 	for i, ci := range u.ContactInfos {
 		if ci.ID.Hex() == id {
+			if u.Account.Type == "email" && ci.Email == u.Account.AccountID {
+				return errors.New("cannot remove main address")
+			}
+
 			u.ContactInfos = append(u.ContactInfos[:i], u.ContactInfos[i+1:]...)
 			return nil
 		}

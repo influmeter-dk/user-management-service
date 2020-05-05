@@ -740,7 +740,7 @@ func TestRemoveEmailEndpoint(t *testing.T) {
 				{
 					ID:          primitive.NewObjectID(),
 					Type:        "email",
-					Email:       "test_for_remove_email0@test.com",
+					Email:       "test_for_remove_email@test.com",
 					ConfirmedAt: time.Now().Unix(),
 				},
 				{
@@ -793,6 +793,20 @@ func TestRemoveEmailEndpoint(t *testing.T) {
 		}
 		_, err := s.RemoveEmail(context.Background(), req)
 		ok, msg := shouldHaveGrpcErrorStatus(err, "contact not found")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	t.Run("try remove main address", func(t *testing.T) {
+		req := &api.ContactInfoMsg{
+			Token: &token,
+			ContactInfo: &api.ContactInfo{
+				Id: testUsers[0].ContactInfos[0].ID.Hex(),
+			},
+		}
+		_, err := s.RemoveEmail(context.Background(), req)
+		ok, msg := shouldHaveGrpcErrorStatus(err, "cannot remove main address")
 		if !ok {
 			t.Error(msg)
 		}
