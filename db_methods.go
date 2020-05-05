@@ -91,6 +91,24 @@ func updateUserPasswordInDB(instanceID string, userID string, newPassword string
 	return nil
 }
 
+func updateAccountPreferredLangDB(instanceID string, userID string, lang string) (models.User, error) {
+	ctx, cancel := getContext()
+	defer cancel()
+
+	_id, _ := primitive.ObjectIDFromHex(userID)
+	filter := bson.M{"_id": _id}
+
+	elem := models.User{}
+
+	rd := options.After
+	fro := options.FindOneAndUpdateOptions{
+		ReturnDocument: &rd,
+	}
+	update := bson.M{"$set": bson.M{"account.preferredLanguage": lang, "timestamps.updatedAt": time.Now().Unix()}}
+	err := collectionRefUsers(instanceID).FindOneAndUpdate(ctx, filter, update, &fro).Decode(&elem)
+	return elem, err
+}
+
 func updateLoginTimeInDB(instanceID string, id string) error {
 	ctx, cancel := getContext()
 	defer cancel()

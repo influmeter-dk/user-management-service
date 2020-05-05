@@ -86,6 +86,7 @@ func (s *userManagementServer) DeleteAccount(ctx context.Context, req *api.UserR
 	log.Printf("user %s initiated account removal for user id %s", req.Token.Id, req.UserId)
 
 	// TODO: send message to email
+	log.Println("TODO: send email about successful account deletion")
 
 	if err := deleteUserFromDB(req.Token.InstanceId, req.UserId); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -107,7 +108,14 @@ func (s *userManagementServer) DeleteAccount(ctx context.Context, req *api.UserR
 }
 
 func (s *userManagementServer) ChangePreferredLanguage(ctx context.Context, req *api.LanguageChangeMsg) (*api.User, error) {
-	return nil, status.Error(codes.Unimplemented, "unimplemented")
+	if req == nil || utils.IsTokenEmpty(req.Token) || req.LanguageCode == "" {
+		return nil, status.Error(codes.InvalidArgument, "missing argument")
+	}
+	user, err := updateAccountPreferredLangDB(req.Token.InstanceId, req.Token.Id, req.LanguageCode)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	return user.ToAPI(), nil
 }
 
 func (s *userManagementServer) SaveProfile(ctx context.Context, req *api.ProfileRequest) (*api.User, error) {
