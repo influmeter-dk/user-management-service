@@ -393,5 +393,89 @@ func TestTokenRefreshedEndpoint(t *testing.T) {
 	})
 }
 func TestSwitchProfileEndpoint(t *testing.T) {
-	t.Error("test unimplemented")
+	s := userManagementServer{}
+	testUsers, err := addTestUsers([]models.User{
+		{
+			Account: models.Account{
+				Type:      "email",
+				AccountID: "test_for_switch_profile@test.com",
+			},
+			Profiles: []models.Profile{
+				{
+					ID:       primitive.NewObjectID(),
+					Nickname: "main",
+				},
+				{
+					ID:       primitive.NewObjectID(),
+					Nickname: "new1",
+				},
+				{
+					ID:       primitive.NewObjectID(),
+					Nickname: "new2",
+				},
+			},
+		},
+	})
+	if err != nil {
+		t.Errorf("failed to create testusers: %s", err.Error())
+		return
+	}
+
+	t.Run("without payload", func(t *testing.T) {
+		_, err := s.SwitchProfile(context.Background(), nil)
+		ok, msg := shouldHaveGrpcErrorStatus(err, "missing argument")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	t.Run("with empty payload", func(t *testing.T) {
+		req := &api.ProfileRequest{}
+		_, err := s.SwitchProfile(context.Background(), req)
+		ok, msg := shouldHaveGrpcErrorStatus(err, "missing argument")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	token := api.TokenInfos{
+		Id:         testUsers[0].ID.Hex(),
+		InstanceId: testInstanceID,
+	}
+
+	t.Run("with wrong profile id", func(t *testing.T) {
+		req := &api.ProfileRequest{
+			Token: &token,
+			Profile: &api.Profile{
+				Id: "wrong_profile_id",
+			},
+		}
+		_, err := s.SwitchProfile(context.Background(), req)
+		ok, msg := shouldHaveGrpcErrorStatus(err, "profile not found")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	t.Run("with correct profile id", func(t *testing.T) {
+		req := &api.ProfileRequest{
+			Token: &token,
+			Profile: &api.Profile{
+				Id: testUsers[0].Profiles[2].ID.Hex(),
+			},
+		}
+		resp, err := s.SwitchProfile(context.Background(), req)
+		if err != nil {
+			t.Errorf("unexpected error: %s", err.Error())
+			return
+		}
+		if resp.AccountId != testUsers[0].Account.AccountID {
+			t.Errorf("unexpected account id: %s", resp)
+			return
+		}
+		if resp.SelectedProfile.Nickname != testUsers[0].Profiles[2].Nickname {
+			t.Errorf("unexpected nickname:  have: %s, want: %s", resp.SelectedProfile.Nickname, testUsers[0].Profiles[2].Nickname)
+			return
+		}
+	})
 }

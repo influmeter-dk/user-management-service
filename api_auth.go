@@ -187,5 +187,30 @@ func (s *userManagementServer) TokenRefreshed(ctx context.Context, req *api.Refr
 }
 
 func (s *userManagementServer) SwitchProfile(ctx context.Context, req *api.ProfileRequest) (*api.UserAuthInfo, error) {
-	return nil, status.Error(codes.Unimplemented, "unimplemented")
+	if req == nil || utils.IsTokenEmpty(req.Token) || req.Profile == nil {
+		return nil, status.Error(codes.InvalidArgument, "missing argument")
+	}
+	user, err := getUserByIDFromDB(req.Token.InstanceId, req.Token.Id)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "user not found")
+	}
+
+	profile, err := user.FindProfile(req.Profile.Id)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "profile not found")
+	}
+
+	apiUser := user.ToAPI()
+
+	response := &api.UserAuthInfo{
+		UserId:            user.ID.Hex(),
+		Roles:             user.Roles,
+		InstanceId:        req.Token.InstanceId,
+		AccountConfirmed:  apiUser.Account.AccountConfirmedAt > 0,
+		AccountId:         apiUser.Account.AccountId,
+		Profiles:          apiUser.Profiles,
+		SelectedProfile:   profile.ToAPI(),
+		PreferredLanguage: apiUser.Account.PreferredLanguage,
+	}
+	return response, nil
 }

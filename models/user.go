@@ -95,35 +95,43 @@ func (u *User) RemoveContactInfo(id string) error {
 	return errors.New("item with given ID not found")
 }
 
-/*
-// AddSubProfile generates unique ID and adds sub-profile to the user's array
-func (u *User) AddSubProfile(sp SubProfile) {
-	sp.ID = primitive.NewObjectID()
-	u.SubProfiles = append(u.SubProfiles, sp)
+// AddProfile generates unique ID and adds profile to the user's array
+func (u *User) AddSubProfile(p Profile) {
+	p.ID = primitive.NewObjectID()
+	u.Profiles = append(u.Profiles, p)
 }
 
-// UpdateSubProfile finds and replaces sub-profile in the user's array
-func (u *User) UpdateSubProfile(sp SubProfile) error {
-	for i, cSP := range u.SubProfiles {
-		if cSP.ID == sp.ID {
-			u.SubProfiles[i] = sp
+// UpdateProfile finds and replaces profile in the user's array
+func (u *User) UpdateProfile(p Profile) error {
+	for i, cP := range u.Profiles {
+		if cP.ID == p.ID {
+			u.Profiles[i] = p
 			return nil
 		}
 	}
-	return errors.New("item with given ID not found")
+	return errors.New("profile with given ID not found")
 }
 
-// RemoveSubProfile finds and removes sub-profile from the user's array
-func (u *User) RemoveSubProfile(id string) error {
-	for i, cSP := range u.SubProfiles {
-		if cSP.ID.Hex() == id {
-			u.SubProfiles = append(u.SubProfiles[:i], u.SubProfiles[i+1:]...)
+// FindProfile finds a profile in the user's array
+func (u User) FindProfile(id string) (Profile, error) {
+	for _, cP := range u.Profiles {
+		if cP.ID.Hex() == id {
+			return cP, nil
+		}
+	}
+	return Profile{}, errors.New("profile with given ID not found")
+}
+
+// RemoveProfile finds and removes profile from the user's array
+func (u *User) RemoveProfile(id string) error {
+	for i, cP := range u.Profiles {
+		if cP.ID.Hex() == id {
+			u.Profiles = append(u.Profiles[:i], u.Profiles[i+1:]...)
 			return nil
 		}
 	}
-	return errors.New("item with given ID not found")
+	return errors.New("profile with given ID not found")
 }
-*/
 
 // AddRefreshToken add a new refresh token to the user's list
 func (u *User) AddRefreshToken(token string) {
