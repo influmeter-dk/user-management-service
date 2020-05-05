@@ -722,6 +722,7 @@ func TestAddEmailEndpoint(t *testing.T) {
 			return
 		}
 		if len(resp.ContactInfos) != 2 || len(resp.ContactInfos[1].Id) < 1 {
+			t.Errorf("number of contacts: %d", len(resp.ContactInfos))
 			t.Errorf("wrong response: %s", resp)
 		}
 	})

@@ -172,13 +172,43 @@ func (s *userManagementServer) RemoveProfile(ctx context.Context, req *api.Profi
 }
 
 func (s *userManagementServer) UpdateContactPreferences(ctx context.Context, req *api.ContactPreferencesMsg) (*api.User, error) {
-	return nil, status.Error(codes.Unimplemented, "unimplemented")
+	if req == nil || utils.IsTokenEmpty(req.Token) || req.ContactPreferences == nil {
+		return nil, status.Error(codes.InvalidArgument, "missing argument")
+	}
+
+	user, err := updateContactPreferencesDB(req.Token.InstanceId, req.Token.Id, models.ContactPreferencesFromAPI(req.ContactPreferences))
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	return user.ToAPI(), nil
 }
 
 func (s *userManagementServer) AddEmail(ctx context.Context, req *api.ContactInfoMsg) (*api.User, error) {
-	return nil, status.Error(codes.Unimplemented, "unimplemented")
+	if req == nil || utils.IsTokenEmpty(req.Token) || req.ContactInfo == nil {
+		return nil, status.Error(codes.InvalidArgument, "missing argument")
+	}
+
+	if req.ContactInfo.Type != "email" {
+		return nil, status.Error(codes.InvalidArgument, "wrong contact type")
+	}
+
+	user, err := getUserByIDFromDB(req.Token.InstanceId, req.Token.Id)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "user not found")
+	}
+
+	user.AddNewEmail(req.ContactInfo.GetEmail(), false)
+	updUser, err := updateUserInDB(req.Token.InstanceId, user)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return updUser.ToAPI(), nil
 }
 
 func (s *userManagementServer) RemoveEmail(ctx context.Context, req *api.ContactInfoMsg) (*api.User, error) {
+	if req == nil || utils.IsTokenEmpty(req.Token) || req.ContactInfo == nil {
+		return nil, status.Error(codes.InvalidArgument, "missing argument")
+	}
 	return nil, status.Error(codes.Unimplemented, "unimplemented")
 }
