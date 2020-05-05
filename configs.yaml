@@ -1,3 +1,0 @@
-db_address: influenzanettestdbcluster-pwvbz.mongodb.net/test?retryWrites=true
-db_credentials_path: ./secret/db.yaml
-db_timeout: 10
