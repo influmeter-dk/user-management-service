@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"testing"
+	"time"
 
 	"github.com/golang/mock/gomock"
 	"github.com/influenzanet/user-management-service/models"
@@ -372,38 +373,444 @@ func TestDeleteAccountEndpoint(t *testing.T) {
 }
 
 func TestChangePreferredLanguageEndpoint(t *testing.T) {
-	t.Error("test unimplemented")
+	s := userManagementServer{}
+	testUsers, err := addTestUsers([]models.User{
+		{
+			Account: models.Account{
+				Type:              "email",
+				AccountID:         "test_for_change_preferred_lang@test.com",
+				PreferredLanguage: "de",
+			},
+		},
+	})
+	if err != nil {
+		t.Errorf("failed to create testusers: %s", err.Error())
+		return
+	}
+
+	t.Run("without payload", func(t *testing.T) {
+		_, err := s.ChangePreferredLanguage(context.Background(), nil)
+		ok, msg := shouldHaveGrpcErrorStatus(err, "missing argument")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	t.Run("with empty payload", func(t *testing.T) {
+		req := &api.LanguageChangeMsg{}
+		_, err := s.ChangePreferredLanguage(context.Background(), req)
+		ok, msg := shouldHaveGrpcErrorStatus(err, "missing argument")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	token := api.TokenInfos{
+		Id:         testUsers[0].ID.Hex(),
+		InstanceId: testInstanceID,
+	}
+
+	t.Run("with normal payload", func(t *testing.T) {
+		req := &api.LanguageChangeMsg{
+			Token:        &token,
+			LanguageCode: "fr",
+		}
+		resp, err := s.ChangePreferredLanguage(context.Background(), req)
+		if err != nil {
+			t.Errorf("unexpected error: %s", err.Error())
+			return
+		}
+		if resp.Account.PreferredLanguage != "fr" {
+			t.Errorf("unexpected language code: %s", resp.Account.PreferredLanguage)
+		}
+	})
 }
 
 func TestSaveProfileEndpoint(t *testing.T) {
-	// TODO: use profiles
-	t.Error("test unimplemented")
+	s := userManagementServer{}
+	testUsers, err := addTestUsers([]models.User{
+		{
+			Account: models.Account{
+				Type:      "email",
+				AccountID: "test_for_save_profile@test.com",
+			},
+			Profiles: []models.Profile{
+				{
+					ID:       primitive.NewObjectID(),
+					Nickname: "main",
+				},
+			},
+		},
+	})
+	if err != nil {
+		t.Errorf("failed to create testusers: %s", err.Error())
+		return
+	}
+
+	t.Run("without payload", func(t *testing.T) {
+		_, err := s.SaveProfile(context.Background(), nil)
+		ok, msg := shouldHaveGrpcErrorStatus(err, "missing argument")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	token := api.TokenInfos{
+		Id:         testUsers[0].ID.Hex(),
+		InstanceId: testInstanceID,
+	}
+
+	t.Run("with add profile", func(t *testing.T) {
+		req := &api.ProfileRequest{
+			Token: &token,
+			Profile: &api.Profile{
+				Nickname: "new test",
+			},
+		}
+		resp, err := s.SaveProfile(context.Background(), req)
+		if err != nil {
+			t.Errorf("unexpected error: %s", err.Error())
+			return
+		}
+		if len(resp.Profiles) != 2 || resp.Profiles[1].Nickname != "new test" {
+			t.Errorf("unexpected response code: %s", resp)
+		}
+	})
+
+	t.Run("with update profile", func(t *testing.T) {
+		req := &api.ProfileRequest{
+			Token: &token,
+			Profile: &api.Profile{
+				Id:       testUsers[0].Profiles[0].ID.Hex(),
+				Nickname: "renamed",
+			},
+		}
+		resp, err := s.SaveProfile(context.Background(), req)
+		if err != nil {
+			t.Errorf("unexpected error: %s", err.Error())
+			return
+		}
+		if len(resp.Profiles) != 2 || resp.Profiles[0].Nickname != "renamed" {
+			t.Errorf("unexpected response code: %s", resp)
+		}
+	})
 }
 
 func TestRemoveProfileEndpoint(t *testing.T) {
-	// TODO: use profiles
-	// create new
-	// update profile
-	t.Error("test unimplemented")
+	s := userManagementServer{}
+	testUsers, err := addTestUsers([]models.User{
+		{
+			Account: models.Account{
+				Type:      "email",
+				AccountID: "test_for_remove_profile@test.com",
+			},
+			Profiles: []models.Profile{
+				{
+					ID:       primitive.NewObjectID(),
+					Nickname: "main",
+				},
+				{
+					ID:       primitive.NewObjectID(),
+					Nickname: "new1",
+				},
+			},
+		},
+	})
+	if err != nil {
+		t.Errorf("failed to create testusers: %s", err.Error())
+		return
+	}
+
+	t.Run("without payload", func(t *testing.T) {
+		_, err := s.RemoveProfile(context.Background(), nil)
+		ok, msg := shouldHaveGrpcErrorStatus(err, "missing argument")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	t.Run("with empty payload", func(t *testing.T) {
+		req := &api.ProfileRequest{}
+		_, err := s.RemoveProfile(context.Background(), req)
+		ok, msg := shouldHaveGrpcErrorStatus(err, "missing argument")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	token := api.TokenInfos{
+		Id:         testUsers[0].ID.Hex(),
+		InstanceId: testInstanceID,
+	}
+	t.Run("with wrong id", func(t *testing.T) {
+		req := &api.ProfileRequest{
+			Token: &token,
+			Profile: &api.Profile{
+				Id: "wrong id",
+			},
+		}
+		_, err := s.RemoveProfile(context.Background(), req)
+		ok, msg := shouldHaveGrpcErrorStatus(err, "profile not found")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	t.Run("with correct id", func(t *testing.T) {
+		req := &api.ProfileRequest{
+			Token: &token,
+			Profile: &api.Profile{
+				Id: testUsers[0].Profiles[0].ID.Hex(),
+			},
+		}
+		resp, err := s.RemoveProfile(context.Background(), req)
+		if err != nil {
+			t.Errorf("unexpected error: %s", err.Error())
+			return
+		}
+		if len(resp.Profiles) != 1 || resp.Profiles[0].Nickname != "main" {
+			t.Errorf("wrong response: %s", resp)
+		}
+	})
+
+	t.Run("last one", func(t *testing.T) {
+		req := &api.ProfileRequest{
+			Token: &token,
+			Profile: &api.Profile{
+				Id: testUsers[0].Profiles[0].ID.Hex(),
+			},
+		}
+		_, err := s.RemoveProfile(context.Background(), req)
+		ok, msg := shouldHaveGrpcErrorStatus(err, "can't delete last profile")
+		if !ok {
+			t.Error(msg)
+		}
+	})
 }
 
 func TestUpdateContactPreferencesEndpoint(t *testing.T) {
-	// TODO: use profiles
-	// create new
-	// update profile
-	t.Error("test unimplemented")
+	s := userManagementServer{}
+	testUsers, err := addTestUsers([]models.User{
+		{
+			Account: models.Account{
+				Type:      "email",
+				AccountID: "test_for_update_contact_prefs@test.com",
+			},
+			ContactPreferences: models.ContactPreferences{
+				SubscribedToNewletter: true,
+				SendNewsletterTo:      []string{"addr_id_1", "addr_id_2"},
+			},
+		},
+	})
+	if err != nil {
+		t.Errorf("failed to create testusers: %s", err.Error())
+		return
+	}
+
+	t.Run("without payload", func(t *testing.T) {
+		_, err := s.UpdateContactPreferences(context.Background(), nil)
+		ok, msg := shouldHaveGrpcErrorStatus(err, "missing argument")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	t.Run("with empty payload", func(t *testing.T) {
+		req := &api.ContactPreferencesMsg{}
+		_, err := s.UpdateContactPreferences(context.Background(), req)
+		ok, msg := shouldHaveGrpcErrorStatus(err, "missing argument")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	token := api.TokenInfos{
+		Id:         testUsers[0].ID.Hex(),
+		InstanceId: testInstanceID,
+	}
+
+	t.Run("update address list and subscription", func(t *testing.T) {
+		req := &api.ContactPreferencesMsg{
+			Token: &token,
+			ContactPreferences: &api.ContactPreferences{
+				SubscribedToNewletter: false,
+				SendNewsletterTo:      []string{"only_here_id"},
+			},
+		}
+		resp, err := s.UpdateContactPreferences(context.Background(), req)
+		if err != nil {
+			t.Errorf("unexpected error: %s", err.Error())
+			return
+		}
+		if len(resp.ContactPreferences.SendNewsletterTo) != 1 || resp.ContactPreferences.SubscribedToNewletter {
+			t.Errorf("wrong response: %s", resp)
+		}
+	})
 }
 
 func TestAddEmailEndpoint(t *testing.T) {
-	// TODO: use profiles
-	// create new
-	// update profile
-	t.Error("test unimplemented")
+	s := userManagementServer{}
+	testUsers, err := addTestUsers([]models.User{
+		{
+			Account: models.Account{
+				Type:      "email",
+				AccountID: "test_for_add_email@test.com",
+			},
+			ContactInfos: []models.ContactInfo{
+				{
+					ID:          primitive.NewObjectID(),
+					Type:        "email",
+					Email:       "test_for_add_email@test.com",
+					ConfirmedAt: time.Now().Unix(),
+				},
+			},
+		},
+	})
+	if err != nil {
+		t.Errorf("failed to create testusers: %s", err.Error())
+		return
+	}
+
+	t.Run("without payload", func(t *testing.T) {
+		_, err := s.AddEmail(context.Background(), nil)
+		ok, msg := shouldHaveGrpcErrorStatus(err, "missing argument")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	t.Run("with empty payload", func(t *testing.T) {
+		req := &api.ContactInfoMsg{}
+		_, err := s.AddEmail(context.Background(), req)
+		ok, msg := shouldHaveGrpcErrorStatus(err, "missing argument")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	token := api.TokenInfos{
+		Id:         testUsers[0].ID.Hex(),
+		InstanceId: testInstanceID,
+	}
+
+	t.Run("with wrong type", func(t *testing.T) {
+		req := &api.ContactInfoMsg{
+			Token: &token,
+			ContactInfo: &api.ContactInfo{
+				Type:    "phone",
+				Address: &api.ContactInfo_Email{Email: "new_email@test.com"},
+			},
+		}
+		_, err := s.AddEmail(context.Background(), req)
+		ok, msg := shouldHaveGrpcErrorStatus(err, "wrong contact type")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	t.Run("add email", func(t *testing.T) {
+		req := &api.ContactInfoMsg{
+			Token: &token,
+			ContactInfo: &api.ContactInfo{
+				Type:    "email",
+				Address: &api.ContactInfo_Email{Email: "new_email@test.com"},
+			},
+		}
+		resp, err := s.AddEmail(context.Background(), req)
+		if err != nil {
+			t.Errorf("unexpected error: %s", err.Error())
+			return
+		}
+		if len(resp.ContactInfos) != 2 || len(resp.ContactInfos[1].Id) < 1 {
+			t.Errorf("wrong response: %s", resp)
+		}
+	})
 }
 
 func TestRemoveEmailEndpoint(t *testing.T) {
-	// TODO: use profiles
-	// create new
-	// update profile
-	t.Error("test unimplemented")
+	s := userManagementServer{}
+	testUsers, err := addTestUsers([]models.User{
+		{
+			Account: models.Account{
+				Type:      "email",
+				AccountID: "test_for_remove_email@test.com",
+			},
+			ContactInfos: []models.ContactInfo{
+				{
+					ID:          primitive.NewObjectID(),
+					Type:        "email",
+					Email:       "test_for_remove_email0@test.com",
+					ConfirmedAt: time.Now().Unix(),
+				},
+				{
+					ID:          primitive.NewObjectID(),
+					Type:        "email",
+					Email:       "test_for_remove_email1@test.com",
+					ConfirmedAt: time.Now().Unix(),
+				}, {
+					ID:          primitive.NewObjectID(),
+					Type:        "email",
+					Email:       "test_for_remove_email2@test.com",
+					ConfirmedAt: time.Now().Unix(),
+				},
+			},
+		},
+	})
+	if err != nil {
+		t.Errorf("failed to create testusers: %s", err.Error())
+		return
+	}
+
+	t.Run("without payload", func(t *testing.T) {
+		_, err := s.RemoveEmail(context.Background(), nil)
+		ok, msg := shouldHaveGrpcErrorStatus(err, "missing argument")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	t.Run("with empty payload", func(t *testing.T) {
+		req := &api.ContactInfoMsg{}
+		_, err := s.RemoveEmail(context.Background(), req)
+		ok, msg := shouldHaveGrpcErrorStatus(err, "missing argument")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	token := api.TokenInfos{
+		Id:         testUsers[0].ID.Hex(),
+		InstanceId: testInstanceID,
+	}
+
+	t.Run("with wrong id", func(t *testing.T) {
+		req := &api.ContactInfoMsg{
+			Token: &token,
+			ContactInfo: &api.ContactInfo{
+				Id: "wrong_id",
+			},
+		}
+		_, err := s.RemoveEmail(context.Background(), req)
+		ok, msg := shouldHaveGrpcErrorStatus(err, "contact not found")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	t.Run("with existing id", func(t *testing.T) {
+		req := &api.ContactInfoMsg{
+			Token: &token,
+			ContactInfo: &api.ContactInfo{
+				Id: testUsers[0].ContactInfos[1].ID.Hex(),
+			},
+		}
+		resp, err := s.RemoveEmail(context.Background(), req)
+		if err != nil {
+			t.Errorf("unexpected error: %s", err.Error())
+			return
+		}
+		if len(resp.ContactInfos) != 2 || resp.ContactInfos[1].Id != testUsers[0].ContactInfos[2].ID.Hex() {
+			t.Errorf("wrong response: %s", resp)
+		}
+	})
 }
