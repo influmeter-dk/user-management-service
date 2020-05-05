@@ -19,48 +19,49 @@ func (s *userManagementServer) Status(ctx context.Context, _ *empty.Empty) (*api
 	return nil, status.Error(codes.Unimplemented, "not implemented")
 }
 
-func (s *userManagementServer) LoginWithEmail(ctx context.Context, creds *api.LoginWithEmailMsg) (*api.UserAuthInfo, error) {
-	if creds == nil {
+func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.LoginWithEmailMsg) (*api.UserAuthInfo, error) {
+	if req == nil || req.Email == "" || req.Password == "" {
 		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
 	}
 
-	return nil, status.Error(codes.Unimplemented, "unimplemented")
-	/*
-		instanceID := creds.InstanceId
-		if instanceID == "" {
-			instanceID = "default"
-		}
-		user, err := getUserByEmailFromDB(instanceID, creds.Email)
+	instanceID := req.InstanceId
+	if instanceID == "" {
+		instanceID = "default"
+	}
+	user, err := getUserByEmailFromDB(instanceID, req.Email)
 
-		if err != nil {
-			return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
-		}
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
+	}
 
-		match, err := utils.ComparePasswordWithHash(user.Account.Password, creds.Password)
-		if err != nil || !match {
-			return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
-		}
+	match, err := utils.ComparePasswordWithHash(user.Account.Password, req.Password)
+	if err != nil || !match {
+		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
+	}
 
-		if err := updateLoginTimeInDB(instanceID, user.ID.Hex()); err != nil {
-			return nil, status.Error(codes.InvalidArgument, err.Error())
-		}
+	if err := updateLoginTimeInDB(instanceID, user.ID.Hex()); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
 
-		var username string
-		if len(user.Roles) > 1 || len(user.Roles) == 1 && user.Roles[0] != "PARTICIPANT" {
-			username = user.Account.AccountID
-		}
+	var username string
+	if len(user.Roles) > 1 || len(user.Roles) == 1 && user.Roles[0] != "PARTICIPANT" {
+		username = user.Account.AccountID
+	}
 
-		response := &api.UserAuthInfo{
-			UserId:            user.ID.Hex(),
-			Roles:             user.Roles,
-			InstanceId:        instanceID,
-			Username:          username,
-			ProfileId:         user.Profiles[0].ID.Hex(),
-			Profiles:          todo,
-			PreferredLanguage: todo,
-		}
-		return response, nil
-	*/
+	apiUser := user.ToAPI()
+
+	response := &api.UserAuthInfo{
+		UserId:            user.ID.Hex(),
+		Roles:             user.Roles,
+		InstanceId:        instanceID,
+		AccountId:         username, // relevant for researchers
+		AccountConfirmed:  apiUser.Account.AccountConfirmedAt > 0,
+		Profiles:          apiUser.Profiles,
+		SelectedProfile:   apiUser.Profiles[0],
+		PreferredLanguage: apiUser.Account.PreferredLanguage,
+	}
+	return response, nil
+
 }
 
 func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.SignupWithEmailMsg) (*api.UserAuthInfo, error) {

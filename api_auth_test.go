@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"testing"
+	"time"
 
 	api "github.com/influenzanet/user-management-service/api"
 	"github.com/influenzanet/user-management-service/models"
@@ -24,9 +25,11 @@ func TestLogin(t *testing.T) {
 
 	testUser := models.User{
 		Account: models.Account{
-			Type:      "email",
-			AccountID: "test-login@test.com",
-			Password:  hashedPw,
+			Type:               "email",
+			AccountID:          "test-login@test.com",
+			AccountConfirmedAt: time.Now().Unix(),
+			Password:           hashedPw,
+			PreferredLanguage:  "de",
 		},
 		Roles: []string{"PARTICIPANT"},
 		Profiles: []models.Profile{
@@ -117,6 +120,11 @@ func TestLogin(t *testing.T) {
 		}
 		if resp == nil || len(resp.UserId) < 3 || len(resp.Roles) < 1 {
 			t.Errorf("unexpected response: %s", resp)
+			return
+		}
+
+		if resp.PreferredLanguage != "de" || !resp.AccountConfirmed {
+			t.Errorf("unexpected PreferredLanguage or AccountConfirmed: %s", resp)
 			return
 		}
 	})
