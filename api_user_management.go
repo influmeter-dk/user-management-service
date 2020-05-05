@@ -5,6 +5,7 @@ import (
 	"log"
 
 	api "github.com/influenzanet/user-management-service/api"
+	"github.com/influenzanet/user-management-service/models"
 	utils "github.com/influenzanet/user-management-service/utils"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -123,12 +124,26 @@ func (s *userManagementServer) SaveProfile(ctx context.Context, req *api.Profile
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
 
-	_, err := getUserByIDFromDB(req.Token.InstanceId, req.Token.Id)
+	user, err := getUserByIDFromDB(req.Token.InstanceId, req.Token.Id)
 	if err != nil {
-		return nil, status.Error(codes.Internal, "not found")
+		return nil, status.Error(codes.Internal, "user not found")
 	}
-	// TODO: handle profile and config
-	return nil, status.Error(codes.Unimplemented, "not implemented")
+
+	if req.Profile.Id == "" {
+		user.AddProfile(models.ProfileFromAPI(req.Profile))
+	} else {
+		err := user.UpdateProfile(models.ProfileFromAPI(req.Profile))
+		if err != nil {
+			return nil, status.Error(codes.Internal, "profile not found")
+		}
+	}
+
+	updUser, err := updateUserInDB(req.Token.InstanceId, user)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return updUser.ToAPI(), nil
 }
 
 func (s *userManagementServer) RemoveProfile(ctx context.Context, req *api.ProfileRequest) (*api.User, error) {

@@ -96,7 +96,7 @@ func (u *User) RemoveContactInfo(id string) error {
 }
 
 // AddProfile generates unique ID and adds profile to the user's array
-func (u *User) AddSubProfile(p Profile) {
+func (u *User) AddProfile(p Profile) {
 	p.ID = primitive.NewObjectID()
 	u.Profiles = append(u.Profiles, p)
 }
