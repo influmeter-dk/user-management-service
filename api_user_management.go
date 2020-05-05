@@ -198,6 +198,9 @@ func (s *userManagementServer) AddEmail(ctx context.Context, req *api.ContactInf
 	}
 
 	user.AddNewEmail(req.ContactInfo.GetEmail(), false)
+	log.Println("TODO: generate token for email confirmation")
+	log.Println("TODO: trigger sending a message when registering email")
+
 	updUser, err := updateUserInDB(req.Token.InstanceId, user)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -210,5 +213,18 @@ func (s *userManagementServer) RemoveEmail(ctx context.Context, req *api.Contact
 	if req == nil || utils.IsTokenEmpty(req.Token) || req.ContactInfo == nil {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
-	return nil, status.Error(codes.Unimplemented, "unimplemented")
+	user, err := getUserByIDFromDB(req.Token.InstanceId, req.Token.Id)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "user not found")
+	}
+
+	err = user.RemoveContactInfo(req.ContactInfo.Id)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	updUser, err := updateUserInDB(req.Token.InstanceId, user)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	return updUser.ToAPI(), nil
 }

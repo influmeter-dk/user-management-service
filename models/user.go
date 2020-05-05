@@ -71,7 +71,7 @@ func (u *User) ConfirmContactInfo(id string) error {
 			return nil
 		}
 	}
-	return errors.New("item with given ID not found")
+	return errors.New("contact not found")
 }
 
 func (u User) FindContactInfo(t string, addr string) (ContactInfo, bool) {
@@ -92,7 +92,7 @@ func (u *User) RemoveContactInfo(id string) error {
 			return nil
 		}
 	}
-	return errors.New("item with given ID not found")
+	return errors.New("contact not found")
 }
 
 // AddProfile generates unique ID and adds profile to the user's array
