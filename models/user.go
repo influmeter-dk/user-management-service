@@ -74,7 +74,7 @@ func (u *User) ConfirmContactInfo(id string) error {
 	return errors.New("contact not found")
 }
 
-func (u User) FindContactInfo(t string, addr string) (ContactInfo, bool) {
+func (u User) FindContactInfoByTypeAndAddr(t string, addr string) (ContactInfo, bool) {
 	for _, ci := range u.ContactInfos {
 		if t == "email" && ci.Email == addr {
 			return ci, true
@@ -85,6 +85,16 @@ func (u User) FindContactInfo(t string, addr string) (ContactInfo, bool) {
 	return ContactInfo{}, false
 }
 
+func (u User) FindContactInfoById(id string) (ContactInfo, bool) {
+	for _, ci := range u.ContactInfos {
+		if ci.ID.Hex() == id {
+			return ci, true
+		}
+	}
+	return ContactInfo{}, false
+}
+
+// RemoveContactInfo from the user and also all references from the contact preferences
 func (u *User) RemoveContactInfo(id string) error {
 	for i, ci := range u.ContactInfos {
 		if ci.ID.Hex() == id {
@@ -92,7 +102,29 @@ func (u *User) RemoveContactInfo(id string) error {
 			return nil
 		}
 	}
+	u.RemoveContactInfoFromContactPreferences(id)
 	return errors.New("contact not found")
+}
+
+// RemoveContactInfoFromContactPreferences should delete all references to a contact info object
+func (u *User) RemoveContactInfoFromContactPreferences(id string) {
+	// remove address from contact preferences
+	for i, addrRef := range u.ContactPreferences.SendNewsletterTo {
+		if addrRef == id {
+			u.ContactPreferences.SendNewsletterTo = append(u.ContactPreferences.SendNewsletterTo[:i], u.ContactPreferences.SendNewsletterTo[i+1:]...)
+			return
+		}
+	}
+}
+
+// ReplaceContactInfoInContactPreferences to use if a new contact reference should replace to old one
+func (u *User) ReplaceContactInfoInContactPreferences(oldId string, newId string) {
+	// replace address from contact preferences
+	for i, addrRef := range u.ContactPreferences.SendNewsletterTo {
+		if addrRef == oldId {
+			u.ContactPreferences.SendNewsletterTo[i] = newId
+		}
+	}
 }
 
 // AddProfile generates unique ID and adds profile to the user's array
