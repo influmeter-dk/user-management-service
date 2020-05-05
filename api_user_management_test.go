@@ -550,7 +550,7 @@ func TestRemoveProfileEndpoint(t *testing.T) {
 			},
 		}
 		_, err := s.RemoveProfile(context.Background(), req)
-		ok, msg := shouldHaveGrpcErrorStatus(err, "profile not found")
+		ok, msg := shouldHaveGrpcErrorStatus(err, "profile with given ID not found")
 		if !ok {
 			t.Error(msg)
 		}
@@ -568,7 +568,7 @@ func TestRemoveProfileEndpoint(t *testing.T) {
 			t.Errorf("unexpected error: %s", err.Error())
 			return
 		}
-		if len(resp.Profiles) != 1 || resp.Profiles[0].Nickname != "main" {
+		if len(resp.Profiles) != 1 || resp.Profiles[0].Nickname == "main" {
 			t.Errorf("wrong response: %s", resp)
 		}
 	})
@@ -577,7 +577,7 @@ func TestRemoveProfileEndpoint(t *testing.T) {
 		req := &api.ProfileRequest{
 			Token: &token,
 			Profile: &api.Profile{
-				Id: testUsers[0].Profiles[0].ID.Hex(),
+				Id: testUsers[0].Profiles[1].ID.Hex(),
 			},
 		}
 		_, err := s.RemoveProfile(context.Background(), req)

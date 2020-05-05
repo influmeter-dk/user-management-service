@@ -147,7 +147,28 @@ func (s *userManagementServer) SaveProfile(ctx context.Context, req *api.Profile
 }
 
 func (s *userManagementServer) RemoveProfile(ctx context.Context, req *api.ProfileRequest) (*api.User, error) {
-	return nil, status.Error(codes.Unimplemented, "unimplemented")
+	if req == nil || utils.IsTokenEmpty(req.Token) || req.Profile == nil {
+		return nil, status.Error(codes.InvalidArgument, "missing argument")
+	}
+
+	user, err := getUserByIDFromDB(req.Token.InstanceId, req.Token.Id)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "user not found")
+	}
+
+	if len(user.Profiles) == 1 {
+		return nil, status.Error(codes.Internal, "can't delete last profile")
+	}
+
+	if err := user.RemoveProfile(req.Profile.Id); err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	updUser, err := updateUserInDB(req.Token.InstanceId, user)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	return updUser.ToAPI(), nil
 }
 
 func (s *userManagementServer) UpdateContactPreferences(ctx context.Context, req *api.ContactPreferencesMsg) (*api.User, error) {
