@@ -96,7 +96,6 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 				Nickname:           req.Email,
 				ConsentConfirmedAt: time.Now().Unix(),
 				AvatarID:           "default",
-				CreatedAt:          time.Now().Unix(),
 			},
 		},
 	}
