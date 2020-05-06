@@ -166,7 +166,7 @@ func (s *userManagementServer) DeleteAccount(ctx context.Context, req *api.UserR
 		UserId:     req.Token.Id,
 		InstanceId: req.Token.InstanceId,
 	}); err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
+		log.Printf("error, when trying to remove temp-tokens: %s", err.Error())
 	}
 
 	log.Printf("user account with id %s successfully removed", req.UserId)
