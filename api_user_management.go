@@ -127,6 +127,13 @@ func (s *userManagementServer) ChangeAccountIDEmail(ctx context.Context, req *ap
 		log.Println("TODO: trigger email sending to new address")
 	}
 
+	if !req.KeepOldEmail {
+		err := user.RemoveContactInfo(oldCI.ID.Hex())
+		if err != nil {
+			log.Println(err.Error())
+		}
+	}
+
 	// Save user:
 	updUser, err := updateUserInDB(req.Token.InstanceId, user)
 	if err != nil {
