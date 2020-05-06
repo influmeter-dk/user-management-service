@@ -93,7 +93,7 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 		Profiles: []models.Profile{
 			{
 				ID:                 primitive.NewObjectID(),
-				Nickname:           "???",
+				Nickname:           req.Email,
 				ConsentConfirmedAt: time.Now().Unix(),
 				AvatarID:           "default",
 				CreatedAt:          time.Now().Unix(),
@@ -101,6 +101,11 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 		},
 	}
 	newUser.AddNewEmail(req.Email, false)
+
+	if req.WantsNewsletter {
+		newUser.ContactPreferences.SubscribedToNewletter = true
+		newUser.ContactPreferences.SendNewsletterTo = []string{newUser.ContactInfos[0].ID.Hex()}
+	}
 
 	instanceID := req.InstanceId
 	if instanceID == "" {
