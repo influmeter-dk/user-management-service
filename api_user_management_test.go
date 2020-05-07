@@ -760,8 +760,8 @@ func TestUpdateContactPreferencesEndpoint(t *testing.T) {
 				AccountID: "test_for_update_contact_prefs@test.com",
 			},
 			ContactPreferences: models.ContactPreferences{
-				SubscribedToNewletter: true,
-				SendNewsletterTo:      []string{"addr_id_1", "addr_id_2"},
+				SubscribedToNewsletter: true,
+				SendNewsletterTo:       []string{"addr_id_1", "addr_id_2"},
 			},
 		},
 	})
@@ -796,8 +796,8 @@ func TestUpdateContactPreferencesEndpoint(t *testing.T) {
 		req := &api.ContactPreferencesMsg{
 			Token: &token,
 			ContactPreferences: &api.ContactPreferences{
-				SubscribedToNewletter: false,
-				SendNewsletterTo:      []string{"only_here_id"},
+				SubscribedToNewsletter: false,
+				SendNewsletterTo:       []string{"only_here_id"},
 			},
 		}
 		resp, err := s.UpdateContactPreferences(context.Background(), req)
@@ -805,7 +805,7 @@ func TestUpdateContactPreferencesEndpoint(t *testing.T) {
 			t.Errorf("unexpected error: %s", err.Error())
 			return
 		}
-		if len(resp.ContactPreferences.SendNewsletterTo) != 1 || resp.ContactPreferences.SubscribedToNewletter {
+		if len(resp.ContactPreferences.SendNewsletterTo) != 1 || resp.ContactPreferences.SubscribedToNewsletter {
 			t.Errorf("wrong response: %s", resp)
 		}
 	})

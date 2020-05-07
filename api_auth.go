@@ -102,7 +102,7 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 	newUser.AddNewEmail(req.Email, false)
 
 	if req.WantsNewsletter {
-		newUser.ContactPreferences.SubscribedToNewletter = true
+		newUser.ContactPreferences.SubscribedToNewsletter = true
 		newUser.ContactPreferences.SendNewsletterTo = []string{newUser.ContactInfos[0].ID.Hex()}
 	}
 
