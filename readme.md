@@ -11,7 +11,7 @@ It follows [common Go organization](https://github.com/influenzanet/influenzanet
 ## Dev operations
 
 Make targets :
-
+ - generate-api: compile proto files
  - build: build service locally
  - install-dev : install dev dependencies (to make & run test)
  - docker: build docker image
