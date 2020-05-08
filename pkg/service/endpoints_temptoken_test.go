@@ -12,7 +12,14 @@ import (
 )
 
 func TestGenerateTempTokenEndpoint(t *testing.T) {
-	s := userManagementServer{}
+	s := userManagementServer{
+		userDBservice:   testUserDBService,
+		globalDBService: testGlobalDBService,
+		JWT: models.JWTConfig{
+			TokenMinimumAgeMin:  time.Second * 1,
+			TokenExpiryInterval: time.Second * 2,
+		},
+	}
 
 	testTempToken := &api.TempTokenInfo{
 		UserId:     "test_user_id",
@@ -56,7 +63,14 @@ func TestGenerateTempTokenEndpoint(t *testing.T) {
 }
 
 func TestValidateTempTokenEndpoint(t *testing.T) {
-	s := userManagementServer{}
+	s := userManagementServer{
+		userDBservice:   testUserDBService,
+		globalDBService: testGlobalDBService,
+		JWT: models.JWTConfig{
+			TokenMinimumAgeMin:  time.Second * 1,
+			TokenExpiryInterval: time.Second * 2,
+		},
+	}
 
 	testTempToken := models.TempToken{
 		UserID:     "test_user_id",
@@ -124,7 +138,14 @@ func TestValidateTempTokenEndpoint(t *testing.T) {
 }
 
 func TestGetTempTokensEndpoint(t *testing.T) {
-	s := userManagementServer{}
+	s := userManagementServer{
+		userDBservice:   testUserDBService,
+		globalDBService: testGlobalDBService,
+		JWT: models.JWTConfig{
+			TokenMinimumAgeMin:  time.Second * 1,
+			TokenExpiryInterval: time.Second * 2,
+		},
+	}
 
 	testTempToken := models.TempToken{
 		UserID:     "test_user_id",
@@ -195,7 +216,14 @@ func TestGetTempTokensEndpoint(t *testing.T) {
 }
 
 func TestDeleteTempTokenEndpoint(t *testing.T) {
-	s := userManagementServer{}
+	s := userManagementServer{
+		userDBservice:   testUserDBService,
+		globalDBService: testGlobalDBService,
+		JWT: models.JWTConfig{
+			TokenMinimumAgeMin:  time.Second * 1,
+			TokenExpiryInterval: time.Second * 2,
+		},
+	}
 
 	testTempToken := models.TempToken{
 		UserID:     "test_user_id",
@@ -266,7 +294,14 @@ func TestDeleteTempTokenEndpoint(t *testing.T) {
 }
 
 func TestPurgeUserTempTokensEndpoint(t *testing.T) {
-	s := userManagementServer{}
+	s := userManagementServer{
+		userDBservice:   testUserDBService,
+		globalDBService: testGlobalDBService,
+		JWT: models.JWTConfig{
+			TokenMinimumAgeMin:  time.Second * 1,
+			TokenExpiryInterval: time.Second * 2,
+		},
+	}
 
 	testTempToken := models.TempToken{
 		UserID:     "test_user_id",

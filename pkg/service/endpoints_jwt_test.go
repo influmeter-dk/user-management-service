@@ -2,22 +2,24 @@ package service
 
 import (
 	"context"
-	"errors"
 	"testing"
 	"time"
 
-	"github.com/golang/mock/gomock"
-
-	api "github.com/influenzanet/authentication-service/api"
-	api_mock "github.com/influenzanet/authentication-service/mocks"
-	"github.com/influenzanet/authentication-service/tokens"
+	"github.com/influenzanet/user-management-service/pkg/api"
+	"github.com/influenzanet/user-management-service/pkg/models"
+	"github.com/influenzanet/user-management-service/pkg/tokens"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func TestValidateJWT(t *testing.T) {
-	conf.JWT.TokenExpiryInterval = time.Second * 2
-	conf.JWT.TokenMinimumAgeMin = time.Second * 1
-
-	s := authServiceServer{}
+	s := userManagementServer{
+		userDBservice:   testUserDBService,
+		globalDBService: testGlobalDBService,
+		JWT: models.JWTConfig{
+			TokenMinimumAgeMin:  time.Second * 1,
+			TokenExpiryInterval: time.Second * 2,
+		},
+	}
 
 	t.Run("without payload", func(t *testing.T) {
 		_, err := s.ValidateJWT(context.Background(), nil)
@@ -36,8 +38,8 @@ func TestValidateJWT(t *testing.T) {
 		}
 	})
 
-	adminToken, err1 := tokens.GenerateNewToken("test-admin-id", "testprofid", []string{"PARTICIPANT", "ADMIN"}, testInstanceID, conf.JWT.TokenExpiryInterval, "")
-	userToken, err2 := tokens.GenerateNewToken("test-user-id", "testprofid", []string{"PARTICIPANT"}, testInstanceID, conf.JWT.TokenExpiryInterval, "")
+	adminToken, err1 := tokens.GenerateNewToken("test-admin-id", "testprofid", []string{"PARTICIPANT", "ADMIN"}, testInstanceID, s.JWT.TokenExpiryInterval, "")
+	userToken, err2 := tokens.GenerateNewToken("test-user-id", "testprofid", []string{"PARTICIPANT"}, testInstanceID, s.JWT.TokenExpiryInterval, "")
 	if err1 != nil || err2 != nil {
 		t.Errorf("unexpected error: %s or %s", err1, err2)
 		return
@@ -92,7 +94,7 @@ func TestValidateJWT(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping waiting for token test in short mode, since it has to wait for token expiration.")
 	}
-	time.Sleep(conf.JWT.TokenExpiryInterval + time.Second)
+	time.Sleep(s.JWT.TokenExpiryInterval + time.Second)
 
 	t.Run("with expired token", func(t *testing.T) {
 		req := &api.JWTRequest{
@@ -107,22 +109,39 @@ func TestValidateJWT(t *testing.T) {
 }
 
 func TestRenewJWT(t *testing.T) {
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-	mockUserManagementClient := api_mock.NewMockUserManagementApiClient(mockCtrl)
-	clients.userManagement = mockUserManagementClient
-
-	conf.JWT.TokenExpiryInterval = time.Second * 2
-	conf.JWT.TokenMinimumAgeMin = time.Second * 1
-
-	userToken, err := tokens.GenerateNewToken("test-user-id", "testprofid", []string{"PARTICIPANT"}, testInstanceID, conf.JWT.TokenExpiryInterval, "")
+	s := userManagementServer{
+		userDBservice:   testUserDBService,
+		globalDBService: testGlobalDBService,
+		JWT: models.JWTConfig{
+			TokenMinimumAgeMin:  time.Second * 1,
+			TokenExpiryInterval: time.Second * 2,
+		},
+	}
+	refreshToken := "TEST-REFRESH-TOKEN-STRING"
+	testUsers, err := addTestUsers([]models.User{
+		{
+			Account: models.Account{
+				Type:          "email",
+				AccountID:     "test_for_renew_token@test.com",
+				RefreshTokens: []string{refreshToken, refreshToken, refreshToken}, // reuse refresh token for simpler testing
+			},
+			Profiles: []models.Profile{
+				{
+					ID:       primitive.NewObjectID(),
+					Nickname: "main",
+				},
+			},
+		},
+	})
+	if err != nil {
+		t.Errorf("failed to create testusers: %s", err.Error())
+		return
+	}
+	userToken, err := tokens.GenerateNewToken(testUsers[0].ID.Hex(), "testprofid", []string{"PARTICIPANT"}, testInstanceID, s.JWT.TokenExpiryInterval, "")
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 		return
 	}
-	refreshToken := "TEST-REFRESH-TOKEN-STRING"
-
-	s := authServiceServer{}
 
 	t.Run("Testing token refresh without token", func(t *testing.T) {
 		_, err := s.RenewJWT(context.Background(), nil)
@@ -172,18 +191,13 @@ func TestRenewJWT(t *testing.T) {
 		t.Skip("skipping renew token test in short mode, since it has to wait for token expiration.")
 	}
 
-	time.Sleep(conf.JWT.TokenMinimumAgeMin)
+	time.Sleep(s.JWT.TokenMinimumAgeMin)
 
 	t.Run("with wrong refresh token", func(t *testing.T) {
 		req := &api.RefreshJWTRequest{
 			AccessToken:  userToken,
 			RefreshToken: userToken + "x",
 		}
-		mockUserManagementClient.EXPECT().CheckRefreshToken(
-			gomock.Any(),
-			gomock.Any(),
-		).Return(nil, errors.New("wrong refresh token"))
-
 		_, err := s.RenewJWT(context.Background(), req)
 		ok, msg := shouldHaveGrpcErrorStatus(err, "wrong refresh token")
 		if !ok {
@@ -197,16 +211,6 @@ func TestRenewJWT(t *testing.T) {
 			AccessToken:  userToken,
 			RefreshToken: refreshToken,
 		}
-
-		mockUserManagementClient.EXPECT().CheckRefreshToken(
-			gomock.Any(),
-			gomock.Any(),
-		).Return(&api.Status{}, nil)
-		mockUserManagementClient.EXPECT().TokenRefreshed(
-			gomock.Any(),
-			gomock.Any(),
-		).Return(&api.Status{}, nil)
-
 		resp, err := s.RenewJWT(context.Background(), req)
 		if err != nil {
 			t.Errorf("unexpected error: %s", err.Error())
@@ -222,7 +226,7 @@ func TestRenewJWT(t *testing.T) {
 		}
 	})
 
-	time.Sleep(conf.JWT.TokenExpiryInterval)
+	time.Sleep(s.JWT.TokenExpiryInterval)
 
 	// Test with expired token
 	t.Run("with expired token", func(t *testing.T) {
@@ -230,15 +234,6 @@ func TestRenewJWT(t *testing.T) {
 			AccessToken:  userToken,
 			RefreshToken: refreshToken,
 		}
-		mockUserManagementClient.EXPECT().CheckRefreshToken(
-			gomock.Any(),
-			gomock.Any(),
-		).Return(&api.Status{}, nil)
-		mockUserManagementClient.EXPECT().TokenRefreshed(
-			gomock.Any(),
-			gomock.Any(),
-		).Return(&api.Status{}, nil)
-
 		resp, err := s.RenewJWT(context.Background(), req)
 		if err != nil {
 			t.Errorf("unexpected error: %s", err.Error())

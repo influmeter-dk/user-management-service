@@ -210,7 +210,7 @@ func TestSignup(t *testing.T) {
 			t.Errorf("unexpected response: %s", resp)
 			return
 		}
-		if resp.SelectedProfileId != "testprofile_id" {
+		if len(resp.SelectedProfileId) < 1 {
 			t.Errorf("unexpected selected profile: %s", resp.SelectedProfileId)
 			return
 		}
@@ -329,11 +329,11 @@ func TestSwitchProfileEndpoint(t *testing.T) {
 			t.Errorf("unexpected response: %s", resp)
 			return
 		}
-		if resp.SelectedProfileId != "testprofile_id" {
+		if resp.SelectedProfileId != testUsers[0].Profiles[2].ID.Hex() {
 			t.Errorf("unexpected selected profile: %s", resp.SelectedProfileId)
 			return
 		}
-		if len(resp.Profiles) != 2 {
+		if len(resp.Profiles) != 3 {
 			t.Errorf("unexpected number of profiles: %d", len(resp.Profiles))
 			return
 		}
