@@ -7,7 +7,7 @@ import (
 	"github.com/influenzanet/user-management-service/pkg/api"
 	"github.com/influenzanet/user-management-service/pkg/models"
 	"github.com/influenzanet/user-management-service/pkg/pwhash"
-	utils "github.com/influenzanet/user-management-service/utils"
+	"github.com/influenzanet/user-management-service/pkg/utils"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )

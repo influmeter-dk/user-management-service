@@ -14,7 +14,7 @@ import (
 	"github.com/influenzanet/user-management-service/pkg/models"
 	"github.com/influenzanet/user-management-service/pkg/pwhash"
 	"github.com/influenzanet/user-management-service/pkg/tokens"
-	utils "github.com/influenzanet/user-management-service/utils"
+	"github.com/influenzanet/user-management-service/pkg/utils"
 )
 
 func (s *userManagementServer) Status(ctx context.Context, _ *empty.Empty) (*api.ServiceStatus, error) {

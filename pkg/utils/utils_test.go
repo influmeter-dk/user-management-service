@@ -4,7 +4,7 @@ import (
 	"log"
 	"testing"
 
-	"github.com/influenzanet/user-management-service/api"
+	"github.com/influenzanet/user-management-service/pkg/api"
 )
 
 func TestCheckPasswordFormat(t *testing.T) {

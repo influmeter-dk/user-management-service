@@ -3,7 +3,7 @@ package utils
 import (
 	"regexp"
 
-	"github.com/influenzanet/user-management-service/api"
+	"github.com/influenzanet/user-management-service/pkg/api"
 )
 
 // CheckEmailFormat to check if input string is a correct email address
