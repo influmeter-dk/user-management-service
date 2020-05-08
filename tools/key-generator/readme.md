@@ -1,0 +1,1 @@
+You can use the key generator, to generate a random private key to sign tokens.

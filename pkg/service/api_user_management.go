@@ -163,10 +163,7 @@ func (s *userManagementServer) DeleteAccount(ctx context.Context, req *api.UserR
 	}
 
 	// remove all TempTokens for the given user ID using auth-service
-	if _, err := clients.authService.PurgeUserTempTokens(context.Background(), &api.TempTokenInfo{
-		UserId:     req.Token.Id,
-		InstanceId: req.Token.InstanceId,
-	}); err != nil {
+	if err := s.globalDBService.DeleteAllTempTokenForUser(req.Token.InstanceId, req.Token.Id, ""); err != nil {
 		log.Printf("error, when trying to remove temp-tokens: %s", err.Error())
 	}
 
