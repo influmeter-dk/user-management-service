@@ -1,38 +1,26 @@
 package service
 
-import "testing"
-
-func TestGetUserEndpoint(t *testing.T) {
-
-	/*		s := userManagementServer{
-			userDBservice:   testUserDBService,
-			globalDBService: testGlobalDBService,
-			JWT: models.JWTConfig{
-				TokenMinimumAgeMin:  time.Second * 1,
-				TokenExpiryInterval: time.Second * 2,
-			},
-		}*/
-	t.Error("unimplemented")
-}
-
-/*
 import (
 	"context"
 	"testing"
 	"time"
 
-	"github.com/golang/mock/gomock"
-	"github.com/influenzanet/user-management-service/models"
-	"github.com/influenzanet/user-management-service/utils"
-
-	api "github.com/influenzanet/user-management-service/api"
-	api_mock "github.com/influenzanet/user-management-service/mocks"
+	"github.com/influenzanet/user-management-service/pkg/api"
+	"github.com/influenzanet/user-management-service/pkg/models"
+	"github.com/influenzanet/user-management-service/pkg/pwhash"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc/status"
 )
 
 func TestGetUserEndpoint(t *testing.T) {
-	s := userManagementServer{}
+	s := userManagementServer{
+		userDBservice:   testUserDBService,
+		globalDBService: testGlobalDBService,
+		JWT: models.JWTConfig{
+			TokenMinimumAgeMin:  time.Second * 1,
+			TokenExpiryInterval: time.Second * 2,
+		},
+	}
 
 	testUsers, err := addTestUsers([]models.User{
 		{
@@ -135,12 +123,19 @@ func TestGetUserEndpoint(t *testing.T) {
 }
 
 func TestChangePasswordEndpoint(t *testing.T) {
-	s := userManagementServer{}
+	s := userManagementServer{
+		userDBservice:   testUserDBService,
+		globalDBService: testGlobalDBService,
+		JWT: models.JWTConfig{
+			TokenMinimumAgeMin:  time.Second * 1,
+			TokenExpiryInterval: time.Second * 2,
+		},
+	}
 
 	oldPassword := "SuperSecurePassword123!§$"
 	newPassword := "NewSuperSecurePassword123!§$"
 
-	hashedOldPassword, _ := utils.HashPassword(oldPassword)
+	hashedOldPassword, _ := pwhash.HashPassword(oldPassword)
 
 	// Create Test User
 	testUser := models.User{
@@ -155,7 +150,7 @@ func TestChangePasswordEndpoint(t *testing.T) {
 		},
 	}
 
-	id, err := addUserToDB(testInstanceID, testUser)
+	id, err := testUserDBService.AddUser(testInstanceID, testUser)
 	if err != nil {
 		t.Errorf("error creating users for testing pw change")
 		return
@@ -269,7 +264,7 @@ func TestChangePasswordEndpoint(t *testing.T) {
 			t.Errorf("unexpected error: %s", err.Error())
 			return
 		}
-		if resp2 == nil || len(resp2.UserId) < 3 || len(resp2.Roles) < 1 {
+		if resp2 == nil || len(resp2.AccessToken) < 3 || len(resp2.RefreshToken) < 1 {
 			t.Errorf("unexpected response: %s", resp2)
 			return
 		}
@@ -277,7 +272,14 @@ func TestChangePasswordEndpoint(t *testing.T) {
 }
 
 func TestChangeAccountIDEmailEndpoint(t *testing.T) {
-	s := userManagementServer{}
+	s := userManagementServer{
+		userDBservice:   testUserDBService,
+		globalDBService: testGlobalDBService,
+		JWT: models.JWTConfig{
+			TokenMinimumAgeMin:  time.Second * 1,
+			TokenExpiryInterval: time.Second * 2,
+		},
+	}
 
 	oldEmailContantID := primitive.NewObjectID()
 	// Create Test User
@@ -457,12 +459,14 @@ func TestChangeAccountIDEmailEndpoint(t *testing.T) {
 }
 
 func TestDeleteAccountEndpoint(t *testing.T) {
-	mockCtrl := gomock.NewController(t)
-	defer mockCtrl.Finish()
-	mockAuthServiceClient := api_mock.NewMockAuthServiceApiClient(mockCtrl)
-	clients.authService = mockAuthServiceClient
-
-	s := userManagementServer{}
+	s := userManagementServer{
+		userDBservice:   testUserDBService,
+		globalDBService: testGlobalDBService,
+		JWT: models.JWTConfig{
+			TokenMinimumAgeMin:  time.Second * 1,
+			TokenExpiryInterval: time.Second * 2,
+		},
+	}
 
 	// Create Test User
 	testUsers, err := addTestUsers([]models.User{
@@ -533,18 +537,12 @@ func TestDeleteAccountEndpoint(t *testing.T) {
 			},
 			UserId: testUsers[0].ID.Hex(),
 		}
-
-		mockAuthServiceClient.EXPECT().PurgeUserTempTokens(
-			gomock.Any(),
-			gomock.Any(),
-		).Return(&api.Status{}, nil)
-
 		_, err := s.DeleteAccount(context.Background(), req)
 		if err != nil {
 			t.Errorf("unexpected error: %s", err.Error())
 			return
 		}
-		_, err = getUserByIDFromDB(testInstanceID, testUsers[0].ID.Hex())
+		_, err = testUserDBService.GetUserByID(testInstanceID, testUsers[0].ID.Hex())
 		if err == nil {
 			t.Error("user should not exist")
 		}
@@ -552,7 +550,14 @@ func TestDeleteAccountEndpoint(t *testing.T) {
 }
 
 func TestChangePreferredLanguageEndpoint(t *testing.T) {
-	s := userManagementServer{}
+	s := userManagementServer{
+		userDBservice:   testUserDBService,
+		globalDBService: testGlobalDBService,
+		JWT: models.JWTConfig{
+			TokenMinimumAgeMin:  time.Second * 1,
+			TokenExpiryInterval: time.Second * 2,
+		},
+	}
 	testUsers, err := addTestUsers([]models.User{
 		{
 			Account: models.Account{
@@ -606,7 +611,14 @@ func TestChangePreferredLanguageEndpoint(t *testing.T) {
 }
 
 func TestSaveProfileEndpoint(t *testing.T) {
-	s := userManagementServer{}
+	s := userManagementServer{
+		userDBservice:   testUserDBService,
+		globalDBService: testGlobalDBService,
+		JWT: models.JWTConfig{
+			TokenMinimumAgeMin:  time.Second * 1,
+			TokenExpiryInterval: time.Second * 2,
+		},
+	}
 	testUsers, err := addTestUsers([]models.User{
 		{
 			Account: models.Account{
@@ -676,7 +688,14 @@ func TestSaveProfileEndpoint(t *testing.T) {
 }
 
 func TestRemoveProfileEndpoint(t *testing.T) {
-	s := userManagementServer{}
+	s := userManagementServer{
+		userDBservice:   testUserDBService,
+		globalDBService: testGlobalDBService,
+		JWT: models.JWTConfig{
+			TokenMinimumAgeMin:  time.Second * 1,
+			TokenExpiryInterval: time.Second * 2,
+		},
+	}
 	testUsers, err := addTestUsers([]models.User{
 		{
 			Account: models.Account{
@@ -768,7 +787,14 @@ func TestRemoveProfileEndpoint(t *testing.T) {
 }
 
 func TestUpdateContactPreferencesEndpoint(t *testing.T) {
-	s := userManagementServer{}
+	s := userManagementServer{
+		userDBservice:   testUserDBService,
+		globalDBService: testGlobalDBService,
+		JWT: models.JWTConfig{
+			TokenMinimumAgeMin:  time.Second * 1,
+			TokenExpiryInterval: time.Second * 2,
+		},
+	}
 	testUsers, err := addTestUsers([]models.User{
 		{
 			Account: models.Account{
@@ -828,7 +854,14 @@ func TestUpdateContactPreferencesEndpoint(t *testing.T) {
 }
 
 func TestAddEmailEndpoint(t *testing.T) {
-	s := userManagementServer{}
+	s := userManagementServer{
+		userDBservice:   testUserDBService,
+		globalDBService: testGlobalDBService,
+		JWT: models.JWTConfig{
+			TokenMinimumAgeMin:  time.Second * 1,
+			TokenExpiryInterval: time.Second * 2,
+		},
+	}
 	testUsers, err := addTestUsers([]models.User{
 		{
 			Account: models.Account{
@@ -908,7 +941,14 @@ func TestAddEmailEndpoint(t *testing.T) {
 }
 
 func TestRemoveEmailEndpoint(t *testing.T) {
-	s := userManagementServer{}
+	s := userManagementServer{
+		userDBservice:   testUserDBService,
+		globalDBService: testGlobalDBService,
+		JWT: models.JWTConfig{
+			TokenMinimumAgeMin:  time.Second * 1,
+			TokenExpiryInterval: time.Second * 2,
+		},
+	}
 	testUsers, err := addTestUsers([]models.User{
 		{
 			Account: models.Account{
@@ -1008,4 +1048,3 @@ func TestRemoveEmailEndpoint(t *testing.T) {
 		}
 	})
 }
-*/
