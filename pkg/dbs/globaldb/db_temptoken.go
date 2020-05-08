@@ -3,13 +3,13 @@ package globaldb
 import (
 	"errors"
 
-	"github.com/influenzanet/authentication-service/models"
-	"github.com/influenzanet/authentication-service/tokens"
+	"github.com/influenzanet/user-management-service/pkg/models"
+	"github.com/influenzanet/user-management-service/pkg/tokens"
 	"go.mongodb.org/mongo-driver/bson"
 )
 
 func (dbService *GlobalDBService) AddTempToken(t models.TempToken) (token string, err error) {
-	ctx, cancel := getContext()
+	ctx, cancel := dbService.getContext()
 	defer cancel()
 
 	t.Token, err = tokens.GenerateUniqueTokenString()
@@ -17,7 +17,7 @@ func (dbService *GlobalDBService) AddTempToken(t models.TempToken) (token string
 		return token, err
 	}
 
-	_, err = collectionRefTempToken().InsertOne(ctx, t)
+	_, err = dbService.collectionRefTempToken().InsertOne(ctx, t)
 	if err != nil {
 		return token, err
 	}
@@ -26,7 +26,7 @@ func (dbService *GlobalDBService) AddTempToken(t models.TempToken) (token string
 }
 
 func (dbService *GlobalDBService) GetTempTokenForUser(instanceID string, uid string, purpose string) (tokens models.TempTokens, err error) {
-	ctx, cancel := getContext()
+	ctx, cancel := dbService.getContext()
 	defer cancel()
 
 	filter := bson.M{"instanceID": instanceID, "userID": uid}
@@ -34,7 +34,7 @@ func (dbService *GlobalDBService) GetTempTokenForUser(instanceID string, uid str
 		filter["purpose"] = purpose
 	}
 
-	cur, err := collectionRefTempToken().Find(ctx, filter)
+	cur, err := dbService.collectionRefTempToken().Find(ctx, filter)
 	if err != nil {
 		return tokens, err
 	}
@@ -57,22 +57,22 @@ func (dbService *GlobalDBService) GetTempTokenForUser(instanceID string, uid str
 }
 
 func (dbService *GlobalDBService) GetTempToken(token string) (models.TempToken, error) {
-	ctx, cancel := getContext()
+	ctx, cancel := dbService.getContext()
 	defer cancel()
 
 	filter := bson.M{"token": token}
 
 	t := models.TempToken{}
-	err := collectionRefTempToken().FindOne(ctx, filter).Decode(&t)
+	err := dbService.collectionRefTempToken().FindOne(ctx, filter).Decode(&t)
 	return t, err
 }
 
 func (dbService *GlobalDBService) DeleteTempToken(token string) error {
-	ctx, cancel := getContext()
+	ctx, cancel := dbService.getContext()
 	defer cancel()
 
 	filter := bson.M{"token": token}
-	res, err := collectionRefTempToken().DeleteOne(ctx, filter)
+	res, err := dbService.collectionRefTempToken().DeleteOne(ctx, filter)
 	if err != nil {
 		return err
 	}
@@ -83,14 +83,14 @@ func (dbService *GlobalDBService) DeleteTempToken(token string) error {
 }
 
 func (dbService *GlobalDBService) DeleteAllTempTokenForUser(instanceID string, userID string, purpose string) error {
-	ctx, cancel := getContext()
+	ctx, cancel := dbService.getContext()
 	defer cancel()
 
 	filter := bson.M{"instanceID": instanceID, "userID": userID}
 	if len(purpose) > 0 {
 		filter["purpose"] = purpose
 	}
-	res, err := collectionRefTempToken().DeleteMany(ctx, filter)
+	res, err := dbService.collectionRefTempToken().DeleteMany(ctx, filter)
 	if err != nil {
 		return err
 	}

@@ -13,9 +13,9 @@ const (
 )
 
 type userManagementServer struct {
-	clients       *models.APIClients
-	userDBservice *userdb.UserDBService
-	userDBservice *globaldb.GlobalDBService
+	clients         *models.APIClients
+	userDBservice   *userdb.UserDBService
+	globalDBService *globaldb.GlobalDBService
 }
 
 // NewUserManagementServer creates a new service instance
@@ -25,7 +25,8 @@ func NewUserManagementServer(
 	globalDBservice *globaldb.GlobalDBService,
 ) *api.UserManagementApiServer {
 	return &userManagementServer{
-		clients:       clients,
-		userDBservice: userDBservice,
+		clients:         clients,
+		userDBservice:   userDBservice,
+		globalDBService: globalDBservice,
 	}
 }

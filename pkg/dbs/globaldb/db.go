@@ -56,9 +56,14 @@ func NewGlobalDBService(
 
 // Collections
 func (dbService *GlobalDBService) collectionRefTempToken() *mongo.Collection {
-	return dbClient.Database(dbService.DBNamePrefix + "global-infos").Collection("temp-tokens")
+	return dbService.DBClient.Database(dbService.DBNamePrefix + "global-infos").Collection("temp-tokens")
 }
 
 func (dbService *GlobalDBService) collectionAppToken() *mongo.Collection {
-	return dbClient.Database(dbService.DBNamePrefix + "global-infos").Collection("app-tokens")
+	return dbService.DBClient.Database(dbService.DBNamePrefix + "global-infos").Collection("app-tokens")
+}
+
+// DB utils
+func (dbService *GlobalDBService) getContext() (ctx context.Context, cancel context.CancelFunc) {
+	return context.WithTimeout(context.Background(), time.Duration(dbService.timeout)*time.Second)
 }

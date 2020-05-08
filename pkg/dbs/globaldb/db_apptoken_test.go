@@ -3,7 +3,7 @@ package globaldb
 import (
 	"testing"
 
-	"github.com/influenzanet/authentication-service/models"
+	"github.com/influenzanet/user-management-service/pkg/models"
 )
 
 func TestDbInterfaceMethodsForAppToken(t *testing.T) {
@@ -12,16 +12,16 @@ func TestDbInterfaceMethodsForAppToken(t *testing.T) {
 		Instances: []string{testInstanceID},
 		Tokens:    []string{"test1", "test2"},
 	}
-	ctx, cancel := getContext()
+	ctx, cancel := testDBService.getContext()
 	defer cancel()
 
-	_, err := collectionAppToken().InsertOne(ctx, appToken)
+	_, err := testDBService.collectionAppToken().InsertOne(ctx, appToken)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err.Error())
 	}
 
 	t.Run("Find existing app token", func(t *testing.T) {
-		res, err := findAppTokenInDB("test1")
+		res, err := testDBService.FindAppToken("test1")
 		if err != nil {
 			t.Errorf("unexpected error: %s", err.Error())
 			return
@@ -32,7 +32,7 @@ func TestDbInterfaceMethodsForAppToken(t *testing.T) {
 	})
 
 	t.Run("Try to find not existing app token", func(t *testing.T) {
-		_, err := findAppTokenInDB("test3")
+		_, err := testDBService.FindAppToken("test3")
 		if err == nil {
 			t.Error("should not be found")
 			return

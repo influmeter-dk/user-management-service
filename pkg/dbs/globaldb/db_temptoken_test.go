@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/influenzanet/authentication-service/models"
-	"github.com/influenzanet/authentication-service/tokens"
+	"github.com/influenzanet/user-management-service/pkg/models"
+	"github.com/influenzanet/user-management-service/pkg/tokens"
 )
 
 // Testing Database Interface methods
@@ -20,7 +20,7 @@ func TestDbInterfaceMethodsForTempToken(t *testing.T) {
 	tokenStr := ""
 
 	t.Run("Add temporary token to DB", func(t *testing.T) {
-		ts, err := addTempTokenDB(testTempToken)
+		ts, err := testDBService.AddTempToken(testTempToken)
 		if err != nil {
 			t.Errorf(err.Error())
 			return
@@ -29,7 +29,7 @@ func TestDbInterfaceMethodsForTempToken(t *testing.T) {
 
 		testTempToken2 := testTempToken
 		testTempToken2.Purpose = "test_purpose2"
-		_, err = addTempTokenDB(testTempToken2)
+		_, err = testDBService.AddTempToken(testTempToken2)
 		if err != nil {
 			t.Errorf(err.Error())
 			return
@@ -37,7 +37,7 @@ func TestDbInterfaceMethodsForTempToken(t *testing.T) {
 	})
 
 	t.Run("try to get temporary token by wrong token string", func(t *testing.T) {
-		tempToken, err := getTempTokenFromDB(tokenStr + "++")
+		tempToken, err := testDBService.GetTempToken(tokenStr + "++")
 		if err == nil || tempToken.UserID != "" {
 			t.Error(tempToken)
 			t.Error("token should not be found")
@@ -46,7 +46,7 @@ func TestDbInterfaceMethodsForTempToken(t *testing.T) {
 	})
 
 	t.Run("get temporary token by token string", func(t *testing.T) {
-		tempToken, err := getTempTokenFromDB(tokenStr)
+		tempToken, err := testDBService.GetTempToken(tokenStr)
 		if err != nil {
 			t.Error("token not found by token string")
 			return
@@ -59,7 +59,7 @@ func TestDbInterfaceMethodsForTempToken(t *testing.T) {
 	})
 
 	t.Run("try to get temporary token by wrong user id", func(t *testing.T) {
-		tt, err := getTempTokenForUserDB(testInstanceID, testTempToken.UserID+"1", "")
+		tt, err := testDBService.GetTempTokenForUser(testInstanceID, testTempToken.UserID+"1", "")
 		if err != nil {
 			t.Error(err)
 			return
@@ -72,7 +72,7 @@ func TestDbInterfaceMethodsForTempToken(t *testing.T) {
 	})
 
 	t.Run("try to get temporary token by wrong instace id", func(t *testing.T) {
-		tt, err := getTempTokenForUserDB(testInstanceID+"1", testTempToken.UserID, "")
+		tt, err := testDBService.GetTempTokenForUser(testInstanceID+"1", testTempToken.UserID, "")
 		if err != nil {
 			t.Error(err)
 			return
@@ -85,7 +85,7 @@ func TestDbInterfaceMethodsForTempToken(t *testing.T) {
 	})
 
 	t.Run("try to get temporary token by wrong purpose", func(t *testing.T) {
-		tt, err := getTempTokenForUserDB(testInstanceID, testTempToken.UserID, testTempToken.Purpose+"1")
+		tt, err := testDBService.GetTempTokenForUser(testInstanceID, testTempToken.UserID, testTempToken.Purpose+"1")
 		if err != nil {
 			t.Error(err)
 			return
@@ -98,7 +98,7 @@ func TestDbInterfaceMethodsForTempToken(t *testing.T) {
 	})
 
 	t.Run("get temporary token by user_id+instance_id", func(t *testing.T) {
-		tt, err := getTempTokenForUserDB(testInstanceID, testTempToken.UserID, "")
+		tt, err := testDBService.GetTempTokenForUser(testInstanceID, testTempToken.UserID, "")
 		if err != nil {
 			t.Error(err)
 			return
@@ -111,7 +111,7 @@ func TestDbInterfaceMethodsForTempToken(t *testing.T) {
 	})
 
 	t.Run("get temporary token by user_id+instance_id+purpose", func(t *testing.T) {
-		tt, err := getTempTokenForUserDB(testInstanceID, testTempToken.UserID, testTempToken.Purpose)
+		tt, err := testDBService.GetTempTokenForUser(testInstanceID, testTempToken.UserID, testTempToken.Purpose)
 		if err != nil {
 			t.Error(err)
 			return
@@ -123,7 +123,7 @@ func TestDbInterfaceMethodsForTempToken(t *testing.T) {
 	})
 
 	t.Run("Try delete not existing temporary token", func(t *testing.T) {
-		err := deleteTempTokenDB(tokenStr + "1")
+		err := testDBService.DeleteTempToken(tokenStr + "1")
 		if err == nil {
 			t.Error("should not be deleted")
 			return
@@ -131,17 +131,17 @@ func TestDbInterfaceMethodsForTempToken(t *testing.T) {
 	})
 
 	t.Run("Delete temporary token", func(t *testing.T) {
-		err := deleteTempTokenDB(tokenStr)
+		err := testDBService.DeleteTempToken(tokenStr)
 		if err != nil {
 			t.Error(err)
 			return
 		}
-		_, err = getTempTokenFromDB(testTempToken.Token)
+		_, err = testDBService.GetTempToken(testTempToken.Token)
 		if err == nil {
 			t.Error("token should be deleted by now")
 			return
 		}
-		_, err = addTempTokenDB(testTempToken)
+		_, err = testDBService.AddTempToken(testTempToken)
 		if err != nil {
 			t.Error(err)
 			return
@@ -149,7 +149,7 @@ func TestDbInterfaceMethodsForTempToken(t *testing.T) {
 	})
 
 	t.Run("Delete all temporary token of a user_id with empty instance_id", func(t *testing.T) {
-		err := deleteAllTempTokenForUserDB("", testTempToken.UserID, "")
+		err := testDBService.DeleteAllTempTokenForUser("", testTempToken.UserID, "")
 		if err == nil {
 			t.Error("should not be deleted, since instance id is missing")
 			return
@@ -157,7 +157,7 @@ func TestDbInterfaceMethodsForTempToken(t *testing.T) {
 	})
 
 	t.Run("Try to delete all temporary token of a user_id with wrong id, correct instance_id", func(t *testing.T) {
-		err := deleteAllTempTokenForUserDB(testTempToken.InstanceID, testTempToken.UserID+"3", "")
+		err := testDBService.DeleteAllTempTokenForUser(testTempToken.InstanceID, testTempToken.UserID+"3", "")
 		if err == nil {
 			t.Error("should not be deleted, because user id is wrong")
 			return
@@ -165,12 +165,12 @@ func TestDbInterfaceMethodsForTempToken(t *testing.T) {
 	})
 
 	t.Run("Delete all temporary token of a user_id+instance_id+purpose", func(t *testing.T) {
-		err := deleteAllTempTokenForUserDB(testTempToken.InstanceID, testTempToken.UserID, testTempToken.Purpose)
+		err := testDBService.DeleteAllTempTokenForUser(testTempToken.InstanceID, testTempToken.UserID, testTempToken.Purpose)
 		if err != nil {
 			t.Error(err)
 			return
 		}
-		tokens, err := getTempTokenForUserDB(testTempToken.InstanceID, testTempToken.UserID, "")
+		tokens, err := testDBService.GetTempTokenForUser(testTempToken.InstanceID, testTempToken.UserID, "")
 		if err != nil {
 			t.Error(err)
 			return
@@ -183,12 +183,12 @@ func TestDbInterfaceMethodsForTempToken(t *testing.T) {
 	})
 
 	t.Run("Delete all temporary token of a user_id+instance_id", func(t *testing.T) {
-		err := deleteAllTempTokenForUserDB(testTempToken.InstanceID, testTempToken.UserID, "")
+		err := testDBService.DeleteAllTempTokenForUser(testTempToken.InstanceID, testTempToken.UserID, "")
 		if err != nil {
 			t.Error(err)
 			return
 		}
-		tokens, err := getTempTokenForUserDB(testTempToken.InstanceID, testTempToken.UserID, "")
+		tokens, err := testDBService.GetTempTokenForUser(testTempToken.InstanceID, testTempToken.UserID, "")
 		if err != nil {
 			t.Error(err)
 			return
