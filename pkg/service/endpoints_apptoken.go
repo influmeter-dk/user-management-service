@@ -3,7 +3,7 @@ package service
 import (
 	"context"
 
-	api "github.com/influenzanet/authentication-service/api"
+	"github.com/influenzanet/user-management-service/pkg/api"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -12,7 +12,7 @@ func (s *userManagementServer) ValidateAppToken(ctx context.Context, req *api.Ap
 	if req == nil || req.Token == "" {
 		return nil, status.Error(codes.InvalidArgument, "invalid app token")
 	}
-	tokenInfos, err := findAppTokenInDB(req.Token)
+	tokenInfos, err := s.globalDBService.FindAppToken(req.Token)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid app token")
 	}

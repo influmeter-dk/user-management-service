@@ -13,14 +13,19 @@ import (
 	"github.com/influenzanet/user-management-service/pkg/api"
 	"github.com/influenzanet/user-management-service/pkg/models"
 	"github.com/influenzanet/user-management-service/pkg/pwhash"
+	"github.com/influenzanet/user-management-service/pkg/tokens"
 	utils "github.com/influenzanet/user-management-service/utils"
 )
 
 func (s *userManagementServer) Status(ctx context.Context, _ *empty.Empty) (*api.ServiceStatus, error) {
-	return nil, status.Error(codes.Unimplemented, "not implemented")
+	return &api.ServiceStatus{
+		Status:  api.ServiceStatus_NORMAL,
+		Msg:     "service running",
+		Version: apiVersion,
+	}, nil
 }
 
-func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.LoginWithEmailMsg) (*api.UserAuthInfo, error) {
+func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.LoginWithEmailMsg) (*api.TokenResponse, error) {
 	if req == nil || req.Email == "" || req.Password == "" {
 		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
 	}
@@ -40,32 +45,54 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
 	}
 
-	if err := s.userDBservice.UpdateLoginTime(instanceID, user.ID.Hex()); err != nil {
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
 	var username string
 	if len(user.Roles) > 1 || len(user.Roles) == 1 && user.Roles[0] != "PARTICIPANT" {
 		username = user.Account.AccountID
 	}
-
 	apiUser := user.ToAPI()
 
-	response := &api.UserAuthInfo{
-		UserId:            user.ID.Hex(),
-		Roles:             user.Roles,
-		InstanceId:        instanceID,
-		AccountId:         username, // relevant for researchers
-		AccountConfirmed:  apiUser.Account.AccountConfirmedAt > 0,
+	// Access Token
+	token, err := tokens.GenerateNewToken(
+		apiUser.Id,
+		apiUser.Profiles[0].Id,
+		user.Roles,
+		instanceID,
+		s.JWT.TokenExpiryInterval,
+		username,
+	)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	// Refresh Token
+	rt, err := tokens.GenerateUniqueTokenString()
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	user.AddRefreshToken(rt)
+
+	user, err = s.userDBservice.UpdateUser(req.InstanceId, user)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	if err := s.userDBservice.UpdateLoginTime(instanceID, user.ID.Hex()); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	response := &api.TokenResponse{
+		AccessToken:       token,
+		RefreshToken:      rt,
+		ExpiresIn:         int32(s.JWT.TokenExpiryInterval / time.Minute),
 		Profiles:          apiUser.Profiles,
-		SelectedProfile:   apiUser.Profiles[0],
+		SelectedProfileId: apiUser.Profiles[0].Id,
 		PreferredLanguage: apiUser.Account.PreferredLanguage,
 	}
 	return response, nil
 
 }
 
-func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.SignupWithEmailMsg) (*api.UserAuthInfo, error) {
+func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.SignupWithEmailMsg) (*api.TokenResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
@@ -116,6 +143,7 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+	newUser.ID, _ = primitive.ObjectIDFromHex(id)
 
 	log.Println("TODO: generate account confirmation token for newly created user")
 	log.Println("TODO: send email for newly created user")
@@ -126,73 +154,50 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 	if len(newUser.Roles) > 1 || len(newUser.Roles) == 1 && newUser.Roles[0] != "PARTICIPANT" {
 		username = newUser.Account.AccountID
 	}
-
 	apiUser := newUser.ToAPI()
 
-	response := &api.UserAuthInfo{
-		UserId:            id,
-		Roles:             newUser.Roles,
-		InstanceId:        instanceID,
-		AccountId:         username, // relevant for researchers
-		AccountConfirmed:  false,
+	// Access Token
+	token, err := tokens.GenerateNewToken(
+		apiUser.Id,
+		apiUser.Profiles[0].Id,
+		newUser.Roles,
+		instanceID,
+		s.JWT.TokenExpiryInterval,
+		username,
+	)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	// Refresh Token
+	rt, err := tokens.GenerateUniqueTokenString()
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	newUser.AddRefreshToken(rt)
+
+	newUser, err = s.userDBservice.UpdateUser(req.InstanceId, newUser)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	if err := s.userDBservice.UpdateLoginTime(instanceID, newUser.ID.Hex()); err != nil {
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	response := &api.TokenResponse{
+		AccessToken:       token,
+		RefreshToken:      rt,
+		ExpiresIn:         int32(s.JWT.TokenExpiryInterval / time.Minute),
 		Profiles:          apiUser.Profiles,
-		SelectedProfile:   apiUser.Profiles[0],
+		SelectedProfileId: apiUser.Profiles[0].Id,
 		PreferredLanguage: apiUser.Account.PreferredLanguage,
 	}
 	return response, nil
 }
 
-func (s *userManagementServer) CheckRefreshToken(ctx context.Context, req *api.RefreshTokenRequest) (*api.ServiceStatus, error) {
-	if req == nil || req.RefreshToken == "" || req.UserId == "" || req.InstanceId == "" {
-		return nil, status.Error(codes.InvalidArgument, "missing argument")
-	}
-	user, err := s.userDBservice.GetUserByID(req.InstanceId, req.UserId)
-	if err != nil {
-		return nil, status.Error(codes.Internal, "user not found")
-	}
-
-	err = user.RemoveRefreshToken(req.RefreshToken)
-	if err != nil {
-		return nil, status.Error(codes.Internal, "token not found")
-	}
-	user.Timestamps.LastTokenRefresh = time.Now().Unix()
-
-	user, err = s.userDBservice.UpdateUser(req.InstanceId, user)
-	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	return &api.ServiceStatus{
-		Status: api.ServiceStatus_NORMAL,
-		Msg:    "refresh token removed",
-	}, nil
-}
-
-func (s *userManagementServer) TokenRefreshed(ctx context.Context, req *api.RefreshTokenRequest) (*api.ServiceStatus, error) {
-	if req == nil || req.RefreshToken == "" || req.UserId == "" || req.InstanceId == "" {
-		return nil, status.Error(codes.InvalidArgument, "missing argument")
-	}
-
-	user, err := s.userDBservice.GetUserByID(req.InstanceId, req.UserId)
-	if err != nil {
-		return nil, status.Error(codes.Internal, "user not found")
-	}
-	user.AddRefreshToken(req.RefreshToken)
-	user.Timestamps.LastTokenRefresh = time.Now().Unix()
-
-	user, err = s.userDBservice.UpdateUser(req.InstanceId, user)
-	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	return &api.ServiceStatus{
-		Status: api.ServiceStatus_NORMAL,
-		Msg:    "token refresh time updated",
-	}, nil
-}
-
-func (s *userManagementServer) SwitchProfile(ctx context.Context, req *api.ProfileRequest) (*api.UserAuthInfo, error) {
-	if req == nil || utils.IsTokenEmpty(req.Token) || req.Profile == nil {
+func (s *userManagementServer) SwitchProfile(ctx context.Context, req *api.SwitchProfileRequest) (*api.TokenResponse, error) {
+	if req == nil || utils.IsTokenEmpty(req.Token) || req.ProfileId == "" || req.RefreshToken == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
 	user, err := s.userDBservice.GetUserByID(req.Token.InstanceId, req.Token.Id)
@@ -200,21 +205,52 @@ func (s *userManagementServer) SwitchProfile(ctx context.Context, req *api.Profi
 		return nil, status.Error(codes.Internal, "user not found")
 	}
 
-	profile, err := user.FindProfile(req.Profile.Id)
+	profile, err := user.FindProfile(req.ProfileId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "profile not found")
 	}
 
+	if err := user.RemoveRefreshToken(req.RefreshToken); err != nil {
+		return nil, status.Error(codes.Internal, "wrong refresh token")
+	}
+
+	var username string
+	if len(user.Roles) > 1 || len(user.Roles) == 1 && user.Roles[0] != "PARTICIPANT" {
+		username = user.Account.AccountID
+	}
 	apiUser := user.ToAPI()
 
-	response := &api.UserAuthInfo{
-		UserId:            user.ID.Hex(),
-		Roles:             user.Roles,
-		InstanceId:        req.Token.InstanceId,
-		AccountConfirmed:  apiUser.Account.AccountConfirmedAt > 0,
-		AccountId:         apiUser.Account.AccountId,
+	// Access Token
+	token, err := tokens.GenerateNewToken(
+		apiUser.Id,
+		profile.ID.Hex(),
+		user.Roles,
+		req.Token.InstanceId,
+		s.JWT.TokenExpiryInterval,
+		username,
+	)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	// Refresh Token
+	rt, err := tokens.GenerateUniqueTokenString()
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	user.AddRefreshToken(rt)
+
+	user, err = s.userDBservice.UpdateUser(req.Token.InstanceId, user)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	response := &api.TokenResponse{
+		AccessToken:       token,
+		RefreshToken:      rt,
+		ExpiresIn:         int32(s.JWT.TokenExpiryInterval / time.Minute),
 		Profiles:          apiUser.Profiles,
-		SelectedProfile:   profile.ToAPI(),
+		SelectedProfileId: profile.ID.Hex(),
 		PreferredLanguage: apiUser.Account.PreferredLanguage,
 	}
 	return response, nil

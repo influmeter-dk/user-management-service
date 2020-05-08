@@ -1,24 +1,30 @@
 package service
 
-/*
 import (
 	"context"
 	"testing"
 	"time"
 
-	api "github.com/influenzanet/user-management-service/api"
-	"github.com/influenzanet/user-management-service/models"
-	utils "github.com/influenzanet/user-management-service/utils"
+	"github.com/influenzanet/user-management-service/pkg/api"
+	"github.com/influenzanet/user-management-service/pkg/models"
+	"github.com/influenzanet/user-management-service/pkg/pwhash"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc/status"
 )
 
 func TestLogin(t *testing.T) {
-	s := userManagementServer{}
+	s := userManagementServer{
+		userDBservice:   testUserDBService,
+		globalDBService: testGlobalDBService,
+		JWT: models.JWTConfig{
+			TokenMinimumAgeMin:  time.Second * 1,
+			TokenExpiryInterval: time.Second * 2,
+		},
+	}
 
 	// Create Test User
 	currentPw := "SuperSecurePassword123!§$"
-	hashedPw, err := utils.HashPassword(currentPw)
+	hashedPw, err := pwhash.HashPassword(currentPw)
 	if err != nil {
 		t.Errorf("error creating user for testing login")
 		return
@@ -38,7 +44,7 @@ func TestLogin(t *testing.T) {
 		},
 	}
 
-	id, err := addUserToDB(testInstanceID, testUser)
+	id, err := testUserDBService.AddUser(testInstanceID, testUser)
 	if err != nil {
 		t.Errorf("error creating user for testing login")
 		return
@@ -119,12 +125,12 @@ func TestLogin(t *testing.T) {
 			t.Errorf("unexpected error: %s", err.Error())
 			return
 		}
-		if resp == nil || len(resp.UserId) < 3 || len(resp.Roles) < 1 {
+		if resp == nil || len(resp.AccessToken) < 1 || len(resp.RefreshToken) < 1 {
 			t.Errorf("unexpected response: %s", resp)
 			return
 		}
 
-		if resp.PreferredLanguage != "de" || !resp.AccountConfirmed {
+		if resp.PreferredLanguage != "de" || resp.SelectedProfileId != testUser.Profiles[0].ID.Hex() {
 			t.Errorf("unexpected PreferredLanguage or AccountConfirmed: %s", resp)
 			return
 		}
@@ -132,7 +138,14 @@ func TestLogin(t *testing.T) {
 }
 
 func TestSignup(t *testing.T) {
-	s := userManagementServer{}
+	s := userManagementServer{
+		userDBservice:   testUserDBService,
+		globalDBService: testGlobalDBService,
+		JWT: models.JWTConfig{
+			TokenMinimumAgeMin:  time.Second * 1,
+			TokenExpiryInterval: time.Second * 2,
+		},
+	}
 
 	wrongEmailFormatNewUserReq := &api.SignupWithEmailMsg{
 		Email:             "test-signup",
@@ -193,21 +206,16 @@ func TestSignup(t *testing.T) {
 			t.Errorf("unexpected error: %s", err.Error())
 			return
 		}
-		if resp == nil {
-			t.Error("response must not be nil")
+		if len(resp.AccessToken) < 1 || len(resp.RefreshToken) < 1 {
+			t.Errorf("unexpected response: %s", resp)
 			return
 		}
-
-		if len(resp.UserId) < 3 || len(resp.Roles) < 1 {
-			t.Errorf("unexpected UserId or roles: %s", resp)
+		if resp.SelectedProfileId != "testprofile_id" {
+			t.Errorf("unexpected selected profile: %s", resp.SelectedProfileId)
 			return
 		}
-		if resp.PreferredLanguage != "en" || resp.AccountConfirmed {
-			t.Errorf("unexpected PreferredLanguage or AccountConfirmed: %s", resp)
-			return
-		}
-		if len(resp.Profiles) != 1 || resp.SelectedProfile == nil {
-			t.Errorf("unexpected profiles: %s", resp)
+		if len(resp.Profiles) != 1 {
+			t.Errorf("unexpected number of profiles: %d", len(resp.Profiles))
 			return
 		}
 	})
@@ -233,173 +241,22 @@ func TestSignup(t *testing.T) {
 	})
 }
 
-func TestCheckRefreshTokenEndpoint(t *testing.T) {
-	s := userManagementServer{}
-	testUsers, err := addTestUsers([]models.User{
-		{
-			Account: models.Account{
-				Type:      "email",
-				AccountID: "test_check_refresh_token_1@test.com",
-			},
+func TestSwitchProfileEndpoint(t *testing.T) {
+	s := userManagementServer{
+		userDBservice:   testUserDBService,
+		globalDBService: testGlobalDBService,
+		JWT: models.JWTConfig{
+			TokenMinimumAgeMin:  time.Second * 1,
+			TokenExpiryInterval: time.Second * 2,
 		},
+	}
+
+	testUsers, err := addTestUsers([]models.User{
 		{
 			Account: models.Account{
 				Type:          "email",
-				AccountID:     "test_check_refresh_token_2@test.com",
-				RefreshTokens: []string{"test-token"},
-			},
-		},
-	})
-	if err != nil {
-		t.Errorf("failed to create testusers: %s", err.Error())
-		return
-	}
-
-	t.Run("without payload", func(t *testing.T) {
-		resp, err := s.CheckRefreshToken(context.Background(), nil)
-		if err == nil {
-			t.Error("should return error")
-		}
-		st, ok := status.FromError(err)
-		if !ok || st.Message() != "missing argument" || resp != nil {
-			t.Errorf("wrong error: %s", err.Error())
-			t.Errorf("or response: %s", resp)
-		}
-	})
-
-	t.Run("with empty payload", func(t *testing.T) {
-		req := &api.RefreshTokenRequest{}
-		resp, err := s.CheckRefreshToken(context.Background(), req)
-		if err == nil {
-			t.Error("should return error")
-		}
-		st, ok := status.FromError(err)
-		if !ok || st.Message() != "missing argument" || resp != nil {
-			t.Errorf("wrong error: %s", err.Error())
-			t.Errorf("or response: %s", resp)
-		}
-	})
-
-	t.Run("with no tokens for the user", func(t *testing.T) {
-		req := &api.RefreshTokenRequest{
-			RefreshToken: "test-token",
-			InstanceId:   testInstanceID,
-			UserId:       testUsers[0].ID.Hex(),
-		}
-		_, err := s.CheckRefreshToken(context.Background(), req)
-		if err == nil {
-			t.Error("should return error")
-		}
-	})
-
-	t.Run("with wrong token for the user", func(t *testing.T) {
-		req := &api.RefreshTokenRequest{
-			RefreshToken: "wrong-test-token",
-			InstanceId:   testInstanceID,
-			UserId:       testUsers[1].ID.Hex(),
-		}
-		_, err := s.CheckRefreshToken(context.Background(), req)
-		if err == nil {
-			t.Error("should return error")
-		}
-	})
-
-	t.Run("with token for the user", func(t *testing.T) {
-		req := &api.RefreshTokenRequest{
-			RefreshToken: "test-token",
-			InstanceId:   testInstanceID,
-			UserId:       testUsers[1].ID.Hex(),
-		}
-		_, err := s.CheckRefreshToken(context.Background(), req)
-		if err != nil {
-			st, _ := status.FromError(err)
-			t.Errorf("unexpected error: %s", st.Message())
-			return
-		}
-
-		user, err := getUserByIDFromDB(testInstanceID, testUsers[1].ID.Hex())
-		if err != nil {
-			st, _ := status.FromError(err)
-			t.Errorf("unexpected error: %s", st.Message())
-			return
-		}
-		if user.HasRefreshToken("test-token") {
-			t.Errorf("refresh token should have been deleted: %s", user.Account.RefreshTokens)
-		}
-	})
-}
-
-func TestTokenRefreshedEndpoint(t *testing.T) {
-	s := userManagementServer{}
-	testUsers, err := addTestUsers([]models.User{
-		{
-			Account: models.Account{
-				Type:      "email",
-				AccountID: "test_token_refreshed_1@test.com",
-			},
-		},
-	})
-	if err != nil {
-		t.Errorf("failed to create testusers: %s", err.Error())
-		return
-	}
-
-	t.Run("without payload", func(t *testing.T) {
-		resp, err := s.TokenRefreshed(context.Background(), nil)
-		if err == nil {
-			t.Error("should return error")
-		}
-		st, ok := status.FromError(err)
-		if !ok || st.Message() != "missing argument" || resp != nil {
-			t.Errorf("wrong error: %s", err.Error())
-			t.Errorf("or response: %s", resp)
-		}
-	})
-
-	t.Run("with empty payload", func(t *testing.T) {
-		req := &api.RefreshTokenRequest{}
-		resp, err := s.TokenRefreshed(context.Background(), req)
-		if err == nil {
-			t.Error("should return error")
-		}
-		st, ok := status.FromError(err)
-		if !ok || st.Message() != "missing argument" || resp != nil {
-			t.Errorf("wrong error: %s", err.Error())
-			t.Errorf("or response: %s", resp)
-		}
-	})
-
-	t.Run("with new token for the user", func(t *testing.T) {
-		req := &api.RefreshTokenRequest{
-			RefreshToken: "new-test-token",
-			InstanceId:   testInstanceID,
-			UserId:       testUsers[0].ID.Hex(),
-		}
-		_, err := s.TokenRefreshed(context.Background(), req)
-		if err != nil {
-			st, _ := status.FromError(err)
-			t.Errorf("unexpected error: %s", st.Message())
-			return
-		}
-
-		user, err := getUserByIDFromDB(testInstanceID, testUsers[0].ID.Hex())
-		if err != nil {
-			st, _ := status.FromError(err)
-			t.Errorf("unexpected error: %s", st.Message())
-			return
-		}
-		if !user.HasRefreshToken("new-test-token") {
-			t.Errorf("refresh token should have been added: %s", user.Account.RefreshTokens)
-		}
-	})
-}
-func TestSwitchProfileEndpoint(t *testing.T) {
-	s := userManagementServer{}
-	testUsers, err := addTestUsers([]models.User{
-		{
-			Account: models.Account{
-				Type:      "email",
-				AccountID: "test_for_switch_profile@test.com",
+				AccountID:     "test_for_switch_profile@test.com",
+				RefreshTokens: []string{"rt"},
 			},
 			Profiles: []models.Profile{
 				{
@@ -431,7 +288,7 @@ func TestSwitchProfileEndpoint(t *testing.T) {
 	})
 
 	t.Run("with empty payload", func(t *testing.T) {
-		req := &api.ProfileRequest{}
+		req := &api.SwitchProfileRequest{}
 		_, err := s.SwitchProfile(context.Background(), req)
 		ok, msg := shouldHaveGrpcErrorStatus(err, "missing argument")
 		if !ok {
@@ -445,11 +302,10 @@ func TestSwitchProfileEndpoint(t *testing.T) {
 	}
 
 	t.Run("with wrong profile id", func(t *testing.T) {
-		req := &api.ProfileRequest{
-			Token: &token,
-			Profile: &api.Profile{
-				Id: "wrong_profile_id",
-			},
+		req := &api.SwitchProfileRequest{
+			Token:        &token,
+			ProfileId:    "wrong_profile_id",
+			RefreshToken: "rt",
 		}
 		_, err := s.SwitchProfile(context.Background(), req)
 		ok, msg := shouldHaveGrpcErrorStatus(err, "profile not found")
@@ -459,25 +315,27 @@ func TestSwitchProfileEndpoint(t *testing.T) {
 	})
 
 	t.Run("with correct profile id", func(t *testing.T) {
-		req := &api.ProfileRequest{
-			Token: &token,
-			Profile: &api.Profile{
-				Id: testUsers[0].Profiles[2].ID.Hex(),
-			},
+		req := &api.SwitchProfileRequest{
+			Token:        &token,
+			ProfileId:    testUsers[0].Profiles[2].ID.Hex(),
+			RefreshToken: "rt",
 		}
 		resp, err := s.SwitchProfile(context.Background(), req)
 		if err != nil {
 			t.Errorf("unexpected error: %s", err.Error())
 			return
 		}
-		if resp.AccountId != testUsers[0].Account.AccountID {
-			t.Errorf("unexpected account id: %s", resp)
+		if len(resp.AccessToken) < 1 || len(resp.RefreshToken) < 1 {
+			t.Errorf("unexpected response: %s", resp)
 			return
 		}
-		if resp.SelectedProfile.Nickname != testUsers[0].Profiles[2].Nickname {
-			t.Errorf("unexpected nickname:  have: %s, want: %s", resp.SelectedProfile.Nickname, testUsers[0].Profiles[2].Nickname)
+		if resp.SelectedProfileId != "testprofile_id" {
+			t.Errorf("unexpected selected profile: %s", resp.SelectedProfileId)
+			return
+		}
+		if len(resp.Profiles) != 2 {
+			t.Errorf("unexpected number of profiles: %d", len(resp.Profiles))
 			return
 		}
 	})
 }
-*/

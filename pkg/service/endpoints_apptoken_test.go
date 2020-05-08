@@ -3,26 +3,32 @@ package service
 import (
 	"context"
 	"testing"
+	"time"
 
-	"github.com/influenzanet/authentication-service/api"
-	"github.com/influenzanet/authentication-service/models"
+	"github.com/influenzanet/user-management-service/pkg/api"
+	"github.com/influenzanet/user-management-service/pkg/models"
 	"google.golang.org/grpc/status"
 )
 
 func TestValidateAppTokenEndpoint(t *testing.T) {
-	s := authServiceServer{}
+	s := userManagementServer{
+		userDBservice:   testUserDBService,
+		globalDBService: testGlobalDBService,
+		JWT: models.JWTConfig{
+			TokenMinimumAgeMin:  time.Second * 1,
+			TokenExpiryInterval: time.Second * 2,
+		},
+	}
 
 	appToken := models.AppToken{
 		AppName:   "testapp",
 		Instances: []string{testInstanceID},
 		Tokens:    []string{"test1", "test2"},
 	}
-	ctx, cancel := getContext()
-	defer cancel()
-
-	_, err := collectionAppToken().InsertOne(ctx, appToken)
+	err := testGlobalDBService.AddAppToken(appToken)
 	if err != nil {
-		t.Errorf("unexpected error: %s", err.Error())
+		t.Errorf("unexpected error when creating app token: %s", err.Error())
+		return
 	}
 
 	t.Run("Without payload", func(t *testing.T) {

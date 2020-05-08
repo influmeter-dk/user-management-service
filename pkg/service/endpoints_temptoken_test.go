@@ -5,9 +5,9 @@ import (
 	"testing"
 	"time"
 
-	api "github.com/influenzanet/authentication-service/api"
-	"github.com/influenzanet/authentication-service/models"
-	"github.com/influenzanet/authentication-service/tokens"
+	"github.com/influenzanet/user-management-service/pkg/api"
+	"github.com/influenzanet/user-management-service/pkg/models"
+	"github.com/influenzanet/user-management-service/pkg/tokens"
 	"google.golang.org/grpc/status"
 )
 
@@ -65,7 +65,7 @@ func TestValidateTempTokenEndpoint(t *testing.T) {
 		Info:       "test_info",
 		Expiration: tokens.GetExpirationTime(10 * time.Second),
 	}
-	token, err := addTempTokenDB(testTempToken)
+	token, err := testGlobalDBService.AddTempToken(testTempToken)
 	if err != nil {
 		t.Error(err)
 		return
@@ -133,7 +133,7 @@ func TestGetTempTokensEndpoint(t *testing.T) {
 		Info:       "test_info",
 		Expiration: tokens.GetExpirationTime(10 * time.Second),
 	}
-	token, err := addTempTokenDB(testTempToken)
+	token, err := testGlobalDBService.AddTempToken(testTempToken)
 	if err != nil {
 		t.Error(err)
 		return
@@ -204,7 +204,7 @@ func TestDeleteTempTokenEndpoint(t *testing.T) {
 		Info:       "test_info",
 		Expiration: tokens.GetExpirationTime(10 * time.Second),
 	}
-	token, err := addTempTokenDB(testTempToken)
+	token, err := testGlobalDBService.AddTempToken(testTempToken)
 	if err != nil {
 		t.Error(err)
 		return
@@ -241,7 +241,7 @@ func TestDeleteTempTokenEndpoint(t *testing.T) {
 			t.Errorf("wrong response: %s", resp)
 			return
 		}
-		tt, err := getTempTokenFromDB(testTempToken.Token)
+		tt, err := testGlobalDBService.GetTempToken(testTempToken.Token)
 		if err != nil || len(tt.Token) < 5 {
 			t.Error("token should not be deleted yet")
 			return
@@ -257,7 +257,7 @@ func TestDeleteTempTokenEndpoint(t *testing.T) {
 			return
 		}
 
-		tt, err := getTempTokenFromDB(testTempToken.Token)
+		tt, err := testGlobalDBService.GetTempToken(testTempToken.Token)
 		if err == nil || len(tt.Token) > 0 {
 			t.Error("token should be deleted by now")
 			return
@@ -275,7 +275,7 @@ func TestPurgeUserTempTokensEndpoint(t *testing.T) {
 		Info:       "test_info",
 		Expiration: tokens.GetExpirationTime(10 * time.Second),
 	}
-	token, err := addTempTokenDB(testTempToken)
+	token, err := testGlobalDBService.AddTempToken(testTempToken)
 	if err != nil {
 		t.Error(err)
 		return
@@ -313,7 +313,7 @@ func TestPurgeUserTempTokensEndpoint(t *testing.T) {
 			t.Errorf("wrong response: %s", resp)
 			return
 		}
-		tokens, err := getTempTokenForUserDB(testTempToken.InstanceID, testTempToken.UserID, "")
+		tokens, err := testGlobalDBService.GetTempTokenForUser(testTempToken.InstanceID, testTempToken.UserID, "")
 		if err != nil {
 			t.Error(err)
 			return
@@ -333,7 +333,7 @@ func TestPurgeUserTempTokensEndpoint(t *testing.T) {
 			t.Errorf("wrong response: %s", resp)
 			return
 		}
-		tokens, err := getTempTokenForUserDB(testTempToken.InstanceID, testTempToken.UserID, "")
+		tokens, err := testGlobalDBService.GetTempTokenForUser(testTempToken.InstanceID, testTempToken.UserID, "")
 		if err != nil {
 			t.Error(err)
 			return
@@ -354,7 +354,7 @@ func TestPurgeUserTempTokensEndpoint(t *testing.T) {
 			return
 		}
 
-		tokens, err := getTempTokenForUserDB(testTempToken.InstanceID, testTempToken.UserID, "")
+		tokens, err := testGlobalDBService.GetTempTokenForUser(testTempToken.InstanceID, testTempToken.UserID, "")
 		if err != nil {
 			t.Error(err)
 			return

@@ -17,7 +17,10 @@ var testDBService *UserDBService
 
 const (
 	testDBNamePrefix = "TEST_"
-	testInstanceID   = "TEST_"
+)
+
+var (
+	testInstanceID = strconv.FormatInt(time.Now().Unix(), 10)
 )
 
 func setupTestDBService() {

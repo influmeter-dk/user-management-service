@@ -70,7 +70,7 @@ func (s *userManagementServer) GetTempTokens(ctx context.Context, t *api.TempTok
 	return tokens.ToAPI(), nil
 }
 
-func (s *userManagementServer) DeleteTempToken(ctx context.Context, t *api.TempToken) (*api.Status, error) {
+func (s *userManagementServer) DeleteTempToken(ctx context.Context, t *api.TempToken) (*api.ServiceStatus, error) {
 	if t == nil || t.Token == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
@@ -79,20 +79,22 @@ func (s *userManagementServer) DeleteTempToken(ctx context.Context, t *api.TempT
 	}
 
 	return &api.ServiceStatus{
-		Status: api.ServiceStatus_NORMAL,
-		Msg:    "deleted",
+		Status:  api.ServiceStatus_NORMAL,
+		Msg:     "deleted",
+		Version: apiVersion,
 	}, nil
 }
 
-func (s *userManagementServer) PurgeUserTempTokens(ctx context.Context, t *api.TempTokenInfo) (*api.Status, error) {
+func (s *userManagementServer) PurgeUserTempTokens(ctx context.Context, t *api.TempTokenInfo) (*api.ServiceStatus, error) {
 	if t == nil || t.UserId == "" || t.InstanceId == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
-	if err := deleteAllTempTokenForUserDB(t.InstanceId, t.UserId, t.Purpose); err != nil {
+	if err := s.globalDBService.DeleteAllTempTokenForUser(t.InstanceId, t.UserId, t.Purpose); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	return &api.Status{
-		Status: api.Status_NORMAL,
-		Msg:    "deleted",
+	return &api.ServiceStatus{
+		Status:  api.ServiceStatus_NORMAL,
+		Msg:     "deleted",
+		Version: apiVersion,
 	}, nil
 }

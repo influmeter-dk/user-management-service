@@ -13,3 +13,11 @@ func (dbService *GlobalDBService) FindAppToken(token string) (appTokenInfos mode
 	err = dbService.collectionAppToken().FindOne(ctx, filter).Decode(&appTokenInfos)
 	return
 }
+
+func (dbService *GlobalDBService) AddAppToken(appToken models.AppToken) (err error) {
+	ctx, cancel := dbService.getContext()
+	defer cancel()
+
+	_, err = dbService.collectionAppToken().InsertOne(ctx, appToken)
+	return
+}

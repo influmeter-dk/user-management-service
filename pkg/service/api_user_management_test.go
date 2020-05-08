@@ -1,5 +1,20 @@
 package service
 
+import "testing"
+
+func TestGetUserEndpoint(t *testing.T) {
+
+	/*		s := userManagementServer{
+			userDBservice:   testUserDBService,
+			globalDBService: testGlobalDBService,
+			JWT: models.JWTConfig{
+				TokenMinimumAgeMin:  time.Second * 1,
+				TokenExpiryInterval: time.Second * 2,
+			},
+		}*/
+	t.Error("unimplemented")
+}
+
 /*
 import (
 	"context"
