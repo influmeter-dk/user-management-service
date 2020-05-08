@@ -1,11 +1,12 @@
-package main
+package service
 
 import (
 	"context"
 	"log"
 
-	api "github.com/influenzanet/user-management-service/api"
-	"github.com/influenzanet/user-management-service/models"
+	"github.com/influenzanet/user-management-service/pkg/api"
+	"github.com/influenzanet/user-management-service/pkg/models"
+	"github.com/influenzanet/user-management-service/pkg/pwhash"
 	utils "github.com/influenzanet/user-management-service/utils"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -25,14 +26,14 @@ func (s *userManagementServer) GetUser(ctx context.Context, req *api.UserReferen
 		return nil, status.Error(codes.PermissionDenied, "not authorized")
 	}
 
-	user, err := getUserByIDFromDB(req.Token.InstanceId, req.UserId)
+	user, err := s.userDBservice.GetUserByID(req.Token.InstanceId, req.UserId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "not found")
 	}
 	return user.ToAPI(), nil
 }
 
-func (s *userManagementServer) ChangePassword(ctx context.Context, req *api.PasswordChangeMsg) (*api.Status, error) {
+func (s *userManagementServer) ChangePassword(ctx context.Context, req *api.PasswordChangeMsg) (*api.ServiceStatus, error) {
 	if req == nil || utils.IsTokenEmpty(req.Token) {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
@@ -41,22 +42,22 @@ func (s *userManagementServer) ChangePassword(ctx context.Context, req *api.Pass
 		return nil, status.Error(codes.InvalidArgument, "new password too weak")
 	}
 
-	user, err := getUserByIDFromDB(req.Token.InstanceId, req.Token.Id)
+	user, err := s.userDBservice.GetUserByID(req.Token.InstanceId, req.Token.Id)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid user and/or password")
 	}
 
-	match, err := utils.ComparePasswordWithHash(user.Account.Password, req.OldPassword)
+	match, err := pwhash.ComparePasswordWithHash(user.Account.Password, req.OldPassword)
 	if err != nil || !match {
 		return nil, status.Error(codes.InvalidArgument, "invalid user and/or password")
 	}
 
-	newHashedPw, err := utils.HashPassword(req.NewPassword)
+	newHashedPw, err := pwhash.HashPassword(req.NewPassword)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	err = updateUserPasswordInDB(req.Token.InstanceId, req.Token.Id, newHashedPw)
+	err = s.userDBservice.UpdateUserPassword(req.Token.InstanceId, req.Token.Id, newHashedPw)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -64,8 +65,8 @@ func (s *userManagementServer) ChangePassword(ctx context.Context, req *api.Pass
 
 	// TODO: initiate email notification for user about password update
 
-	return &api.Status{
-		Status: api.Status_NORMAL,
+	return &api.ServiceStatus{
+		Status: api.ServiceStatus_NORMAL,
 		Msg:    "password changed",
 	}, nil
 }
@@ -76,12 +77,12 @@ func (s *userManagementServer) ChangeAccountIDEmail(ctx context.Context, req *ap
 	}
 
 	// is email address still free to use?
-	_, err := getUserByEmailFromDB(req.Token.InstanceId, req.NewEmail)
+	_, err := s.userDBservice.GetUserByEmail(req.Token.InstanceId, req.NewEmail)
 	if err == nil {
 		return nil, status.Error(codes.InvalidArgument, "already in use")
 	}
 
-	user, err := getUserByIDFromDB(req.Token.InstanceId, req.Token.Id)
+	user, err := s.userDBservice.GetUserByID(req.Token.InstanceId, req.Token.Id)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "user not found")
 	}
@@ -135,14 +136,14 @@ func (s *userManagementServer) ChangeAccountIDEmail(ctx context.Context, req *ap
 	}
 
 	// Save user:
-	updUser, err := updateUserInDB(req.Token.InstanceId, user)
+	updUser, err := s.userDBservice.UpdateUser(req.Token.InstanceId, user)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	return updUser.ToAPI(), nil
 }
 
-func (s *userManagementServer) DeleteAccount(ctx context.Context, req *api.UserReference) (*api.Status, error) {
+func (s *userManagementServer) DeleteAccount(ctx context.Context, req *api.UserReference) (*api.ServiceStatus, error) {
 	if req == nil || utils.IsTokenEmpty(req.Token) || req.UserId == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
@@ -157,7 +158,7 @@ func (s *userManagementServer) DeleteAccount(ctx context.Context, req *api.UserR
 	// TODO: send message to email
 	log.Println("TODO: send email about successful account deletion")
 
-	if err := deleteUserFromDB(req.Token.InstanceId, req.UserId); err != nil {
+	if err := s.userDBservice.DeleteUser(req.Token.InstanceId, req.UserId); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
@@ -170,8 +171,8 @@ func (s *userManagementServer) DeleteAccount(ctx context.Context, req *api.UserR
 	}
 
 	log.Printf("user account with id %s successfully removed", req.UserId)
-	return &api.Status{
-		Status: api.Status_NORMAL,
+	return &api.ServiceStatus{
+		Status: api.ServiceStatus_NORMAL,
 		Msg:    "user deleted",
 	}, nil
 }
@@ -180,7 +181,7 @@ func (s *userManagementServer) ChangePreferredLanguage(ctx context.Context, req 
 	if req == nil || utils.IsTokenEmpty(req.Token) || req.LanguageCode == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
-	user, err := updateAccountPreferredLangDB(req.Token.InstanceId, req.Token.Id, req.LanguageCode)
+	user, err := s.userDBservice.UpdateAccountPreferredLang(req.Token.InstanceId, req.Token.Id, req.LanguageCode)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -192,7 +193,7 @@ func (s *userManagementServer) SaveProfile(ctx context.Context, req *api.Profile
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
 
-	user, err := getUserByIDFromDB(req.Token.InstanceId, req.Token.Id)
+	user, err := s.userDBservice.GetUserByID(req.Token.InstanceId, req.Token.Id)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "user not found")
 	}
@@ -206,7 +207,7 @@ func (s *userManagementServer) SaveProfile(ctx context.Context, req *api.Profile
 		}
 	}
 
-	updUser, err := updateUserInDB(req.Token.InstanceId, user)
+	updUser, err := s.userDBservice.UpdateUser(req.Token.InstanceId, user)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -219,7 +220,7 @@ func (s *userManagementServer) RemoveProfile(ctx context.Context, req *api.Profi
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
 
-	user, err := getUserByIDFromDB(req.Token.InstanceId, req.Token.Id)
+	user, err := s.userDBservice.GetUserByID(req.Token.InstanceId, req.Token.Id)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "user not found")
 	}
@@ -231,7 +232,7 @@ func (s *userManagementServer) RemoveProfile(ctx context.Context, req *api.Profi
 	if err := user.RemoveProfile(req.Profile.Id); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	updUser, err := updateUserInDB(req.Token.InstanceId, user)
+	updUser, err := s.userDBservice.UpdateUser(req.Token.InstanceId, user)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -244,7 +245,7 @@ func (s *userManagementServer) UpdateContactPreferences(ctx context.Context, req
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
 
-	user, err := updateContactPreferencesDB(req.Token.InstanceId, req.Token.Id, models.ContactPreferencesFromAPI(req.ContactPreferences))
+	user, err := s.userDBservice.UpdateContactPreferences(req.Token.InstanceId, req.Token.Id, models.ContactPreferencesFromAPI(req.ContactPreferences))
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -260,7 +261,7 @@ func (s *userManagementServer) AddEmail(ctx context.Context, req *api.ContactInf
 		return nil, status.Error(codes.InvalidArgument, "wrong contact type")
 	}
 
-	user, err := getUserByIDFromDB(req.Token.InstanceId, req.Token.Id)
+	user, err := s.userDBservice.GetUserByID(req.Token.InstanceId, req.Token.Id)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "user not found")
 	}
@@ -269,7 +270,7 @@ func (s *userManagementServer) AddEmail(ctx context.Context, req *api.ContactInf
 	log.Println("TODO: generate token for email confirmation")
 	log.Println("TODO: trigger sending a message when registering email")
 
-	updUser, err := updateUserInDB(req.Token.InstanceId, user)
+	updUser, err := s.userDBservice.UpdateUser(req.Token.InstanceId, user)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -281,7 +282,7 @@ func (s *userManagementServer) RemoveEmail(ctx context.Context, req *api.Contact
 	if req == nil || utils.IsTokenEmpty(req.Token) || req.ContactInfo == nil {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
-	user, err := getUserByIDFromDB(req.Token.InstanceId, req.Token.Id)
+	user, err := s.userDBservice.GetUserByID(req.Token.InstanceId, req.Token.Id)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "user not found")
 	}
@@ -290,7 +291,7 @@ func (s *userManagementServer) RemoveEmail(ctx context.Context, req *api.Contact
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	updUser, err := updateUserInDB(req.Token.InstanceId, user)
+	updUser, err := s.userDBservice.UpdateUser(req.Token.InstanceId, user)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}

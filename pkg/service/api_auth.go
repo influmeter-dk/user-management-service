@@ -1,4 +1,4 @@
-package main
+package service
 
 import (
 	"context"
@@ -10,12 +10,13 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
-	api "github.com/influenzanet/user-management-service/api"
-	"github.com/influenzanet/user-management-service/models"
+	"github.com/influenzanet/user-management-service/pkg/api"
+	"github.com/influenzanet/user-management-service/pkg/models"
+	"github.com/influenzanet/user-management-service/pkg/pwhash"
 	utils "github.com/influenzanet/user-management-service/utils"
 )
 
-func (s *userManagementServer) Status(ctx context.Context, _ *empty.Empty) (*api.Status, error) {
+func (s *userManagementServer) Status(ctx context.Context, _ *empty.Empty) (*api.ServiceStatus, error) {
 	return nil, status.Error(codes.Unimplemented, "not implemented")
 }
 
@@ -28,18 +29,18 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 	if instanceID == "" {
 		instanceID = "default"
 	}
-	user, err := getUserByEmailFromDB(instanceID, req.Email)
+	user, err := s.userDBservice.GetUserByEmail(instanceID, req.Email)
 
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
 	}
 
-	match, err := utils.ComparePasswordWithHash(user.Account.Password, req.Password)
+	match, err := pwhash.ComparePasswordWithHash(user.Account.Password, req.Password)
 	if err != nil || !match {
 		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
 	}
 
-	if err := updateLoginTimeInDB(instanceID, user.ID.Hex()); err != nil {
+	if err := s.userDBservice.UpdateLoginTime(instanceID, user.ID.Hex()); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
@@ -75,7 +76,7 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 		return nil, status.Error(codes.InvalidArgument, "password too weak")
 	}
 
-	password, err := utils.HashPassword(req.Password)
+	password, err := pwhash.HashPassword(req.Password)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -111,7 +112,7 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 		instanceID = "default"
 	}
 
-	id, err := addUserToDB(instanceID, newUser)
+	id, err := s.userDBservice.AddUser(instanceID, newUser)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -141,11 +142,11 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 	return response, nil
 }
 
-func (s *userManagementServer) CheckRefreshToken(ctx context.Context, req *api.RefreshTokenRequest) (*api.Status, error) {
+func (s *userManagementServer) CheckRefreshToken(ctx context.Context, req *api.RefreshTokenRequest) (*api.ServiceStatus, error) {
 	if req == nil || req.RefreshToken == "" || req.UserId == "" || req.InstanceId == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
-	user, err := getUserByIDFromDB(req.InstanceId, req.UserId)
+	user, err := s.userDBservice.GetUserByID(req.InstanceId, req.UserId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "user not found")
 	}
@@ -156,36 +157,36 @@ func (s *userManagementServer) CheckRefreshToken(ctx context.Context, req *api.R
 	}
 	user.Timestamps.LastTokenRefresh = time.Now().Unix()
 
-	user, err = updateUserInDB(req.InstanceId, user)
+	user, err = s.userDBservice.UpdateUser(req.InstanceId, user)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	return &api.Status{
-		Status: api.Status_NORMAL,
+	return &api.ServiceStatus{
+		Status: api.ServiceStatus_NORMAL,
 		Msg:    "refresh token removed",
 	}, nil
 }
 
-func (s *userManagementServer) TokenRefreshed(ctx context.Context, req *api.RefreshTokenRequest) (*api.Status, error) {
+func (s *userManagementServer) TokenRefreshed(ctx context.Context, req *api.RefreshTokenRequest) (*api.ServiceStatus, error) {
 	if req == nil || req.RefreshToken == "" || req.UserId == "" || req.InstanceId == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
 
-	user, err := getUserByIDFromDB(req.InstanceId, req.UserId)
+	user, err := s.userDBservice.GetUserByID(req.InstanceId, req.UserId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "user not found")
 	}
 	user.AddRefreshToken(req.RefreshToken)
 	user.Timestamps.LastTokenRefresh = time.Now().Unix()
 
-	user, err = updateUserInDB(req.InstanceId, user)
+	user, err = s.userDBservice.UpdateUser(req.InstanceId, user)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	return &api.Status{
-		Status: api.Status_NORMAL,
+	return &api.ServiceStatus{
+		Status: api.ServiceStatus_NORMAL,
 		Msg:    "token refresh time updated",
 	}, nil
 }
@@ -194,7 +195,7 @@ func (s *userManagementServer) SwitchProfile(ctx context.Context, req *api.Profi
 	if req == nil || utils.IsTokenEmpty(req.Token) || req.Profile == nil {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
-	user, err := getUserByIDFromDB(req.Token.InstanceId, req.Token.Id)
+	user, err := s.userDBservice.GetUserByID(req.Token.InstanceId, req.Token.Id)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "user not found")
 	}
