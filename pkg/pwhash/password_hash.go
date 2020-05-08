@@ -1,4 +1,4 @@
-package utils
+package pwhash
 
 import (
 	"crypto/rand"

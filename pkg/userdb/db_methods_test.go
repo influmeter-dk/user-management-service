@@ -1,10 +1,10 @@
-package main
+package userdb
 
 import (
 	"testing"
 	"time"
 
-	"github.com/influenzanet/user-management-service/models"
+	"github.com/influenzanet/user-management-service/pkg/models"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 

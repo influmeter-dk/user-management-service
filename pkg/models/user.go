@@ -4,7 +4,7 @@ import (
 	"errors"
 	"time"
 
-	api "github.com/influenzanet/user-management-service/api"
+	"github.com/influenzanet/user-management-service/pkg/api"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 

@@ -1,6 +1,6 @@
 package models
 
-import api "github.com/influenzanet/user-management-service/api"
+import "github.com/influenzanet/user-management-service/pkg/api"
 
 // ContactPreferences defines how to reach out to the user for what purpose
 type ContactPreferences struct {
