@@ -1,12 +1,72 @@
 package userdb
 
 import (
+	"context"
+	"fmt"
+	"log"
+	"os"
+	"strconv"
 	"testing"
 	"time"
 
 	"github.com/influenzanet/user-management-service/pkg/models"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
+
+var testDBService *UserDBService
+
+const (
+	testDBNamePrefix = "TEST_"
+	testInstanceID   = "TEST_"
+)
+
+func setupTestDBService() {
+	connStr := os.Getenv("USER_DB_CONNECTION_STR")
+	username := os.Getenv("USER_DB_USERNAME")
+	password := os.Getenv("USER_DB_PASSWORD")
+	prefix := os.Getenv("USER_DB_CONNECTION_PREFIX") // Used in test mode
+	if connStr == "" || username == "" || password == "" {
+		log.Fatal("Couldn't read DB credentials.")
+	}
+	URI := fmt.Sprintf(`mongodb%s://%s:%s@%s`, prefix, username, password, connStr)
+
+	var err error
+	Timeout, err := strconv.Atoi(os.Getenv("DB_TIMEOUT"))
+	if err != nil {
+		log.Fatal("DB_TIMEOUT: " + err.Error())
+	}
+	IdleConnTimeout, err := strconv.Atoi(os.Getenv("DB_IDLE_CONN_TIMEOUT"))
+	if err != nil {
+		log.Fatal("DB_IDLE_CONN_TIMEOUT" + err.Error())
+	}
+	mps, err := strconv.Atoi(os.Getenv("DB_MAX_POOL_SIZE"))
+	MaxPoolSize := uint64(mps)
+	if err != nil {
+		log.Fatal("DB_MAX_POOL_SIZE: " + err.Error())
+	}
+	testDBService = NewUserDBService(
+		URI, Timeout, IdleConnTimeout, MaxPoolSize, testDBNamePrefix,
+	)
+}
+
+func dropTestDB() {
+	log.Println("Drop test database")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	err := testDBService.DBClient.Database(testDBNamePrefix + testInstanceID + "_users").Drop(ctx)
+	if err != nil {
+		log.Fatal(err)
+	}
+}
+
+// Pre-Test Setup
+func TestMain(m *testing.M) {
+	setupTestDBService()
+	result := m.Run()
+	dropTestDB()
+	os.Exit(result)
+}
 
 // Testing Database Interface methods
 func TestDbInterfaceMethods(t *testing.T) {
@@ -19,7 +79,7 @@ func TestDbInterfaceMethods(t *testing.T) {
 	}
 
 	t.Run("Testing create user", func(t *testing.T) {
-		id, err := addUserToDB(testInstanceID, testUser)
+		id, err := testDBService.AddUser(testInstanceID, testUser)
 		if err != nil {
 			t.Errorf(err.Error())
 			return
@@ -33,14 +93,14 @@ func TestDbInterfaceMethods(t *testing.T) {
 	})
 
 	t.Run("Testing creating existing user", func(t *testing.T) {
-		_, err := addUserToDB(testInstanceID, testUser)
+		_, err := testDBService.AddUser(testInstanceID, testUser)
 		if err == nil {
 			t.Errorf("user already existed, but created again")
 		}
 	})
 
 	t.Run("Testing find existing user by id", func(t *testing.T) {
-		user, err := getUserByIDFromDB(testInstanceID, testUser.ID.Hex())
+		user, err := testDBService.GetUserByID(testInstanceID, testUser.ID.Hex())
 		if err != nil {
 			t.Errorf(err.Error())
 			return
@@ -52,7 +112,7 @@ func TestDbInterfaceMethods(t *testing.T) {
 	})
 
 	t.Run("Testing find not existing user by id", func(t *testing.T) {
-		_, err := getUserByIDFromDB(testInstanceID, testUser.ID.Hex()+"1")
+		_, err := testDBService.GetUserByID(testInstanceID, testUser.ID.Hex()+"1")
 		if err == nil {
 			t.Errorf("user should not be found")
 			return
@@ -60,7 +120,7 @@ func TestDbInterfaceMethods(t *testing.T) {
 	})
 
 	t.Run("Testing find existing user by email", func(t *testing.T) {
-		user, err := getUserByEmailFromDB(testInstanceID, testUser.Account.AccountID)
+		user, err := testDBService.GetUserByEmail(testInstanceID, testUser.Account.AccountID)
 		if err != nil {
 			t.Errorf(err.Error())
 			return
@@ -72,7 +132,7 @@ func TestDbInterfaceMethods(t *testing.T) {
 	})
 
 	t.Run("Testing find not existing user by email", func(t *testing.T) {
-		_, err := getUserByEmailFromDB(testInstanceID, testUser.Account.AccountID+"1")
+		_, err := testDBService.GetUserByEmail(testInstanceID, testUser.Account.AccountID+"1")
 		if err == nil {
 			t.Errorf("user should not be found")
 			return
@@ -81,7 +141,7 @@ func TestDbInterfaceMethods(t *testing.T) {
 
 	t.Run("Testing updating existing user's attributes", func(t *testing.T) {
 		testUser.Account.AccountConfirmedAt = time.Now().Unix()
-		_, err := updateUserInDB(testInstanceID, testUser)
+		_, err := testDBService.UpdateUser(testInstanceID, testUser)
 		if err != nil {
 			t.Errorf(err.Error())
 			return
@@ -98,7 +158,7 @@ func TestDbInterfaceMethods(t *testing.T) {
 			return
 		}
 		currentUser.ID = id
-		_, err = updateUserInDB(testInstanceID, currentUser)
+		_, err = testDBService.UpdateUser(testInstanceID, currentUser)
 		if err == nil {
 			t.Errorf("cannot update not existing user")
 			return
@@ -106,7 +166,7 @@ func TestDbInterfaceMethods(t *testing.T) {
 	})
 
 	t.Run("Testing deleting existing user", func(t *testing.T) {
-		err := deleteUserFromDB(testInstanceID, testUser.ID.Hex())
+		err := testDBService.DeleteUser(testInstanceID, testUser.ID.Hex())
 		if err != nil {
 			t.Errorf(err.Error())
 			return
@@ -114,7 +174,7 @@ func TestDbInterfaceMethods(t *testing.T) {
 	})
 
 	t.Run("Testing deleting not existing user", func(t *testing.T) {
-		err := deleteUserFromDB(testInstanceID, testUser.ID.Hex()+"1")
+		err := testDBService.DeleteUser(testInstanceID, testUser.ID.Hex()+"1")
 		if err == nil {
 			t.Errorf("user should not be found - error expected")
 			return
