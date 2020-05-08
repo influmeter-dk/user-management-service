@@ -48,7 +48,13 @@ func setupTestDBService() {
 		log.Fatal("DB_MAX_POOL_SIZE: " + err.Error())
 	}
 	testDBService = NewUserDBService(
-		URI, Timeout, IdleConnTimeout, MaxPoolSize, testDBNamePrefix,
+		models.DBConfig{
+			URI:             URI,
+			Timeout:         Timeout,
+			IdleConnTimeout: IdleConnTimeout,
+			MaxPoolSize:     MaxPoolSize,
+			DBNamePrefix:    testDBNamePrefix,
+		},
 	)
 }
 

@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/influenzanet/user-management-service/pkg/models"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
@@ -15,24 +16,18 @@ type GlobalDBService struct {
 	DBNamePrefix string
 }
 
-func NewGlobalDBService(
-	URI string,
-	timeout int,
-	idleConnTimeout int,
-	maxPoolSize uint64,
-	DBNamePrefix string,
-) *GlobalDBService {
+func NewGlobalDBService(configs models.DBConfig) *GlobalDBService {
 	var err error
 	dbClient, err := mongo.NewClient(
-		options.Client().ApplyURI(URI),
-		options.Client().SetMaxConnIdleTime(time.Duration(idleConnTimeout)*time.Second),
-		options.Client().SetMaxPoolSize(maxPoolSize),
+		options.Client().ApplyURI(configs.URI),
+		options.Client().SetMaxConnIdleTime(time.Duration(configs.IdleConnTimeout)*time.Second),
+		options.Client().SetMaxPoolSize(configs.MaxPoolSize),
 	)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Duration(configs.Timeout)*time.Second)
 	defer cancel()
 
 	err = dbClient.Connect(ctx)
@@ -40,7 +35,7 @@ func NewGlobalDBService(
 		log.Fatal(err)
 	}
 
-	ctx, conCancel := context.WithTimeout(context.Background(), time.Duration(timeout)*time.Second)
+	ctx, conCancel := context.WithTimeout(context.Background(), time.Duration(configs.Timeout)*time.Second)
 	err = dbClient.Ping(ctx, nil)
 	defer conCancel()
 	if err != nil {
@@ -49,8 +44,8 @@ func NewGlobalDBService(
 
 	return &GlobalDBService{
 		DBClient:     dbClient,
-		timeout:      timeout,
-		DBNamePrefix: DBNamePrefix,
+		timeout:      configs.Timeout,
+		DBNamePrefix: configs.DBNamePrefix,
 	}
 }
 

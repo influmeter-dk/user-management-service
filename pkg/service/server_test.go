@@ -61,7 +61,13 @@ func setupTestGlobalDBService() {
 		log.Fatal("DB_MAX_POOL_SIZE: " + err.Error())
 	}
 	testGlobalDBService = globaldb.NewGlobalDBService(
-		URI, Timeout, IdleConnTimeout, MaxPoolSize, testDBNamePrefix,
+		models.DBConfig{
+			URI:             URI,
+			Timeout:         Timeout,
+			IdleConnTimeout: IdleConnTimeout,
+			MaxPoolSize:     MaxPoolSize,
+			DBNamePrefix:    testDBNamePrefix,
+		},
 	)
 }
 
@@ -90,7 +96,13 @@ func setupTestUserDBService() {
 		log.Fatal("DB_MAX_POOL_SIZE: " + err.Error())
 	}
 	testUserDBService = userdb.NewUserDBService(
-		URI, Timeout, IdleConnTimeout, MaxPoolSize, testDBNamePrefix,
+		models.DBConfig{
+			URI:             URI,
+			Timeout:         Timeout,
+			IdleConnTimeout: IdleConnTimeout,
+			MaxPoolSize:     MaxPoolSize,
+			DBNamePrefix:    testDBNamePrefix,
+		},
 	)
 }
 
