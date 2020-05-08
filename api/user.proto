@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package inf.user;
+option go_package = "github.com/influenzanet/user-management-service/pkg/api";
+
+message User {
+  message Account {
+    string type = 1; // email-pw, or other
+    string account_id = 2;
+    int64 account_confirmed_at = 3;
+    string preferred_language = 4;
+  }
+  message Timestamps {
+    int64 created_at = 1;
+    int64 updated_at = 2;
+    int64 last_login = 3;
+    int64 last_token_refresh = 4;
+  }
+
+  string id = 1;
+  Account account = 2;
+  repeated string roles = 3;
+  Timestamps timestamps = 4;
+  repeated Profile profiles = 5;
+  ContactPreferences contact_preferences = 6;
+  repeated ContactInfo contact_infos = 7;
+}
+
+message ContactInfo {
+  string id = 1;
+  string type = 2; // e.g. email, phone
+  int64 confirmed_at = 3;
+  oneof address {
+    string email = 4;
+    string phone = 5;
+  }
+}
+
+message ContactPreferences {
+  bool subscribed_to_newsletter = 1;
+  repeated string send_newsletter_to = 2; // list of contact info ids
+}
+
+message Profile {
+  string id = 1;
+  string nickname = 2; // we don't ask for real names - just that the user can
+                       // identify the profile
+  int64 consent_confirmed_at = 3; // when the user confirm that he/she has the
+                                  // consent to enter data for this indivildual
+  string avatar_id = 4;           // id of predifined avatar
+  int64 created_at = 5;           // timestamp of profile creation
+}
