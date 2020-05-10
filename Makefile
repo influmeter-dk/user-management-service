@@ -14,7 +14,7 @@ help:
 	@echo "  TEST_ARGS : Arguments to pass to go test call"
 
 generate-api:
-	if [ ! -d "$(PROTO_BUILD_DIR)" ]; then mkdir -p "$(PROTO_BUILD_DIR)"; else  find "$(PROTO_BUILD_DIR)/api" -type f -delete &&  mkdir -p "$(PROTO_BUILD_DIR)"; fi
+	if [ ! -d "$(PROTO_BUILD_DIR)/api" ]; then mkdir -p "$(PROTO_BUILD_DIR)"; else  find "$(PROTO_BUILD_DIR)/api" -type f -delete &&  mkdir -p "$(PROTO_BUILD_DIR)"; fi
 	find ./api/*.proto -maxdepth 1 -type f -exec protoc {} --go_opt=paths=source_relative --go_out=plugins=grpc:$(PROTO_BUILD_DIR) \;
 
 

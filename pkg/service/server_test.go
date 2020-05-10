@@ -20,7 +20,7 @@ var testGlobalDBService *globaldb.GlobalDBService
 var testUserDBService *userdb.UserDBService
 
 const (
-	testDBNamePrefix = "TEST_"
+	testDBNamePrefix = "TEST_SERVICE_"
 )
 
 var (

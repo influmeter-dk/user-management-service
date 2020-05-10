@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"log"
 
 	"github.com/influenzanet/user-management-service/internal/config"
 	"github.com/influenzanet/user-management-service/pkg/dbs/globaldb"
@@ -26,12 +27,14 @@ func main() {
 
 	ctx := context.Background()
 
-	service.RunServer(
+	if err := service.RunServer(
 		ctx,
 		conf.Port,
 		clients,
 		userDBService,
 		globalDBService,
 		conf.JWT,
-	)
+	); err != nil {
+		log.Fatal(err)
+	}
 }

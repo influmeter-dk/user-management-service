@@ -22,6 +22,14 @@ var (
 	testInstanceID = strconv.FormatInt(time.Now().Unix(), 10)
 )
 
+// Pre-Test Setup
+func TestMain(m *testing.M) {
+	setupTestDBService()
+	result := m.Run()
+	dropTestDB()
+	os.Exit(result)
+}
+
 func setupTestDBService() {
 	connStr := os.Getenv("GLOBAL_DB_CONNECTION_STR")
 	username := os.Getenv("GLOBAL_DB_USERNAME")
@@ -62,16 +70,8 @@ func dropTestDB() {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	err := testDBService.DBClient.Database(testDBNamePrefix + testInstanceID + "_users").Drop(ctx)
+	err := testDBService.DBClient.Database(testDBNamePrefix + "global-infos").Drop(ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
-}
-
-// Pre-Test Setup
-func TestMain(m *testing.M) {
-	setupTestDBService()
-	result := m.Run()
-	dropTestDB()
-	os.Exit(result)
 }
