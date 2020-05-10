@@ -76,6 +76,7 @@ message LoginWithEmailMsg {
   string email = 1;
   string password = 2;
   string instance_id = 3;
+  bool as_participant = 4;
 }
 
 message UserReference {

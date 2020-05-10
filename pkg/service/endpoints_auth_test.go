@@ -114,9 +114,10 @@ func TestLogin(t *testing.T) {
 
 	t.Run("with valid fields", func(t *testing.T) {
 		req := &api.LoginWithEmailMsg{
-			Email:      testUser.Account.AccountID,
-			Password:   currentPw,
-			InstanceId: testInstanceID,
+			Email:         testUser.Account.AccountID,
+			Password:      currentPw,
+			InstanceId:    testInstanceID,
+			AsParticipant: true,
 		}
 
 		resp, err := s.LoginWithEmail(context.Background(), req)

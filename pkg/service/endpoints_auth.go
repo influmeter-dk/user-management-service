@@ -46,16 +46,22 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 	}
 
 	var username string
-	if len(user.Roles) > 1 || len(user.Roles) == 1 && user.Roles[0] != "PARTICIPANT" {
-		username = user.Account.AccountID
-	}
-	apiUser := user.ToAPI()
 
+	currentRoles := user.Roles
+	if req.AsParticipant {
+		currentRoles = []string{"PARTICIPANT"}
+	} else {
+		if len(user.Roles) > 1 || len(user.Roles) == 1 && user.Roles[0] != "PARTICIPANT" {
+			username = user.Account.AccountID
+		}
+	}
+
+	apiUser := user.ToAPI()
 	// Access Token
 	token, err := tokens.GenerateNewToken(
 		apiUser.Id,
 		apiUser.Profiles[0].Id,
-		user.Roles,
+		currentRoles,
 		instanceID,
 		s.JWT.TokenExpiryInterval,
 		username,
