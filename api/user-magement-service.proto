@@ -12,6 +12,7 @@ service UserManagementApi {
 
   // Auth and Token handling:
   rpc LoginWithEmail(LoginWithEmailMsg) returns (inf.tokens.TokenResponse);
+  rpc LoginWithTempToken(JWTRequest) returns (inf.tokens.TokenResponse);
   rpc SignupWithEmail(SignupWithEmailMsg) returns (inf.tokens.TokenResponse);
   rpc SwitchProfile(SwitchProfileRequest) returns (inf.tokens.TokenResponse);
   rpc ValidateJWT(JWTRequest) returns (inf.tokens.TokenInfos);

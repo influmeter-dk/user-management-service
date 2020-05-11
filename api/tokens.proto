@@ -13,6 +13,7 @@ message TokenInfos {
   map<string, string> payload = 4; // optional infos, e.g., role(s)
   string profil_id = 5;            // which subprofile of the user is selected
   bool account_confirmed = 6;      // e.g. if user verified email, phone address
+  TempTokenInfo temp_token = 7; // in case user logged in with a temporary token
 }
 
 message TempTokenInfo {
