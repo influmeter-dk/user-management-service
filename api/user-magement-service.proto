@@ -48,6 +48,12 @@ service UserManagementApi {
   rpc UpdateContactPreferences(ContactPreferencesMsg) returns (inf.user.User);
   rpc AddEmail(ContactInfoMsg) returns (inf.user.User);
   rpc RemoveEmail(ContactInfoMsg) returns (inf.user.User);
+
+  // Management Methods:
+  rpc CreateUser(CreateUserReq) returns (inf.user.User);
+  rpc AddRoleForUser(RoleMsg) returns (inf.user.User);
+  rpc RemoveRoleForUser(RoleMsg) returns (inf.user.User);
+  rpc FindNonParticipantUsers(FindNonParticipantUsersMsg) returns (UserListMsg);
 }
 
 /*
@@ -150,3 +156,18 @@ message RefreshJWTRequest {
   string refresh_token = 1;
   string access_token = 2;
 }
+
+message CreateUserReq {
+  inf.tokens.TokenInfos token = 1;
+  inf.user.User user = 2;
+}
+
+message RoleMsg {
+  inf.tokens.TokenInfos token = 1;
+  string account_id = 2;
+  string role = 3;
+}
+
+message FindNonParticipantUsersMsg { inf.tokens.TokenInfos token = 1; }
+
+message UserListMsg { repeated inf.user.User users = 1; }

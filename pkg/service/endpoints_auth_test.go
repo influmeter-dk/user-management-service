@@ -138,7 +138,11 @@ func TestLogin(t *testing.T) {
 	})
 }
 
-func TestSignup(t *testing.T) {
+func TestLoginWithTempToken(t *testing.T) {
+	t.Error("test unimplemented")
+}
+
+func TestSignupWithEmail(t *testing.T) {
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
