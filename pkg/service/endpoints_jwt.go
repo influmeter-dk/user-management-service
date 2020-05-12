@@ -28,6 +28,7 @@ func (s *userManagementServer) ValidateJWT(ctx context.Context, req *api.JWTRequ
 		IssuedAt:   parsedToken.IssuedAt,
 		Payload:    parsedToken.Payload,
 		ProfilId:   parsedToken.ProfileID,
+		TempToken:  parsedToken.TempTokenInfos.ToAPI(),
 	}, nil
 }
 
@@ -62,7 +63,7 @@ func (s *userManagementServer) RenewJWT(ctx context.Context, req *api.RefreshJWT
 	username := tokens.GetUsernameFromPayload(parsedToken.Payload)
 
 	// Generate new access token:
-	newToken, err := tokens.GenerateNewToken(parsedToken.ID, parsedToken.ProfileID, roles, parsedToken.InstanceID, s.JWT.TokenExpiryInterval, username)
+	newToken, err := tokens.GenerateNewToken(parsedToken.ID, parsedToken.ProfileID, roles, parsedToken.InstanceID, s.JWT.TokenExpiryInterval, username, nil)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}

@@ -65,6 +65,7 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 		instanceID,
 		s.JWT.TokenExpiryInterval,
 		username,
+		nil,
 	)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -130,7 +131,7 @@ func (s *userManagementServer) LoginWithTempToken(ctx context.Context, req *api.
 		tokenInfos.InstanceID,
 		s.JWT.TokenExpiryInterval,
 		"",
-		// nil - TODO save temptoken to jwt
+		&tokenInfos,
 	)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -222,6 +223,7 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 		instanceID,
 		s.JWT.TokenExpiryInterval,
 		username,
+		nil,
 	)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -286,6 +288,7 @@ func (s *userManagementServer) SwitchProfile(ctx context.Context, req *api.Switc
 		req.Token.InstanceId,
 		s.JWT.TokenExpiryInterval,
 		username,
+		models.TempTokenFromAPI(req.Token.TempToken),
 	)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())

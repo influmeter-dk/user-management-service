@@ -17,7 +17,10 @@ type TempToken struct {
 }
 
 // ToAPI converts the object from DB to API format
-func (t TempToken) ToAPI() *api.TempTokenInfo {
+func (t *TempToken) ToAPI() *api.TempTokenInfo {
+	if t == nil {
+		return nil
+	}
 	return &api.TempTokenInfo{
 		Token:      t.Token,
 		Expiration: t.Expiration,
@@ -25,6 +28,20 @@ func (t TempToken) ToAPI() *api.TempTokenInfo {
 		UserId:     t.UserID,
 		Info:       t.Info,
 		InstanceId: t.InstanceID,
+	}
+}
+
+func TempTokenFromAPI(t *api.TempTokenInfo) *TempToken {
+	if t == nil {
+		return nil
+	}
+	return &TempToken{
+		Token:      t.Token,
+		Expiration: t.Expiration,
+		Purpose:    t.Purpose,
+		UserID:     t.UserId,
+		Info:       t.Info,
+		InstanceID: t.InstanceId,
 	}
 }
 

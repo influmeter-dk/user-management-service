@@ -38,8 +38,16 @@ func TestValidateJWT(t *testing.T) {
 		}
 	})
 
-	adminToken, err1 := tokens.GenerateNewToken("test-admin-id", "testprofid", []string{"PARTICIPANT", "ADMIN"}, testInstanceID, s.JWT.TokenExpiryInterval, "")
-	userToken, err2 := tokens.GenerateNewToken("test-user-id", "testprofid", []string{"PARTICIPANT"}, testInstanceID, s.JWT.TokenExpiryInterval, "")
+	adminToken, err1 := tokens.GenerateNewToken("test-admin-id", "testprofid", []string{"PARTICIPANT", "ADMIN"}, testInstanceID, s.JWT.TokenExpiryInterval, "", nil)
+	userToken, err2 := tokens.GenerateNewToken(
+		"test-user-id",
+		"testprofid",
+		[]string{"PARTICIPANT"},
+		testInstanceID,
+		s.JWT.TokenExpiryInterval,
+		"",
+		&models.TempToken{UserID: "test-user-id", Purpose: "testpurpose"},
+	)
 	if err1 != nil || err2 != nil {
 		t.Errorf("unexpected error: %s or %s", err1, err2)
 		return
@@ -70,6 +78,10 @@ func TestValidateJWT(t *testing.T) {
 		roles := tokens.GetRolesFromPayload(resp.Payload)
 		if resp == nil || resp.InstanceId != testInstanceID || resp.Id != "test-user-id" || len(roles) != 1 || roles[0] != "PARTICIPANT" {
 			t.Errorf("unexpected response: %s", resp)
+			return
+		}
+		if resp.TempToken == nil || resp.TempToken.Purpose != "testpurpose" {
+			t.Errorf("unexpected temptoken in response: %s", resp.TempToken)
 			return
 		}
 	})
@@ -106,10 +118,6 @@ func TestValidateJWT(t *testing.T) {
 			t.Error(msg)
 		}
 	})
-
-	t.Run("with temptoken", func(t *testing.T) {
-		t.Error("unimplemented")
-	})
 }
 
 func TestRenewJWT(t *testing.T) {
@@ -141,7 +149,7 @@ func TestRenewJWT(t *testing.T) {
 		t.Errorf("failed to create testusers: %s", err.Error())
 		return
 	}
-	userToken, err := tokens.GenerateNewToken(testUsers[0].ID.Hex(), "testprofid", []string{"PARTICIPANT"}, testInstanceID, s.JWT.TokenExpiryInterval, "")
+	userToken, err := tokens.GenerateNewToken(testUsers[0].ID.Hex(), "testprofid", []string{"PARTICIPANT"}, testInstanceID, s.JWT.TokenExpiryInterval, "", nil)
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 		return

@@ -10,6 +10,7 @@ import (
 	b64 "encoding/base64"
 
 	jwt "github.com/dgrijalva/jwt-go"
+	"github.com/influenzanet/user-management-service/pkg/models"
 )
 
 var (
@@ -19,10 +20,11 @@ var (
 
 // UserClaims - Information a token enocodes
 type UserClaims struct {
-	ID         string            `json:"id,omitempty"`
-	InstanceID string            `json:"instance_id,omitempty"`
-	ProfileID  string            `json:"profile_id,omitempty"`
-	Payload    map[string]string `json:"payload,omitempty"`
+	ID             string            `json:"id,omitempty"`
+	InstanceID     string            `json:"instance_id,omitempty"`
+	ProfileID      string            `json:"profile_id,omitempty"`
+	Payload        map[string]string `json:"payload,omitempty"`
+	TempTokenInfos *models.TempToken `json:"temptoken,omitempty"`
 	jwt.StandardClaims
 }
 
@@ -49,7 +51,7 @@ func getSecretKey() (newSecretKey []byte, err error) {
 }
 
 // GenerateNewToken create and signes a new token
-func GenerateNewToken(userID string, profileID string, userRoles []string, instanceID string, experiresIn time.Duration, username string) (string, error) {
+func GenerateNewToken(userID string, profileID string, userRoles []string, instanceID string, experiresIn time.Duration, username string, tempTokenInfos *models.TempToken) (string, error) {
 	payload := map[string]string{}
 
 	if len(userRoles) > 0 {
@@ -65,6 +67,7 @@ func GenerateNewToken(userID string, profileID string, userRoles []string, insta
 		instanceID,
 		profileID,
 		payload,
+		tempTokenInfos,
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(experiresIn).Unix(),
 			IssuedAt:  time.Now().Unix(),
