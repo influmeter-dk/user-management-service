@@ -39,6 +39,7 @@ func TestCreateUserEndpoint(t *testing.T) {
 	t.Run("with non admin user", func(t *testing.T) {
 		req := &api.CreateUserReq{
 			Token: &api.TokenInfos{
+				Id:         "testuserid",
 				InstanceId: testInstanceID,
 				Payload: map[string]string{
 					"roles": "PARTICIPANT",
@@ -57,13 +58,16 @@ func TestCreateUserEndpoint(t *testing.T) {
 	t.Run("with valid arguments", func(t *testing.T) {
 		req := &api.CreateUserReq{
 			Token: &api.TokenInfos{
+				Id:         "testuserid",
 				InstanceId: testInstanceID,
 				Payload: map[string]string{
 					"roles": "PARTICIPANT,ADMIN",
 				},
 			},
-			AccountId:       "test_created_user@email.test",
-			InitialPassword: "initpw",
+			AccountId:         "test_created_user@email.test",
+			InitialPassword:   "initpw543",
+			PreferredLanguage: "en",
+			Roles:             []string{"PARTICIPANT", "ADMIN"},
 		}
 		resp, err := s.CreateUser(context.Background(), req)
 		if err != nil {
@@ -79,16 +83,17 @@ func TestCreateUserEndpoint(t *testing.T) {
 	t.Run("with already existing user", func(t *testing.T) {
 		req := &api.CreateUserReq{
 			Token: &api.TokenInfos{
+				Id:         "testuserid",
 				InstanceId: testInstanceID,
 				Payload: map[string]string{
 					"roles": "PARTICIPANT,ADMIN",
 				},
 			},
 			AccountId:       "test_created_user@email.test",
-			InitialPassword: "initpw",
+			InitialPassword: "initpwi7867-k",
 		}
 		_, err := s.CreateUser(context.Background(), req)
-		ok, msg := shouldHaveGrpcErrorStatus(err, "already exists")
+		ok, msg := shouldHaveGrpcErrorStatus(err, "user already exists")
 		if !ok {
 			t.Error(msg)
 		}
@@ -138,6 +143,7 @@ func TestAddRoleForUserEndpoint(t *testing.T) {
 	t.Run("with non admin user", func(t *testing.T) {
 		req := &api.RoleMsg{
 			Token: &api.TokenInfos{
+				Id:         "testuserid",
 				InstanceId: testInstanceID,
 				Payload: map[string]string{
 					"roles": "PARTICIPANT",
@@ -156,6 +162,7 @@ func TestAddRoleForUserEndpoint(t *testing.T) {
 	t.Run("with valid arguments", func(t *testing.T) {
 		req := &api.RoleMsg{
 			Token: &api.TokenInfos{
+				Id:         "testuserid",
 				InstanceId: testInstanceID,
 				Payload: map[string]string{
 					"roles": "PARTICIPANT,ADMIN",
@@ -178,6 +185,7 @@ func TestAddRoleForUserEndpoint(t *testing.T) {
 	t.Run("with already added role", func(t *testing.T) {
 		req := &api.RoleMsg{
 			Token: &api.TokenInfos{
+				Id:         "testuserid",
 				InstanceId: testInstanceID,
 				Payload: map[string]string{
 					"roles": "PARTICIPANT,ADMIN",
@@ -239,6 +247,7 @@ func TestRemoveRoleForUserEndpoint(t *testing.T) {
 	t.Run("with non admin user", func(t *testing.T) {
 		req := &api.RoleMsg{
 			Token: &api.TokenInfos{
+				Id:         "testuserid",
 				InstanceId: testInstanceID,
 				Payload: map[string]string{
 					"roles": "PARTICIPANT",
@@ -257,6 +266,7 @@ func TestRemoveRoleForUserEndpoint(t *testing.T) {
 	t.Run("with valid arguments", func(t *testing.T) {
 		req := &api.RoleMsg{
 			Token: &api.TokenInfos{
+				Id:         "testuserid",
 				InstanceId: testInstanceID,
 				Payload: map[string]string{
 					"roles": "PARTICIPANT,ADMIN",
@@ -279,6 +289,7 @@ func TestRemoveRoleForUserEndpoint(t *testing.T) {
 	t.Run("with already non existing role", func(t *testing.T) {
 		req := &api.RoleMsg{
 			Token: &api.TokenInfos{
+				Id:         "testuserid",
 				InstanceId: testInstanceID,
 				Payload: map[string]string{
 					"roles": "PARTICIPANT,ADMIN",
@@ -354,6 +365,7 @@ func TestFindNonParticipantUsersEndpoint(t *testing.T) {
 	t.Run("with non admin user", func(t *testing.T) {
 		req := &api.FindNonParticipantUsersMsg{
 			Token: &api.TokenInfos{
+				Id:         "testuserid",
 				InstanceId: testInstanceID,
 				Payload: map[string]string{
 					"roles": "PARTICIPANT",
@@ -370,6 +382,7 @@ func TestFindNonParticipantUsersEndpoint(t *testing.T) {
 	t.Run("with valid arguments", func(t *testing.T) {
 		req := &api.FindNonParticipantUsersMsg{
 			Token: &api.TokenInfos{
+				Id:         "testuserid",
 				InstanceId: testInstanceID,
 				Payload: map[string]string{
 					"roles": "PARTICIPANT,ADMIN",

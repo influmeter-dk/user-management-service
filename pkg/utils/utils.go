@@ -2,6 +2,7 @@ package utils
 
 import (
 	"regexp"
+	"strings"
 
 	"github.com/influenzanet/user-management-service/pkg/api"
 )
@@ -39,6 +40,22 @@ func CheckPasswordFormat(password string) bool {
 func IsTokenEmpty(t *api.TokenInfos) bool {
 	if t == nil || t.Id == "" || t.InstanceId == "" {
 		return true
+	}
+	return false
+}
+
+// CheckRoleInToken Check if role is present in the token
+func CheckRoleInToken(t *api.TokenInfos, role string) bool {
+	if t == nil {
+		return false
+	}
+	if val, ok := t.Payload["roles"]; ok {
+		roles := strings.Split(val, ",")
+		for _, r := range roles {
+			if r == role {
+				return true
+			}
+		}
 	}
 	return false
 }
