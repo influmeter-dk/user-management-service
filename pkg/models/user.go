@@ -50,6 +50,28 @@ func (u User) HasRole(role string) bool {
 	return false
 }
 
+// AddRole to append a role to the user
+func (u *User) AddRole(role string) error {
+	for _, v := range u.Roles {
+		if v == role {
+			return errors.New("role already added")
+		}
+	}
+	u.Roles = append(u.Roles, role)
+	return nil
+}
+
+// RemoveRole to append a role to the user
+func (u *User) RemoveRole(role string) error {
+	for i, ci := range u.Roles {
+		if ci == role {
+			u.Roles = append(u.Roles[:i], u.Roles[i+1:]...)
+			return nil
+		}
+	}
+	return errors.New("role not found")
+}
+
 // Add a new email address
 func (u *User) AddNewEmail(addr string, confirmed bool) {
 	contactInfo := ContactInfo{

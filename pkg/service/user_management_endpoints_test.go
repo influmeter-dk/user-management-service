@@ -116,7 +116,9 @@ func TestAddRoleForUserEndpoint(t *testing.T) {
 			Account: models.Account{
 				Type:      "email",
 				AccountID: "test_for_add_role@test.com",
-			}},
+			},
+			Roles: []string{"PARTICIPANT"},
+		},
 	})
 	if err != nil {
 		t.Errorf("failed to create testusers: %s", err.Error())
@@ -176,7 +178,7 @@ func TestAddRoleForUserEndpoint(t *testing.T) {
 			t.Errorf("unexpected error: %s", err.Error())
 			return
 		}
-		if len(resp.Roles) != 2 && resp.Roles[1] != "ADMIN" {
+		if len(resp.Roles) != 2 || resp.Roles[1] != "ADMIN" {
 			t.Errorf("unexpected response: %s", resp)
 			return
 		}

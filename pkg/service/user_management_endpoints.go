@@ -75,7 +75,19 @@ func (s *userManagementServer) AddRoleForUser(ctx context.Context, req *api.Role
 	if !utils.CheckRoleInToken(req.Token, "ADMIN") {
 		return nil, status.Error(codes.PermissionDenied, "permission denied")
 	}
-	return nil, status.Error(codes.Unimplemented, "unimplemented")
+
+	user, err := s.userDBservice.GetUserByEmail(req.Token.InstanceId, req.AccountId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if err := user.AddRole(req.Role); err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	user, err = s.userDBservice.UpdateUser(req.Token.InstanceId, user)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	return user.ToAPI(), nil
 }
 
 func (s *userManagementServer) RemoveRoleForUser(ctx context.Context, req *api.RoleMsg) (*api.User, error) {
@@ -85,7 +97,18 @@ func (s *userManagementServer) RemoveRoleForUser(ctx context.Context, req *api.R
 	if !utils.CheckRoleInToken(req.Token, "ADMIN") {
 		return nil, status.Error(codes.PermissionDenied, "permission denied")
 	}
-	return nil, status.Error(codes.Unimplemented, "unimplemented")
+	user, err := s.userDBservice.GetUserByEmail(req.Token.InstanceId, req.AccountId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	if err := user.RemoveRole(req.Role); err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	user, err = s.userDBservice.UpdateUser(req.Token.InstanceId, user)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	return user.ToAPI(), nil
 }
 
 func (s *userManagementServer) FindNonParticipantUsers(ctx context.Context, req *api.FindNonParticipantUsersMsg) (*api.UserListMsg, error) {
