@@ -306,7 +306,6 @@ func TestRemoveRoleForUserEndpoint(t *testing.T) {
 			t.Error(msg)
 		}
 	})
-
 }
 
 func TestFindNonParticipantUsersEndpoint(t *testing.T) {
@@ -396,8 +395,10 @@ func TestFindNonParticipantUsersEndpoint(t *testing.T) {
 			t.Errorf("unexpected error: %s", err.Error())
 			return
 		}
-		if len(resp.Users) != 2 {
-			t.Errorf("unexpected response: %s", resp.Users)
+		for _, u := range resp.Users {
+			if len(u.Roles) == 1 && u.Roles[0] == "PARTICIPANT" {
+				t.Errorf("unexpected user: %s", u)
+			}
 		}
 	})
 }

@@ -156,3 +156,37 @@ func (dbService *UserDBService) DeleteUser(instanceID string, id string) error {
 	}
 	return nil
 }
+
+func (dbService *UserDBService) FindNonParticipantUsers(instanceID string) (users []models.User, err error) {
+	ctx, cancel := dbService.getContext()
+	defer cancel()
+
+	filter := bson.M{
+		"roles": bson.M{"$elemMatch": bson.M{"$in": bson.A{"RESEARCHER", "ADMIN"}}},
+	}
+	cur, err := dbService.collectionRefUsers(instanceID).Find(
+		ctx,
+		filter,
+	)
+
+	if err != nil {
+		return users, err
+	}
+	defer cur.Close(ctx)
+
+	users = []models.User{}
+	for cur.Next(ctx) {
+		var result models.User
+		err := cur.Decode(&result)
+		if err != nil {
+			return users, err
+		}
+
+		users = append(users, result)
+	}
+	if err := cur.Err(); err != nil {
+		return users, err
+	}
+
+	return users, nil
+}

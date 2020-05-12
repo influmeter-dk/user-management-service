@@ -118,5 +118,16 @@ func (s *userManagementServer) FindNonParticipantUsers(ctx context.Context, req 
 	if !utils.CheckRoleInToken(req.Token, "ADMIN") {
 		return nil, status.Error(codes.PermissionDenied, "permission denied")
 	}
-	return nil, status.Error(codes.Unimplemented, "unimplemented")
+
+	users, err := s.userDBservice.FindNonParticipantUsers(req.Token.InstanceId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	resp := api.UserListMsg{
+		Users: make([]*api.User, len(users)),
+	}
+	for i, u := range users {
+		resp.Users[i] = u.ToAPI()
+	}
+	return &resp, nil
 }
