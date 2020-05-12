@@ -3,5 +3,4 @@
 .DS_Store
 secret
 vendor
-build
 test.sh

@@ -1,7 +1,8 @@
-.PHONY: build test install-dev docker
+.PHONY: build test install-dev docker generate-api
 
-DOCKER_OPTS ?= --rm
 PROTO_BUILD_DIR = ./pkg
+DOCKER_OPTS ?= --rm
+VERSION := $(shell git describe --tags)
 
 help:
 	@echo "Service building targets"
@@ -9,6 +10,7 @@ help:
 	@echo "  test  : run test suites"
 	@echo "  docker: build docker image"
 	@echo "  install-dev: install dev dependencies"
+	@echo "  generate-api: compile protobuf files for go"
 	@echo "Env:"
 	@echo "  DOCKER_OPTS : default docker build options (default : $(DOCKER_OPTS))"
 	@echo "  TEST_ARGS : Arguments to pass to go test call"
@@ -16,7 +18,6 @@ help:
 generate-api:
 	if [ ! -d "$(PROTO_BUILD_DIR)/api" ]; then mkdir -p "$(PROTO_BUILD_DIR)"; else  find "$(PROTO_BUILD_DIR)/api" -type f -delete &&  mkdir -p "$(PROTO_BUILD_DIR)"; fi
 	find ./api/*.proto -maxdepth 1 -type f -exec protoc {} --go_opt=paths=source_relative --go_out=plugins=grpc:$(PROTO_BUILD_DIR) \;
-
 
 build:
 	go build .
@@ -29,4 +30,4 @@ install-dev:
 	go install github.com/golang/mock/mockgen
 
 docker:
-	docker build $(DOCKER_OPTS) .
+	docker build -t  github.com/influenzanet/user-management-service:$(VERSION)  -f build/docker/Dockerfile $(DOCKER_OPTS) .
