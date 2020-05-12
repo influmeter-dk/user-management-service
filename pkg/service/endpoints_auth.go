@@ -201,7 +201,7 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 		Profiles: []models.Profile{
 			{
 				ID:                 primitive.NewObjectID(),
-				Nickname:           req.Email,
+				Alias:              req.Email,
 				ConsentConfirmedAt: time.Now().Unix(),
 				AvatarID:           "default",
 			},

@@ -43,8 +43,8 @@ message ContactPreferences {
 
 message Profile {
   string id = 1;
-  string nickname = 2; // we don't ask for real names - just that the user can
-                       // identify the profile
+  string alias = 2; // we don't ask for real names - just that the user can
+                    // identify the profile
   int64 consent_confirmed_at = 3; // when the user confirm that he/she has the
                                   // consent to enter data for this indivildual
   string avatar_id = 4;           // id of predifined avatar

@@ -627,8 +627,8 @@ func TestSaveProfileEndpoint(t *testing.T) {
 			},
 			Profiles: []models.Profile{
 				{
-					ID:       primitive.NewObjectID(),
-					Nickname: "main",
+					ID:    primitive.NewObjectID(),
+					Alias: "main",
 				},
 			},
 		},
@@ -655,7 +655,7 @@ func TestSaveProfileEndpoint(t *testing.T) {
 		req := &api.ProfileRequest{
 			Token: &token,
 			Profile: &api.Profile{
-				Nickname: "new test",
+				Alias: "new test",
 			},
 		}
 		resp, err := s.SaveProfile(context.Background(), req)
@@ -663,7 +663,7 @@ func TestSaveProfileEndpoint(t *testing.T) {
 			t.Errorf("unexpected error: %s", err.Error())
 			return
 		}
-		if len(resp.Profiles) != 2 || resp.Profiles[1].Nickname != "new test" {
+		if len(resp.Profiles) != 2 || resp.Profiles[1].Alias != "new test" {
 			t.Errorf("unexpected response code: %s", resp)
 		}
 	})
@@ -672,8 +672,8 @@ func TestSaveProfileEndpoint(t *testing.T) {
 		req := &api.ProfileRequest{
 			Token: &token,
 			Profile: &api.Profile{
-				Id:       testUsers[0].Profiles[0].ID.Hex(),
-				Nickname: "renamed",
+				Id:    testUsers[0].Profiles[0].ID.Hex(),
+				Alias: "renamed",
 			},
 		}
 		resp, err := s.SaveProfile(context.Background(), req)
@@ -681,7 +681,7 @@ func TestSaveProfileEndpoint(t *testing.T) {
 			t.Errorf("unexpected error: %s", err.Error())
 			return
 		}
-		if len(resp.Profiles) != 2 || resp.Profiles[0].Nickname != "renamed" {
+		if len(resp.Profiles) != 2 || resp.Profiles[0].Alias != "renamed" {
 			t.Errorf("unexpected response code: %s", resp)
 		}
 	})
@@ -704,12 +704,12 @@ func TestRemoveProfileEndpoint(t *testing.T) {
 			},
 			Profiles: []models.Profile{
 				{
-					ID:       primitive.NewObjectID(),
-					Nickname: "main",
+					ID:    primitive.NewObjectID(),
+					Alias: "main",
 				},
 				{
-					ID:       primitive.NewObjectID(),
-					Nickname: "new1",
+					ID:    primitive.NewObjectID(),
+					Alias: "new1",
 				},
 			},
 		},
@@ -766,7 +766,7 @@ func TestRemoveProfileEndpoint(t *testing.T) {
 			t.Errorf("unexpected error: %s", err.Error())
 			return
 		}
-		if len(resp.Profiles) != 1 || resp.Profiles[0].Nickname == "main" {
+		if len(resp.Profiles) != 1 || resp.Profiles[0].Alias == "main" {
 			t.Errorf("wrong response: %s", resp)
 		}
 	})

@@ -8,7 +8,7 @@ import (
 // Profile describes personal profile information for a User
 type Profile struct {
 	ID                 primitive.ObjectID `bson:"_id,omitempty"`
-	Nickname           string             `bson:"nickname,omitempty"`
+	Alias              string             `bson:"alias,omitempty"`
 	ConsentConfirmedAt int64              `bson:"consentConfirmedAt"`
 	CreatedAt          int64              `bson:"createdAt"`
 	AvatarID           string             `bson:"avatarID,omitempty"`
@@ -19,7 +19,7 @@ func ProfileFromAPI(p *api.Profile) Profile {
 		return Profile{}
 	}
 	dbProf := Profile{
-		Nickname:           p.Nickname,
+		Alias:              p.Alias,
 		ConsentConfirmedAt: p.ConsentConfirmedAt,
 		CreatedAt:          p.CreatedAt,
 		AvatarID:           p.AvatarId,
@@ -35,7 +35,7 @@ func ProfileFromAPI(p *api.Profile) Profile {
 func (p Profile) ToAPI() *api.Profile {
 	return &api.Profile{
 		Id:                 p.ID.Hex(),
-		Nickname:           p.Nickname,
+		Alias:              p.Alias,
 		ConsentConfirmedAt: p.ConsentConfirmedAt,
 		CreatedAt:          p.CreatedAt,
 		AvatarId:           p.AvatarID,

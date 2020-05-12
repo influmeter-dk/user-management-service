@@ -265,16 +265,16 @@ func TestSwitchProfileEndpoint(t *testing.T) {
 			},
 			Profiles: []models.Profile{
 				{
-					ID:       primitive.NewObjectID(),
-					Nickname: "main",
+					ID:    primitive.NewObjectID(),
+					Alias: "main",
 				},
 				{
-					ID:       primitive.NewObjectID(),
-					Nickname: "new1",
+					ID:    primitive.NewObjectID(),
+					Alias: "new1",
 				},
 				{
-					ID:       primitive.NewObjectID(),
-					Nickname: "new2",
+					ID:    primitive.NewObjectID(),
+					Alias: "new2",
 				},
 			},
 		},

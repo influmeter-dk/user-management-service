@@ -127,8 +127,8 @@ func TestRenewJWT(t *testing.T) {
 			},
 			Profiles: []models.Profile{
 				{
-					ID:       primitive.NewObjectID(),
-					Nickname: "main",
+					ID:    primitive.NewObjectID(),
+					Alias: "main",
 				},
 			},
 		},
