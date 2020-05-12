@@ -99,36 +99,27 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 }
 
 func (s *userManagementServer) LoginWithTempToken(ctx context.Context, req *api.JWTRequest) (*api.TokenResponse, error) {
-	return nil, status.Error(codes.Unimplemented, "unimplemented")
-	/*if req == nil || req.Email == "" || req.Password == "" {
-		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
+	if req == nil || req.Token == "" {
+		return nil, status.Error(codes.InvalidArgument, "invalid token")
 	}
 
-	instanceID := req.InstanceId
-	if instanceID == "" {
-		instanceID = "default"
-	}
-	user, err := s.userDBservice.GetUserByEmail(instanceID, req.Email)
-
+	tokenInfos, err := s.globalDBService.GetTempToken(req.Token)
 	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
+		log.Println(err.Error())
+		return nil, status.Error(codes.InvalidArgument, "invalid token")
+	}
+	if tokenInfos.Purpose != "survey-login" || tokens.ReachedExpirationTime(tokenInfos.Expiration) {
+		log.Println("wrong token found for survey login:")
+		log.Println(tokenInfos)
+		return nil, status.Error(codes.InvalidArgument, "invalid token")
 	}
 
-	match, err := pwhash.ComparePasswordWithHash(user.Account.Password, req.Password)
-	if err != nil || !match {
-		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
+	user, err := s.userDBservice.GetUserByID(tokenInfos.InstanceID, tokenInfos.UserID)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "user not found")
 	}
 
-	var username string
-
-	currentRoles := user.Roles
-	if req.AsParticipant {
-		currentRoles = []string{"PARTICIPANT"}
-	} else {
-		if len(user.Roles) > 1 || len(user.Roles) == 1 && user.Roles[0] != "PARTICIPANT" {
-			username = user.Account.AccountID
-		}
-	}
+	currentRoles := []string{"PARTICIPANT"}
 
 	apiUser := user.ToAPI()
 	// Access Token
@@ -136,40 +127,27 @@ func (s *userManagementServer) LoginWithTempToken(ctx context.Context, req *api.
 		apiUser.Id,
 		apiUser.Profiles[0].Id,
 		currentRoles,
-		instanceID,
+		tokenInfos.InstanceID,
 		s.JWT.TokenExpiryInterval,
-		username,
+		"",
+		// nil - TODO save temptoken to jwt
 	)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	// Refresh Token
-	rt, err := tokens.GenerateUniqueTokenString()
-	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-	user.AddRefreshToken(rt)
-
-	user, err = s.userDBservice.UpdateUser(req.InstanceId, user)
-	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	if err := s.userDBservice.UpdateLoginTime(instanceID, user.ID.Hex()); err != nil {
+	if err := s.userDBservice.UpdateLoginTime(tokenInfos.InstanceID, user.ID.Hex()); err != nil {
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	response := &api.TokenResponse{
 		AccessToken:       token,
-		RefreshToken:      rt,
 		ExpiresIn:         int32(s.JWT.TokenExpiryInterval / time.Minute),
 		Profiles:          apiUser.Profiles,
 		SelectedProfileId: apiUser.Profiles[0].Id,
 		PreferredLanguage: apiUser.Account.PreferredLanguage,
 	}
 	return response, nil
-	*/
 }
 
 func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.SignupWithEmailMsg) (*api.TokenResponse, error) {

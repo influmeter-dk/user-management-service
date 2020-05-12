@@ -106,6 +106,10 @@ func TestValidateJWT(t *testing.T) {
 			t.Error(msg)
 		}
 	})
+
+	t.Run("with temptoken", func(t *testing.T) {
+		t.Error("unimplemented")
+	})
 }
 
 func TestRenewJWT(t *testing.T) {
