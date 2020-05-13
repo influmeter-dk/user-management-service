@@ -1,0 +1,1 @@
+docker run --env-file user-management-env.list -p 5002:5002 github.com/influenzanet/user-management-service:$1

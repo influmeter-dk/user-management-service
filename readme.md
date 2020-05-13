@@ -2,33 +2,33 @@
 
 This is a Go implementation of the [User Management Service](https://github.com/influenzanet/influenzanet/wiki/Services#user-management-service)
 
-It provides operations to manage User accounts and profiles for an InfluenzaNet platform
+It provides operations to manage User accounts and profiles for an InfluenzaNet platform.
 
-It follows [common Go organization](https://github.com/influenzanet/influenzanet/wiki/Go-based-service-organisation)
-
-## TODO API docs (link)
-
-## Dev operations
-
-Make targets :
- - generate-api: compile proto files
- - build: build service locally
- - install-dev : install dev dependencies (to make & run test)
- - docker: build docker image
- - test: run test suites
 
 ## Test
-
-install dev dependencies using `make install-dev`
-
-Then generate mock client for the authentication-service:
-
-```sh
-mockgen -source=./api/auth-service-api.pb.go AuthServiceApiClient > mocks/auth-service-api.go
+With a running go setup, you can use the command
 ```
+make test
+```
+to execute the test script. Makefile expects the test script to be at test/test.sh. The test script could contain DB secrets therefore are not added to this git repository. An example [test script](test/example_test_srcipt.sh) can be found in the `test` folder.
 
-For more information about testing grpc clients with go check: <https://github.com/grpc/grpc-go/blob/master/Documentation/gomock-example.md>
+Currently the tests also require a working database connection to a mongoDB instance.
 
-## To sort
+## Build
+### Docker
+Dockerfile(s) are located in `build/docker`. The default Dockerfile is using a multistage build and create a minimal image base on `scratch`.
+To trigger the build process using the default docker file call:
+```
+make docker
+```
+This will use the most recent git tag to tag the docker image.
 
-Maximum ten devices can get a refresh token at the same time - see models_user.go
+#### Contribute your deployment setup:
+Feel free to create your own Dockerfile (e.g. compiling and deploying to specific target images), eventually others may need the same.
+You can create a pull request with adding the Dockerfile into `build/docker` with a good name that it can be identified well, and add a short description to `build/docker/readme.md` about the purpose and speciality of it.
+
+An example to run your created docker image - with the set environment variables - can be found [here](build/docker/example).
+
+
+## Misc
+Maximum ten devices can get a refresh token at the same time - see pkg/models/user.go
