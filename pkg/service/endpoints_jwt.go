@@ -7,6 +7,7 @@ import (
 
 	"github.com/influenzanet/user-management-service/pkg/api"
 	"github.com/influenzanet/user-management-service/pkg/tokens"
+	"github.com/influenzanet/user-management-service/pkg/utils"
 	"google.golang.org/grpc/codes"
 
 	"google.golang.org/grpc/status"
@@ -90,5 +91,27 @@ func (s *userManagementServer) RenewJWT(ctx context.Context, req *api.RefreshJWT
 		SelectedProfileId: parsedToken.ProfileID,
 		Profiles:          user.ToAPI().Profiles,
 		PreferredLanguage: user.Account.PreferredLanguage,
+	}, nil
+}
+
+func (s *userManagementServer) RevokeAllRefreshTokens(ctx context.Context, req *api.RevokeRefreshTokensReq) (*api.ServiceStatus, error) {
+	if req == nil || utils.IsTokenEmpty(req.Token) {
+		return nil, status.Error(codes.InvalidArgument, "missing arguments")
+	}
+
+	user, err := s.userDBservice.GetUserByID(req.Token.InstanceId, req.Token.Id)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "user not found")
+	}
+	user.Account.RefreshTokens = []string{}
+
+	_, err = s.userDBservice.UpdateUser(req.Token.InstanceId, user)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "user not found")
+	}
+	return &api.ServiceStatus{
+		Status:  api.ServiceStatus_NORMAL,
+		Msg:     "refresh tokens revoked",
+		Version: apiVersion,
 	}, nil
 }

@@ -17,6 +17,7 @@ service UserManagementApi {
   rpc SwitchProfile(SwitchProfileRequest) returns (inf.tokens.TokenResponse);
   rpc ValidateJWT(JWTRequest) returns (inf.tokens.TokenInfos);
   rpc RenewJWT(RefreshJWTRequest) returns (inf.tokens.TokenResponse);
+  rpc RevokeAllRefreshTokens(RevokeRefreshTokensReq) returns (ServiceStatus);
 
   rpc ValidateAppToken(AppTokenRequest) returns (AppTokenValidation);
 
@@ -91,6 +92,8 @@ message UserReference {
   string user_id = 2;
   string instance_id = 3;
 }
+
+message RevokeRefreshTokensReq { inf.tokens.TokenInfos token = 1; }
 
 message RefreshTokenRequest {
   string user_id = 1;

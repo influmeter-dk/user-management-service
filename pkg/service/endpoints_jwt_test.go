@@ -261,3 +261,75 @@ func TestRenewJWT(t *testing.T) {
 		}
 	})
 }
+
+func TestRevokeAllRefreshTokens(t *testing.T) {
+	s := userManagementServer{
+		userDBservice:   testUserDBService,
+		globalDBService: testGlobalDBService,
+		JWT: models.JWTConfig{
+			TokenMinimumAgeMin:  time.Second * 1,
+			TokenExpiryInterval: time.Second * 2,
+		},
+	}
+	refreshToken := "TEST-REFRESH-TOKEN-STRING"
+	testUsers, err := addTestUsers([]models.User{
+		{
+			Account: models.Account{
+				Type:          "email",
+				AccountID:     "test_for_revoke_refresh_tokens@test.com",
+				RefreshTokens: []string{refreshToken, refreshToken, refreshToken}, // reuse refresh token for simpler testing
+			},
+			Profiles: []models.Profile{
+				{
+					ID:    primitive.NewObjectID(),
+					Alias: "main",
+				},
+			},
+		},
+	})
+	if err != nil {
+		t.Errorf("failed to create testusers: %s", err.Error())
+		return
+	}
+
+	t.Run("Testing token refresh without token", func(t *testing.T) {
+		_, err := s.RevokeAllRefreshTokens(context.Background(), nil)
+		ok, msg := shouldHaveGrpcErrorStatus(err, "missing arguments")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	t.Run("with empty req", func(t *testing.T) {
+		req := &api.RevokeRefreshTokensReq{}
+
+		_, err := s.RevokeAllRefreshTokens(context.Background(), req)
+		ok, msg := shouldHaveGrpcErrorStatus(err, "missing arguments")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	t.Run("revoke", func(t *testing.T) {
+		req := &api.RevokeRefreshTokensReq{
+			Token: &api.TokenInfos{
+				InstanceId: testInstanceID,
+				Id:         testUsers[0].ID.Hex(),
+			},
+		}
+
+		_, err := s.RevokeAllRefreshTokens(context.Background(), req)
+		if err != nil {
+			t.Errorf("unexpected error: %s", err.Error())
+			return
+		}
+		u, err := s.userDBservice.GetUserByID(testInstanceID, testUsers[0].ID.Hex())
+		if err != nil {
+			t.Errorf("unexpected error: %s", err.Error())
+			return
+		}
+		if len(u.Account.RefreshTokens) > 0 {
+			t.Errorf("unexpected number of refresh tokens: %d", len(u.Account.RefreshTokens))
+		}
+	})
+}

@@ -1,4 +1,4 @@
-.PHONY: build test install-dev docker generate-api
+.PHONY: build test install-dev docker api
 
 PROTO_BUILD_DIR = ./pkg
 DOCKER_OPTS ?= --rm
