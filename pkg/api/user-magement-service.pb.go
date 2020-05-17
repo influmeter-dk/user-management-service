@@ -844,6 +844,202 @@ func (x *PasswordChangeMsg) GetNewPassword() string {
 	return ""
 }
 
+type InitiateResetPasswordMsg struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	AccountId string `protobuf:"bytes,1,opt,name=account_id,json=accountId,proto3" json:"account_id,omitempty"`
+}
+
+func (x *InitiateResetPasswordMsg) Reset() {
+	*x = InitiateResetPasswordMsg{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_api_user_magement_service_proto_msgTypes[12]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *InitiateResetPasswordMsg) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*InitiateResetPasswordMsg) ProtoMessage() {}
+
+func (x *InitiateResetPasswordMsg) ProtoReflect() protoreflect.Message {
+	mi := &file_api_user_magement_service_proto_msgTypes[12]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use InitiateResetPasswordMsg.ProtoReflect.Descriptor instead.
+func (*InitiateResetPasswordMsg) Descriptor() ([]byte, []int) {
+	return file_api_user_magement_service_proto_rawDescGZIP(), []int{12}
+}
+
+func (x *InitiateResetPasswordMsg) GetAccountId() string {
+	if x != nil {
+		return x.AccountId
+	}
+	return ""
+}
+
+type GetInfosForResetPasswordMsg struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Token *TempToken `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
+}
+
+func (x *GetInfosForResetPasswordMsg) Reset() {
+	*x = GetInfosForResetPasswordMsg{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_api_user_magement_service_proto_msgTypes[13]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *GetInfosForResetPasswordMsg) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*GetInfosForResetPasswordMsg) ProtoMessage() {}
+
+func (x *GetInfosForResetPasswordMsg) ProtoReflect() protoreflect.Message {
+	mi := &file_api_user_magement_service_proto_msgTypes[13]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use GetInfosForResetPasswordMsg.ProtoReflect.Descriptor instead.
+func (*GetInfosForResetPasswordMsg) Descriptor() ([]byte, []int) {
+	return file_api_user_magement_service_proto_rawDescGZIP(), []int{13}
+}
+
+func (x *GetInfosForResetPasswordMsg) GetToken() *TempToken {
+	if x != nil {
+		return x.Token
+	}
+	return nil
+}
+
+type UserInfoForPWReset struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	AccountId string `protobuf:"bytes,1,opt,name=account_id,json=accountId,proto3" json:"account_id,omitempty"`
+}
+
+func (x *UserInfoForPWReset) Reset() {
+	*x = UserInfoForPWReset{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_api_user_magement_service_proto_msgTypes[14]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *UserInfoForPWReset) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UserInfoForPWReset) ProtoMessage() {}
+
+func (x *UserInfoForPWReset) ProtoReflect() protoreflect.Message {
+	mi := &file_api_user_magement_service_proto_msgTypes[14]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UserInfoForPWReset.ProtoReflect.Descriptor instead.
+func (*UserInfoForPWReset) Descriptor() ([]byte, []int) {
+	return file_api_user_magement_service_proto_rawDescGZIP(), []int{14}
+}
+
+func (x *UserInfoForPWReset) GetAccountId() string {
+	if x != nil {
+		return x.AccountId
+	}
+	return ""
+}
+
+type ResetPasswordMsg struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Token       *TempToken `protobuf:"bytes,1,opt,name=token,proto3" json:"token,omitempty"`
+	NewPassword string     `protobuf:"bytes,2,opt,name=new_password,json=newPassword,proto3" json:"new_password,omitempty"`
+}
+
+func (x *ResetPasswordMsg) Reset() {
+	*x = ResetPasswordMsg{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_api_user_magement_service_proto_msgTypes[15]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *ResetPasswordMsg) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ResetPasswordMsg) ProtoMessage() {}
+
+func (x *ResetPasswordMsg) ProtoReflect() protoreflect.Message {
+	mi := &file_api_user_magement_service_proto_msgTypes[15]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ResetPasswordMsg.ProtoReflect.Descriptor instead.
+func (*ResetPasswordMsg) Descriptor() ([]byte, []int) {
+	return file_api_user_magement_service_proto_rawDescGZIP(), []int{15}
+}
+
+func (x *ResetPasswordMsg) GetToken() *TempToken {
+	if x != nil {
+		return x.Token
+	}
+	return nil
+}
+
+func (x *ResetPasswordMsg) GetNewPassword() string {
+	if x != nil {
+		return x.NewPassword
+	}
+	return ""
+}
+
 type EmailChangeMsg struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -857,7 +1053,7 @@ type EmailChangeMsg struct {
 func (x *EmailChangeMsg) Reset() {
 	*x = EmailChangeMsg{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_api_user_magement_service_proto_msgTypes[12]
+		mi := &file_api_user_magement_service_proto_msgTypes[16]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -870,7 +1066,7 @@ func (x *EmailChangeMsg) String() string {
 func (*EmailChangeMsg) ProtoMessage() {}
 
 func (x *EmailChangeMsg) ProtoReflect() protoreflect.Message {
-	mi := &file_api_user_magement_service_proto_msgTypes[12]
+	mi := &file_api_user_magement_service_proto_msgTypes[16]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -883,7 +1079,7 @@ func (x *EmailChangeMsg) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use EmailChangeMsg.ProtoReflect.Descriptor instead.
 func (*EmailChangeMsg) Descriptor() ([]byte, []int) {
-	return file_api_user_magement_service_proto_rawDescGZIP(), []int{12}
+	return file_api_user_magement_service_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *EmailChangeMsg) GetToken() *TokenInfos {
@@ -919,7 +1115,7 @@ type LanguageChangeMsg struct {
 func (x *LanguageChangeMsg) Reset() {
 	*x = LanguageChangeMsg{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_api_user_magement_service_proto_msgTypes[13]
+		mi := &file_api_user_magement_service_proto_msgTypes[17]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -932,7 +1128,7 @@ func (x *LanguageChangeMsg) String() string {
 func (*LanguageChangeMsg) ProtoMessage() {}
 
 func (x *LanguageChangeMsg) ProtoReflect() protoreflect.Message {
-	mi := &file_api_user_magement_service_proto_msgTypes[13]
+	mi := &file_api_user_magement_service_proto_msgTypes[17]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -945,7 +1141,7 @@ func (x *LanguageChangeMsg) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use LanguageChangeMsg.ProtoReflect.Descriptor instead.
 func (*LanguageChangeMsg) Descriptor() ([]byte, []int) {
-	return file_api_user_magement_service_proto_rawDescGZIP(), []int{13}
+	return file_api_user_magement_service_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *LanguageChangeMsg) GetToken() *TokenInfos {
@@ -974,7 +1170,7 @@ type ContactPreferencesMsg struct {
 func (x *ContactPreferencesMsg) Reset() {
 	*x = ContactPreferencesMsg{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_api_user_magement_service_proto_msgTypes[14]
+		mi := &file_api_user_magement_service_proto_msgTypes[18]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -987,7 +1183,7 @@ func (x *ContactPreferencesMsg) String() string {
 func (*ContactPreferencesMsg) ProtoMessage() {}
 
 func (x *ContactPreferencesMsg) ProtoReflect() protoreflect.Message {
-	mi := &file_api_user_magement_service_proto_msgTypes[14]
+	mi := &file_api_user_magement_service_proto_msgTypes[18]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1000,7 +1196,7 @@ func (x *ContactPreferencesMsg) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ContactPreferencesMsg.ProtoReflect.Descriptor instead.
 func (*ContactPreferencesMsg) Descriptor() ([]byte, []int) {
-	return file_api_user_magement_service_proto_rawDescGZIP(), []int{14}
+	return file_api_user_magement_service_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *ContactPreferencesMsg) GetToken() *TokenInfos {
@@ -1029,7 +1225,7 @@ type ContactInfoMsg struct {
 func (x *ContactInfoMsg) Reset() {
 	*x = ContactInfoMsg{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_api_user_magement_service_proto_msgTypes[15]
+		mi := &file_api_user_magement_service_proto_msgTypes[19]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1042,7 +1238,7 @@ func (x *ContactInfoMsg) String() string {
 func (*ContactInfoMsg) ProtoMessage() {}
 
 func (x *ContactInfoMsg) ProtoReflect() protoreflect.Message {
-	mi := &file_api_user_magement_service_proto_msgTypes[15]
+	mi := &file_api_user_magement_service_proto_msgTypes[19]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1055,7 +1251,7 @@ func (x *ContactInfoMsg) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use ContactInfoMsg.ProtoReflect.Descriptor instead.
 func (*ContactInfoMsg) Descriptor() ([]byte, []int) {
-	return file_api_user_magement_service_proto_rawDescGZIP(), []int{15}
+	return file_api_user_magement_service_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *ContactInfoMsg) GetToken() *TokenInfos {
@@ -1083,7 +1279,7 @@ type JWTRequest struct {
 func (x *JWTRequest) Reset() {
 	*x = JWTRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_api_user_magement_service_proto_msgTypes[16]
+		mi := &file_api_user_magement_service_proto_msgTypes[20]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1096,7 +1292,7 @@ func (x *JWTRequest) String() string {
 func (*JWTRequest) ProtoMessage() {}
 
 func (x *JWTRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_user_magement_service_proto_msgTypes[16]
+	mi := &file_api_user_magement_service_proto_msgTypes[20]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1109,7 +1305,7 @@ func (x *JWTRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use JWTRequest.ProtoReflect.Descriptor instead.
 func (*JWTRequest) Descriptor() ([]byte, []int) {
-	return file_api_user_magement_service_proto_rawDescGZIP(), []int{16}
+	return file_api_user_magement_service_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *JWTRequest) GetToken() string {
@@ -1131,7 +1327,7 @@ type RefreshJWTRequest struct {
 func (x *RefreshJWTRequest) Reset() {
 	*x = RefreshJWTRequest{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_api_user_magement_service_proto_msgTypes[17]
+		mi := &file_api_user_magement_service_proto_msgTypes[21]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1144,7 +1340,7 @@ func (x *RefreshJWTRequest) String() string {
 func (*RefreshJWTRequest) ProtoMessage() {}
 
 func (x *RefreshJWTRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_api_user_magement_service_proto_msgTypes[17]
+	mi := &file_api_user_magement_service_proto_msgTypes[21]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1157,7 +1353,7 @@ func (x *RefreshJWTRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RefreshJWTRequest.ProtoReflect.Descriptor instead.
 func (*RefreshJWTRequest) Descriptor() ([]byte, []int) {
-	return file_api_user_magement_service_proto_rawDescGZIP(), []int{17}
+	return file_api_user_magement_service_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *RefreshJWTRequest) GetRefreshToken() string {
@@ -1189,7 +1385,7 @@ type CreateUserReq struct {
 func (x *CreateUserReq) Reset() {
 	*x = CreateUserReq{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_api_user_magement_service_proto_msgTypes[18]
+		mi := &file_api_user_magement_service_proto_msgTypes[22]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1202,7 +1398,7 @@ func (x *CreateUserReq) String() string {
 func (*CreateUserReq) ProtoMessage() {}
 
 func (x *CreateUserReq) ProtoReflect() protoreflect.Message {
-	mi := &file_api_user_magement_service_proto_msgTypes[18]
+	mi := &file_api_user_magement_service_proto_msgTypes[22]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1215,7 +1411,7 @@ func (x *CreateUserReq) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CreateUserReq.ProtoReflect.Descriptor instead.
 func (*CreateUserReq) Descriptor() ([]byte, []int) {
-	return file_api_user_magement_service_proto_rawDescGZIP(), []int{18}
+	return file_api_user_magement_service_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *CreateUserReq) GetToken() *TokenInfos {
@@ -1266,7 +1462,7 @@ type RoleMsg struct {
 func (x *RoleMsg) Reset() {
 	*x = RoleMsg{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_api_user_magement_service_proto_msgTypes[19]
+		mi := &file_api_user_magement_service_proto_msgTypes[23]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1279,7 +1475,7 @@ func (x *RoleMsg) String() string {
 func (*RoleMsg) ProtoMessage() {}
 
 func (x *RoleMsg) ProtoReflect() protoreflect.Message {
-	mi := &file_api_user_magement_service_proto_msgTypes[19]
+	mi := &file_api_user_magement_service_proto_msgTypes[23]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1292,7 +1488,7 @@ func (x *RoleMsg) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RoleMsg.ProtoReflect.Descriptor instead.
 func (*RoleMsg) Descriptor() ([]byte, []int) {
-	return file_api_user_magement_service_proto_rawDescGZIP(), []int{19}
+	return file_api_user_magement_service_proto_rawDescGZIP(), []int{23}
 }
 
 func (x *RoleMsg) GetToken() *TokenInfos {
@@ -1327,7 +1523,7 @@ type FindNonParticipantUsersMsg struct {
 func (x *FindNonParticipantUsersMsg) Reset() {
 	*x = FindNonParticipantUsersMsg{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_api_user_magement_service_proto_msgTypes[20]
+		mi := &file_api_user_magement_service_proto_msgTypes[24]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1340,7 +1536,7 @@ func (x *FindNonParticipantUsersMsg) String() string {
 func (*FindNonParticipantUsersMsg) ProtoMessage() {}
 
 func (x *FindNonParticipantUsersMsg) ProtoReflect() protoreflect.Message {
-	mi := &file_api_user_magement_service_proto_msgTypes[20]
+	mi := &file_api_user_magement_service_proto_msgTypes[24]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1353,7 +1549,7 @@ func (x *FindNonParticipantUsersMsg) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use FindNonParticipantUsersMsg.ProtoReflect.Descriptor instead.
 func (*FindNonParticipantUsersMsg) Descriptor() ([]byte, []int) {
-	return file_api_user_magement_service_proto_rawDescGZIP(), []int{20}
+	return file_api_user_magement_service_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *FindNonParticipantUsersMsg) GetToken() *TokenInfos {
@@ -1374,7 +1570,7 @@ type UserListMsg struct {
 func (x *UserListMsg) Reset() {
 	*x = UserListMsg{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_api_user_magement_service_proto_msgTypes[21]
+		mi := &file_api_user_magement_service_proto_msgTypes[25]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -1387,7 +1583,7 @@ func (x *UserListMsg) String() string {
 func (*UserListMsg) ProtoMessage() {}
 
 func (x *UserListMsg) ProtoReflect() protoreflect.Message {
-	mi := &file_api_user_magement_service_proto_msgTypes[21]
+	mi := &file_api_user_magement_service_proto_msgTypes[25]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1400,7 +1596,7 @@ func (x *UserListMsg) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UserListMsg.ProtoReflect.Descriptor instead.
 func (*UserListMsg) Descriptor() ([]byte, []int) {
-	return file_api_user_magement_service_proto_rawDescGZIP(), []int{21}
+	return file_api_user_magement_service_proto_rawDescGZIP(), []int{25}
 }
 
 func (x *UserListMsg) GetUsers() []*User {
@@ -1522,6 +1718,24 @@ var file_api_user_magement_service_proto_rawDesc = []byte{
 	0x70, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x0b,
 	0x6f, 0x6c, 0x64, 0x50, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x12, 0x21, 0x0a, 0x0c, 0x6e,
 	0x65, 0x77, 0x5f, 0x70, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x0b, 0x6e, 0x65, 0x77, 0x50, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x22, 0x39,
+	0x0a, 0x18, 0x49, 0x6e, 0x69, 0x74, 0x69, 0x61, 0x74, 0x65, 0x52, 0x65, 0x73, 0x65, 0x74, 0x50,
+	0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x4d, 0x73, 0x67, 0x12, 0x1d, 0x0a, 0x0a, 0x61, 0x63,
+	0x63, 0x6f, 0x75, 0x6e, 0x74, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09,
+	0x61, 0x63, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x49, 0x64, 0x22, 0x4a, 0x0a, 0x1b, 0x47, 0x65, 0x74,
+	0x49, 0x6e, 0x66, 0x6f, 0x73, 0x46, 0x6f, 0x72, 0x52, 0x65, 0x73, 0x65, 0x74, 0x50, 0x61, 0x73,
+	0x73, 0x77, 0x6f, 0x72, 0x64, 0x4d, 0x73, 0x67, 0x12, 0x2b, 0x0a, 0x05, 0x74, 0x6f, 0x6b, 0x65,
+	0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x15, 0x2e, 0x69, 0x6e, 0x66, 0x2e, 0x74, 0x6f,
+	0x6b, 0x65, 0x6e, 0x73, 0x2e, 0x54, 0x65, 0x6d, 0x70, 0x54, 0x6f, 0x6b, 0x65, 0x6e, 0x52, 0x05,
+	0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x22, 0x33, 0x0a, 0x12, 0x55, 0x73, 0x65, 0x72, 0x49, 0x6e, 0x66,
+	0x6f, 0x46, 0x6f, 0x72, 0x50, 0x57, 0x52, 0x65, 0x73, 0x65, 0x74, 0x12, 0x1d, 0x0a, 0x0a, 0x61,
+	0x63, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x09, 0x61, 0x63, 0x63, 0x6f, 0x75, 0x6e, 0x74, 0x49, 0x64, 0x22, 0x62, 0x0a, 0x10, 0x52, 0x65,
+	0x73, 0x65, 0x74, 0x50, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x4d, 0x73, 0x67, 0x12, 0x2b,
+	0x0a, 0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x15, 0x2e,
+	0x69, 0x6e, 0x66, 0x2e, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x73, 0x2e, 0x54, 0x65, 0x6d, 0x70, 0x54,
+	0x6f, 0x6b, 0x65, 0x6e, 0x52, 0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x12, 0x21, 0x0a, 0x0c, 0x6e,
+	0x65, 0x77, 0x5f, 0x70, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28,
 	0x09, 0x52, 0x0b, 0x6e, 0x65, 0x77, 0x50, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x22, 0x81,
 	0x01, 0x0a, 0x0e, 0x45, 0x6d, 0x61, 0x69, 0x6c, 0x43, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x4d, 0x73,
 	0x67, 0x12, 0x2c, 0x0a, 0x05, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x18, 0x01, 0x20, 0x01, 0x28, 0x0b,
@@ -1590,7 +1804,7 @@ var file_api_user_magement_service_proto_rawDesc = []byte{
 	0x6b, 0x65, 0x6e, 0x22, 0x33, 0x0a, 0x0b, 0x55, 0x73, 0x65, 0x72, 0x4c, 0x69, 0x73, 0x74, 0x4d,
 	0x73, 0x67, 0x12, 0x24, 0x0a, 0x05, 0x75, 0x73, 0x65, 0x72, 0x73, 0x18, 0x01, 0x20, 0x03, 0x28,
 	0x0b, 0x32, 0x0e, 0x2e, 0x69, 0x6e, 0x66, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x2e, 0x55, 0x73, 0x65,
-	0x72, 0x52, 0x05, 0x75, 0x73, 0x65, 0x72, 0x73, 0x32, 0xa6, 0x12, 0x0a, 0x11, 0x55, 0x73, 0x65,
+	0x72, 0x52, 0x05, 0x75, 0x73, 0x65, 0x72, 0x73, 0x32, 0xf0, 0x14, 0x0a, 0x11, 0x55, 0x73, 0x65,
 	0x72, 0x4d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x41, 0x70, 0x69, 0x12, 0x48,
 	0x0a, 0x06, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x12, 0x16, 0x2e, 0x67, 0x6f, 0x6f, 0x67, 0x6c,
 	0x65, 0x2e, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x62, 0x75, 0x66, 0x2e, 0x45, 0x6d, 0x70, 0x74, 0x79,
@@ -1693,55 +1907,75 @@ var file_api_user_magement_service_proto_rawDesc = []byte{
 	0x61, 0x6e, 0x61, 0x67, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x5f, 0x61, 0x70, 0x69, 0x2e, 0x4c, 0x61,
 	0x6e, 0x67, 0x75, 0x61, 0x67, 0x65, 0x43, 0x68, 0x61, 0x6e, 0x67, 0x65, 0x4d, 0x73, 0x67, 0x1a,
 	0x0e, 0x2e, 0x69, 0x6e, 0x66, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x12,
-	0x46, 0x0a, 0x0b, 0x53, 0x61, 0x76, 0x65, 0x50, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x12, 0x27,
-	0x2e, 0x69, 0x6e, 0x66, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65,
-	0x6d, 0x65, 0x6e, 0x74, 0x5f, 0x61, 0x70, 0x69, 0x2e, 0x50, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65,
-	0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x0e, 0x2e, 0x69, 0x6e, 0x66, 0x2e, 0x75, 0x73,
-	0x65, 0x72, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x12, 0x48, 0x0a, 0x0d, 0x52, 0x65, 0x6d, 0x6f, 0x76,
+	0x72, 0x0a, 0x15, 0x49, 0x6e, 0x69, 0x74, 0x69, 0x61, 0x74, 0x65, 0x50, 0x61, 0x73, 0x73, 0x77,
+	0x6f, 0x72, 0x64, 0x52, 0x65, 0x73, 0x65, 0x74, 0x12, 0x31, 0x2e, 0x69, 0x6e, 0x66, 0x2e, 0x75,
+	0x73, 0x65, 0x72, 0x5f, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x5f, 0x61,
+	0x70, 0x69, 0x2e, 0x49, 0x6e, 0x69, 0x74, 0x69, 0x61, 0x74, 0x65, 0x52, 0x65, 0x73, 0x65, 0x74,
+	0x50, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x4d, 0x73, 0x67, 0x1a, 0x26, 0x2e, 0x69, 0x6e,
+	0x66, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x6d, 0x65, 0x6e,
+	0x74, 0x5f, 0x61, 0x70, 0x69, 0x2e, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x53, 0x74, 0x61,
+	0x74, 0x75, 0x73, 0x12, 0x7d, 0x0a, 0x18, 0x47, 0x65, 0x74, 0x49, 0x6e, 0x66, 0x6f, 0x73, 0x46,
+	0x6f, 0x72, 0x50, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x52, 0x65, 0x73, 0x65, 0x74, 0x12,
+	0x34, 0x2e, 0x69, 0x6e, 0x66, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x6d, 0x61, 0x6e, 0x61, 0x67,
+	0x65, 0x6d, 0x65, 0x6e, 0x74, 0x5f, 0x61, 0x70, 0x69, 0x2e, 0x47, 0x65, 0x74, 0x49, 0x6e, 0x66,
+	0x6f, 0x73, 0x46, 0x6f, 0x72, 0x52, 0x65, 0x73, 0x65, 0x74, 0x50, 0x61, 0x73, 0x73, 0x77, 0x6f,
+	0x72, 0x64, 0x4d, 0x73, 0x67, 0x1a, 0x2b, 0x2e, 0x69, 0x6e, 0x66, 0x2e, 0x75, 0x73, 0x65, 0x72,
+	0x5f, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x5f, 0x61, 0x70, 0x69, 0x2e,
+	0x55, 0x73, 0x65, 0x72, 0x49, 0x6e, 0x66, 0x6f, 0x46, 0x6f, 0x72, 0x50, 0x57, 0x52, 0x65, 0x73,
+	0x65, 0x74, 0x12, 0x55, 0x0a, 0x0d, 0x52, 0x65, 0x73, 0x65, 0x74, 0x50, 0x61, 0x73, 0x73, 0x77,
+	0x6f, 0x72, 0x64, 0x12, 0x29, 0x2e, 0x69, 0x6e, 0x66, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x6d,
+	0x61, 0x6e, 0x61, 0x67, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x5f, 0x61, 0x70, 0x69, 0x2e, 0x52, 0x65,
+	0x73, 0x65, 0x74, 0x50, 0x61, 0x73, 0x73, 0x77, 0x6f, 0x72, 0x64, 0x4d, 0x73, 0x67, 0x1a, 0x19,
+	0x2e, 0x69, 0x6e, 0x66, 0x2e, 0x74, 0x6f, 0x6b, 0x65, 0x6e, 0x73, 0x2e, 0x54, 0x6f, 0x6b, 0x65,
+	0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x46, 0x0a, 0x0b, 0x53, 0x61, 0x76,
 	0x65, 0x50, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x12, 0x27, 0x2e, 0x69, 0x6e, 0x66, 0x2e, 0x75,
 	0x73, 0x65, 0x72, 0x5f, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x5f, 0x61,
 	0x70, 0x69, 0x2e, 0x50, 0x72, 0x6f, 0x66, 0x69, 0x6c, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
 	0x74, 0x1a, 0x0e, 0x2e, 0x69, 0x6e, 0x66, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x2e, 0x55, 0x73, 0x65,
-	0x72, 0x12, 0x5a, 0x0a, 0x18, 0x55, 0x70, 0x64, 0x61, 0x74, 0x65, 0x43, 0x6f, 0x6e, 0x74, 0x61,
-	0x63, 0x74, 0x50, 0x72, 0x65, 0x66, 0x65, 0x72, 0x65, 0x6e, 0x63, 0x65, 0x73, 0x12, 0x2e, 0x2e,
-	0x69, 0x6e, 0x66, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x6d,
-	0x65, 0x6e, 0x74, 0x5f, 0x61, 0x70, 0x69, 0x2e, 0x43, 0x6f, 0x6e, 0x74, 0x61, 0x63, 0x74, 0x50,
-	0x72, 0x65, 0x66, 0x65, 0x72, 0x65, 0x6e, 0x63, 0x65, 0x73, 0x4d, 0x73, 0x67, 0x1a, 0x0e, 0x2e,
-	0x69, 0x6e, 0x66, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x12, 0x43, 0x0a,
-	0x08, 0x41, 0x64, 0x64, 0x45, 0x6d, 0x61, 0x69, 0x6c, 0x12, 0x27, 0x2e, 0x69, 0x6e, 0x66, 0x2e,
-	0x75, 0x73, 0x65, 0x72, 0x5f, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x5f,
-	0x61, 0x70, 0x69, 0x2e, 0x43, 0x6f, 0x6e, 0x74, 0x61, 0x63, 0x74, 0x49, 0x6e, 0x66, 0x6f, 0x4d,
-	0x73, 0x67, 0x1a, 0x0e, 0x2e, 0x69, 0x6e, 0x66, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x2e, 0x55, 0x73,
-	0x65, 0x72, 0x12, 0x46, 0x0a, 0x0b, 0x52, 0x65, 0x6d, 0x6f, 0x76, 0x65, 0x45, 0x6d, 0x61, 0x69,
-	0x6c, 0x12, 0x27, 0x2e, 0x69, 0x6e, 0x66, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x6d, 0x61, 0x6e,
-	0x61, 0x67, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x5f, 0x61, 0x70, 0x69, 0x2e, 0x43, 0x6f, 0x6e, 0x74,
-	0x61, 0x63, 0x74, 0x49, 0x6e, 0x66, 0x6f, 0x4d, 0x73, 0x67, 0x1a, 0x0e, 0x2e, 0x69, 0x6e, 0x66,
-	0x2e, 0x75, 0x73, 0x65, 0x72, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x12, 0x44, 0x0a, 0x0a, 0x43, 0x72,
-	0x65, 0x61, 0x74, 0x65, 0x55, 0x73, 0x65, 0x72, 0x12, 0x26, 0x2e, 0x69, 0x6e, 0x66, 0x2e, 0x75,
-	0x73, 0x65, 0x72, 0x5f, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x5f, 0x61,
-	0x70, 0x69, 0x2e, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x71,
-	0x1a, 0x0e, 0x2e, 0x69, 0x6e, 0x66, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x2e, 0x55, 0x73, 0x65, 0x72,
-	0x12, 0x42, 0x0a, 0x0e, 0x41, 0x64, 0x64, 0x52, 0x6f, 0x6c, 0x65, 0x46, 0x6f, 0x72, 0x55, 0x73,
-	0x65, 0x72, 0x12, 0x20, 0x2e, 0x69, 0x6e, 0x66, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x6d, 0x61,
-	0x6e, 0x61, 0x67, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x5f, 0x61, 0x70, 0x69, 0x2e, 0x52, 0x6f, 0x6c,
-	0x65, 0x4d, 0x73, 0x67, 0x1a, 0x0e, 0x2e, 0x69, 0x6e, 0x66, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x2e,
-	0x55, 0x73, 0x65, 0x72, 0x12, 0x45, 0x0a, 0x11, 0x52, 0x65, 0x6d, 0x6f, 0x76, 0x65, 0x52, 0x6f,
-	0x6c, 0x65, 0x46, 0x6f, 0x72, 0x55, 0x73, 0x65, 0x72, 0x12, 0x20, 0x2e, 0x69, 0x6e, 0x66, 0x2e,
-	0x75, 0x73, 0x65, 0x72, 0x5f, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x5f,
-	0x61, 0x70, 0x69, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x4d, 0x73, 0x67, 0x1a, 0x0e, 0x2e, 0x69, 0x6e,
-	0x66, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x12, 0x74, 0x0a, 0x17, 0x46,
-	0x69, 0x6e, 0x64, 0x4e, 0x6f, 0x6e, 0x50, 0x61, 0x72, 0x74, 0x69, 0x63, 0x69, 0x70, 0x61, 0x6e,
-	0x74, 0x55, 0x73, 0x65, 0x72, 0x73, 0x12, 0x33, 0x2e, 0x69, 0x6e, 0x66, 0x2e, 0x75, 0x73, 0x65,
-	0x72, 0x5f, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x5f, 0x61, 0x70, 0x69,
-	0x2e, 0x46, 0x69, 0x6e, 0x64, 0x4e, 0x6f, 0x6e, 0x50, 0x61, 0x72, 0x74, 0x69, 0x63, 0x69, 0x70,
-	0x61, 0x6e, 0x74, 0x55, 0x73, 0x65, 0x72, 0x73, 0x4d, 0x73, 0x67, 0x1a, 0x24, 0x2e, 0x69, 0x6e,
+	0x72, 0x12, 0x48, 0x0a, 0x0d, 0x52, 0x65, 0x6d, 0x6f, 0x76, 0x65, 0x50, 0x72, 0x6f, 0x66, 0x69,
+	0x6c, 0x65, 0x12, 0x27, 0x2e, 0x69, 0x6e, 0x66, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x6d, 0x61,
+	0x6e, 0x61, 0x67, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x5f, 0x61, 0x70, 0x69, 0x2e, 0x50, 0x72, 0x6f,
+	0x66, 0x69, 0x6c, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x0e, 0x2e, 0x69, 0x6e,
+	0x66, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x12, 0x5a, 0x0a, 0x18, 0x55,
+	0x70, 0x64, 0x61, 0x74, 0x65, 0x43, 0x6f, 0x6e, 0x74, 0x61, 0x63, 0x74, 0x50, 0x72, 0x65, 0x66,
+	0x65, 0x72, 0x65, 0x6e, 0x63, 0x65, 0x73, 0x12, 0x2e, 0x2e, 0x69, 0x6e, 0x66, 0x2e, 0x75, 0x73,
+	0x65, 0x72, 0x5f, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x5f, 0x61, 0x70,
+	0x69, 0x2e, 0x43, 0x6f, 0x6e, 0x74, 0x61, 0x63, 0x74, 0x50, 0x72, 0x65, 0x66, 0x65, 0x72, 0x65,
+	0x6e, 0x63, 0x65, 0x73, 0x4d, 0x73, 0x67, 0x1a, 0x0e, 0x2e, 0x69, 0x6e, 0x66, 0x2e, 0x75, 0x73,
+	0x65, 0x72, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x12, 0x43, 0x0a, 0x08, 0x41, 0x64, 0x64, 0x45, 0x6d,
+	0x61, 0x69, 0x6c, 0x12, 0x27, 0x2e, 0x69, 0x6e, 0x66, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x6d,
+	0x61, 0x6e, 0x61, 0x67, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x5f, 0x61, 0x70, 0x69, 0x2e, 0x43, 0x6f,
+	0x6e, 0x74, 0x61, 0x63, 0x74, 0x49, 0x6e, 0x66, 0x6f, 0x4d, 0x73, 0x67, 0x1a, 0x0e, 0x2e, 0x69,
+	0x6e, 0x66, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x12, 0x46, 0x0a, 0x0b,
+	0x52, 0x65, 0x6d, 0x6f, 0x76, 0x65, 0x45, 0x6d, 0x61, 0x69, 0x6c, 0x12, 0x27, 0x2e, 0x69, 0x6e,
 	0x66, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x6d, 0x65, 0x6e,
-	0x74, 0x5f, 0x61, 0x70, 0x69, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x4c, 0x69, 0x73, 0x74, 0x4d, 0x73,
-	0x67, 0x42, 0x39, 0x5a, 0x37, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f,
-	0x69, 0x6e, 0x66, 0x6c, 0x75, 0x65, 0x6e, 0x7a, 0x61, 0x6e, 0x65, 0x74, 0x2f, 0x75, 0x73, 0x65,
-	0x72, 0x2d, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x2d, 0x73, 0x65, 0x72,
-	0x76, 0x69, 0x63, 0x65, 0x2f, 0x70, 0x6b, 0x67, 0x2f, 0x61, 0x70, 0x69, 0x62, 0x06, 0x70, 0x72,
-	0x6f, 0x74, 0x6f, 0x33,
+	0x74, 0x5f, 0x61, 0x70, 0x69, 0x2e, 0x43, 0x6f, 0x6e, 0x74, 0x61, 0x63, 0x74, 0x49, 0x6e, 0x66,
+	0x6f, 0x4d, 0x73, 0x67, 0x1a, 0x0e, 0x2e, 0x69, 0x6e, 0x66, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x2e,
+	0x55, 0x73, 0x65, 0x72, 0x12, 0x44, 0x0a, 0x0a, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x55, 0x73,
+	0x65, 0x72, 0x12, 0x26, 0x2e, 0x69, 0x6e, 0x66, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x6d, 0x61,
+	0x6e, 0x61, 0x67, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x5f, 0x61, 0x70, 0x69, 0x2e, 0x43, 0x72, 0x65,
+	0x61, 0x74, 0x65, 0x55, 0x73, 0x65, 0x72, 0x52, 0x65, 0x71, 0x1a, 0x0e, 0x2e, 0x69, 0x6e, 0x66,
+	0x2e, 0x75, 0x73, 0x65, 0x72, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x12, 0x42, 0x0a, 0x0e, 0x41, 0x64,
+	0x64, 0x52, 0x6f, 0x6c, 0x65, 0x46, 0x6f, 0x72, 0x55, 0x73, 0x65, 0x72, 0x12, 0x20, 0x2e, 0x69,
+	0x6e, 0x66, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x6d, 0x65,
+	0x6e, 0x74, 0x5f, 0x61, 0x70, 0x69, 0x2e, 0x52, 0x6f, 0x6c, 0x65, 0x4d, 0x73, 0x67, 0x1a, 0x0e,
+	0x2e, 0x69, 0x6e, 0x66, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x12, 0x45,
+	0x0a, 0x11, 0x52, 0x65, 0x6d, 0x6f, 0x76, 0x65, 0x52, 0x6f, 0x6c, 0x65, 0x46, 0x6f, 0x72, 0x55,
+	0x73, 0x65, 0x72, 0x12, 0x20, 0x2e, 0x69, 0x6e, 0x66, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x6d,
+	0x61, 0x6e, 0x61, 0x67, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x5f, 0x61, 0x70, 0x69, 0x2e, 0x52, 0x6f,
+	0x6c, 0x65, 0x4d, 0x73, 0x67, 0x1a, 0x0e, 0x2e, 0x69, 0x6e, 0x66, 0x2e, 0x75, 0x73, 0x65, 0x72,
+	0x2e, 0x55, 0x73, 0x65, 0x72, 0x12, 0x74, 0x0a, 0x17, 0x46, 0x69, 0x6e, 0x64, 0x4e, 0x6f, 0x6e,
+	0x50, 0x61, 0x72, 0x74, 0x69, 0x63, 0x69, 0x70, 0x61, 0x6e, 0x74, 0x55, 0x73, 0x65, 0x72, 0x73,
+	0x12, 0x33, 0x2e, 0x69, 0x6e, 0x66, 0x2e, 0x75, 0x73, 0x65, 0x72, 0x5f, 0x6d, 0x61, 0x6e, 0x61,
+	0x67, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x5f, 0x61, 0x70, 0x69, 0x2e, 0x46, 0x69, 0x6e, 0x64, 0x4e,
+	0x6f, 0x6e, 0x50, 0x61, 0x72, 0x74, 0x69, 0x63, 0x69, 0x70, 0x61, 0x6e, 0x74, 0x55, 0x73, 0x65,
+	0x72, 0x73, 0x4d, 0x73, 0x67, 0x1a, 0x24, 0x2e, 0x69, 0x6e, 0x66, 0x2e, 0x75, 0x73, 0x65, 0x72,
+	0x5f, 0x6d, 0x61, 0x6e, 0x61, 0x67, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x5f, 0x61, 0x70, 0x69, 0x2e,
+	0x55, 0x73, 0x65, 0x72, 0x4c, 0x69, 0x73, 0x74, 0x4d, 0x73, 0x67, 0x42, 0x39, 0x5a, 0x37, 0x67,
+	0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x69, 0x6e, 0x66, 0x6c, 0x75, 0x65,
+	0x6e, 0x7a, 0x61, 0x6e, 0x65, 0x74, 0x2f, 0x75, 0x73, 0x65, 0x72, 0x2d, 0x6d, 0x61, 0x6e, 0x61,
+	0x67, 0x65, 0x6d, 0x65, 0x6e, 0x74, 0x2d, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2f, 0x70,
+	0x6b, 0x67, 0x2f, 0x61, 0x70, 0x69, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -1757,123 +1991,135 @@ func file_api_user_magement_service_proto_rawDescGZIP() []byte {
 }
 
 var file_api_user_magement_service_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
-var file_api_user_magement_service_proto_msgTypes = make([]protoimpl.MessageInfo, 22)
+var file_api_user_magement_service_proto_msgTypes = make([]protoimpl.MessageInfo, 26)
 var file_api_user_magement_service_proto_goTypes = []interface{}{
-	(ServiceStatus_StatusValue)(0),     // 0: inf.user_management_api.ServiceStatus.StatusValue
-	(*ServiceStatus)(nil),              // 1: inf.user_management_api.ServiceStatus
-	(*SignupWithEmailMsg)(nil),         // 2: inf.user_management_api.SignupWithEmailMsg
-	(*LoginWithEmailMsg)(nil),          // 3: inf.user_management_api.LoginWithEmailMsg
-	(*UserReference)(nil),              // 4: inf.user_management_api.UserReference
-	(*RevokeRefreshTokensReq)(nil),     // 5: inf.user_management_api.RevokeRefreshTokensReq
-	(*RefreshTokenRequest)(nil),        // 6: inf.user_management_api.RefreshTokenRequest
-	(*AppTokenRequest)(nil),            // 7: inf.user_management_api.AppTokenRequest
-	(*AppTokenValidation)(nil),         // 8: inf.user_management_api.AppTokenValidation
-	(*SwitchProfileRequest)(nil),       // 9: inf.user_management_api.SwitchProfileRequest
-	(*ProfileRequest)(nil),             // 10: inf.user_management_api.ProfileRequest
-	(*UserAuthInfo)(nil),               // 11: inf.user_management_api.UserAuthInfo
-	(*PasswordChangeMsg)(nil),          // 12: inf.user_management_api.PasswordChangeMsg
-	(*EmailChangeMsg)(nil),             // 13: inf.user_management_api.EmailChangeMsg
-	(*LanguageChangeMsg)(nil),          // 14: inf.user_management_api.LanguageChangeMsg
-	(*ContactPreferencesMsg)(nil),      // 15: inf.user_management_api.ContactPreferencesMsg
-	(*ContactInfoMsg)(nil),             // 16: inf.user_management_api.ContactInfoMsg
-	(*JWTRequest)(nil),                 // 17: inf.user_management_api.JWTRequest
-	(*RefreshJWTRequest)(nil),          // 18: inf.user_management_api.RefreshJWTRequest
-	(*CreateUserReq)(nil),              // 19: inf.user_management_api.CreateUserReq
-	(*RoleMsg)(nil),                    // 20: inf.user_management_api.RoleMsg
-	(*FindNonParticipantUsersMsg)(nil), // 21: inf.user_management_api.FindNonParticipantUsersMsg
-	(*UserListMsg)(nil),                // 22: inf.user_management_api.UserListMsg
-	(*TokenInfos)(nil),                 // 23: inf.tokens.TokenInfos
-	(*Profile)(nil),                    // 24: inf.user.Profile
-	(*ContactPreferences)(nil),         // 25: inf.user.ContactPreferences
-	(*ContactInfo)(nil),                // 26: inf.user.ContactInfo
-	(*User)(nil),                       // 27: inf.user.User
-	(*empty.Empty)(nil),                // 28: google.protobuf.Empty
-	(*TempToken)(nil),                  // 29: inf.tokens.TempToken
-	(*TempTokenInfo)(nil),              // 30: inf.tokens.TempTokenInfo
-	(*TokenResponse)(nil),              // 31: inf.tokens.TokenResponse
-	(*TempTokenInfos)(nil),             // 32: inf.tokens.TempTokenInfos
+	(ServiceStatus_StatusValue)(0),      // 0: inf.user_management_api.ServiceStatus.StatusValue
+	(*ServiceStatus)(nil),               // 1: inf.user_management_api.ServiceStatus
+	(*SignupWithEmailMsg)(nil),          // 2: inf.user_management_api.SignupWithEmailMsg
+	(*LoginWithEmailMsg)(nil),           // 3: inf.user_management_api.LoginWithEmailMsg
+	(*UserReference)(nil),               // 4: inf.user_management_api.UserReference
+	(*RevokeRefreshTokensReq)(nil),      // 5: inf.user_management_api.RevokeRefreshTokensReq
+	(*RefreshTokenRequest)(nil),         // 6: inf.user_management_api.RefreshTokenRequest
+	(*AppTokenRequest)(nil),             // 7: inf.user_management_api.AppTokenRequest
+	(*AppTokenValidation)(nil),          // 8: inf.user_management_api.AppTokenValidation
+	(*SwitchProfileRequest)(nil),        // 9: inf.user_management_api.SwitchProfileRequest
+	(*ProfileRequest)(nil),              // 10: inf.user_management_api.ProfileRequest
+	(*UserAuthInfo)(nil),                // 11: inf.user_management_api.UserAuthInfo
+	(*PasswordChangeMsg)(nil),           // 12: inf.user_management_api.PasswordChangeMsg
+	(*InitiateResetPasswordMsg)(nil),    // 13: inf.user_management_api.InitiateResetPasswordMsg
+	(*GetInfosForResetPasswordMsg)(nil), // 14: inf.user_management_api.GetInfosForResetPasswordMsg
+	(*UserInfoForPWReset)(nil),          // 15: inf.user_management_api.UserInfoForPWReset
+	(*ResetPasswordMsg)(nil),            // 16: inf.user_management_api.ResetPasswordMsg
+	(*EmailChangeMsg)(nil),              // 17: inf.user_management_api.EmailChangeMsg
+	(*LanguageChangeMsg)(nil),           // 18: inf.user_management_api.LanguageChangeMsg
+	(*ContactPreferencesMsg)(nil),       // 19: inf.user_management_api.ContactPreferencesMsg
+	(*ContactInfoMsg)(nil),              // 20: inf.user_management_api.ContactInfoMsg
+	(*JWTRequest)(nil),                  // 21: inf.user_management_api.JWTRequest
+	(*RefreshJWTRequest)(nil),           // 22: inf.user_management_api.RefreshJWTRequest
+	(*CreateUserReq)(nil),               // 23: inf.user_management_api.CreateUserReq
+	(*RoleMsg)(nil),                     // 24: inf.user_management_api.RoleMsg
+	(*FindNonParticipantUsersMsg)(nil),  // 25: inf.user_management_api.FindNonParticipantUsersMsg
+	(*UserListMsg)(nil),                 // 26: inf.user_management_api.UserListMsg
+	(*TokenInfos)(nil),                  // 27: inf.tokens.TokenInfos
+	(*Profile)(nil),                     // 28: inf.user.Profile
+	(*TempToken)(nil),                   // 29: inf.tokens.TempToken
+	(*ContactPreferences)(nil),          // 30: inf.user.ContactPreferences
+	(*ContactInfo)(nil),                 // 31: inf.user.ContactInfo
+	(*User)(nil),                        // 32: inf.user.User
+	(*empty.Empty)(nil),                 // 33: google.protobuf.Empty
+	(*TempTokenInfo)(nil),               // 34: inf.tokens.TempTokenInfo
+	(*TokenResponse)(nil),               // 35: inf.tokens.TokenResponse
+	(*TempTokenInfos)(nil),              // 36: inf.tokens.TempTokenInfos
 }
 var file_api_user_magement_service_proto_depIdxs = []int32{
 	0,  // 0: inf.user_management_api.ServiceStatus.status:type_name -> inf.user_management_api.ServiceStatus.StatusValue
-	23, // 1: inf.user_management_api.UserReference.token:type_name -> inf.tokens.TokenInfos
-	23, // 2: inf.user_management_api.RevokeRefreshTokensReq.token:type_name -> inf.tokens.TokenInfos
-	23, // 3: inf.user_management_api.SwitchProfileRequest.token:type_name -> inf.tokens.TokenInfos
-	23, // 4: inf.user_management_api.ProfileRequest.token:type_name -> inf.tokens.TokenInfos
-	24, // 5: inf.user_management_api.ProfileRequest.profile:type_name -> inf.user.Profile
-	24, // 6: inf.user_management_api.UserAuthInfo.profiles:type_name -> inf.user.Profile
-	24, // 7: inf.user_management_api.UserAuthInfo.selected_profile:type_name -> inf.user.Profile
-	23, // 8: inf.user_management_api.PasswordChangeMsg.token:type_name -> inf.tokens.TokenInfos
-	23, // 9: inf.user_management_api.EmailChangeMsg.token:type_name -> inf.tokens.TokenInfos
-	23, // 10: inf.user_management_api.LanguageChangeMsg.token:type_name -> inf.tokens.TokenInfos
-	23, // 11: inf.user_management_api.ContactPreferencesMsg.token:type_name -> inf.tokens.TokenInfos
-	25, // 12: inf.user_management_api.ContactPreferencesMsg.contact_preferences:type_name -> inf.user.ContactPreferences
-	23, // 13: inf.user_management_api.ContactInfoMsg.token:type_name -> inf.tokens.TokenInfos
-	26, // 14: inf.user_management_api.ContactInfoMsg.contact_info:type_name -> inf.user.ContactInfo
-	23, // 15: inf.user_management_api.CreateUserReq.token:type_name -> inf.tokens.TokenInfos
-	23, // 16: inf.user_management_api.RoleMsg.token:type_name -> inf.tokens.TokenInfos
-	23, // 17: inf.user_management_api.FindNonParticipantUsersMsg.token:type_name -> inf.tokens.TokenInfos
-	27, // 18: inf.user_management_api.UserListMsg.users:type_name -> inf.user.User
-	28, // 19: inf.user_management_api.UserManagementApi.Status:input_type -> google.protobuf.Empty
-	3,  // 20: inf.user_management_api.UserManagementApi.LoginWithEmail:input_type -> inf.user_management_api.LoginWithEmailMsg
-	17, // 21: inf.user_management_api.UserManagementApi.LoginWithTempToken:input_type -> inf.user_management_api.JWTRequest
-	2,  // 22: inf.user_management_api.UserManagementApi.SignupWithEmail:input_type -> inf.user_management_api.SignupWithEmailMsg
-	9,  // 23: inf.user_management_api.UserManagementApi.SwitchProfile:input_type -> inf.user_management_api.SwitchProfileRequest
-	17, // 24: inf.user_management_api.UserManagementApi.ValidateJWT:input_type -> inf.user_management_api.JWTRequest
-	18, // 25: inf.user_management_api.UserManagementApi.RenewJWT:input_type -> inf.user_management_api.RefreshJWTRequest
-	5,  // 26: inf.user_management_api.UserManagementApi.RevokeAllRefreshTokens:input_type -> inf.user_management_api.RevokeRefreshTokensReq
-	29, // 27: inf.user_management_api.UserManagementApi.VerifyContact:input_type -> inf.tokens.TempToken
-	7,  // 28: inf.user_management_api.UserManagementApi.ValidateAppToken:input_type -> inf.user_management_api.AppTokenRequest
-	30, // 29: inf.user_management_api.UserManagementApi.GenerateTempToken:input_type -> inf.tokens.TempTokenInfo
-	30, // 30: inf.user_management_api.UserManagementApi.GetTempTokens:input_type -> inf.tokens.TempTokenInfo
-	29, // 31: inf.user_management_api.UserManagementApi.DeleteTempToken:input_type -> inf.tokens.TempToken
-	30, // 32: inf.user_management_api.UserManagementApi.PurgeUserTempTokens:input_type -> inf.tokens.TempTokenInfo
-	4,  // 33: inf.user_management_api.UserManagementApi.GetUser:input_type -> inf.user_management_api.UserReference
-	12, // 34: inf.user_management_api.UserManagementApi.ChangePassword:input_type -> inf.user_management_api.PasswordChangeMsg
-	13, // 35: inf.user_management_api.UserManagementApi.ChangeAccountIDEmail:input_type -> inf.user_management_api.EmailChangeMsg
-	4,  // 36: inf.user_management_api.UserManagementApi.DeleteAccount:input_type -> inf.user_management_api.UserReference
-	14, // 37: inf.user_management_api.UserManagementApi.ChangePreferredLanguage:input_type -> inf.user_management_api.LanguageChangeMsg
-	10, // 38: inf.user_management_api.UserManagementApi.SaveProfile:input_type -> inf.user_management_api.ProfileRequest
-	10, // 39: inf.user_management_api.UserManagementApi.RemoveProfile:input_type -> inf.user_management_api.ProfileRequest
-	15, // 40: inf.user_management_api.UserManagementApi.UpdateContactPreferences:input_type -> inf.user_management_api.ContactPreferencesMsg
-	16, // 41: inf.user_management_api.UserManagementApi.AddEmail:input_type -> inf.user_management_api.ContactInfoMsg
-	16, // 42: inf.user_management_api.UserManagementApi.RemoveEmail:input_type -> inf.user_management_api.ContactInfoMsg
-	19, // 43: inf.user_management_api.UserManagementApi.CreateUser:input_type -> inf.user_management_api.CreateUserReq
-	20, // 44: inf.user_management_api.UserManagementApi.AddRoleForUser:input_type -> inf.user_management_api.RoleMsg
-	20, // 45: inf.user_management_api.UserManagementApi.RemoveRoleForUser:input_type -> inf.user_management_api.RoleMsg
-	21, // 46: inf.user_management_api.UserManagementApi.FindNonParticipantUsers:input_type -> inf.user_management_api.FindNonParticipantUsersMsg
-	1,  // 47: inf.user_management_api.UserManagementApi.Status:output_type -> inf.user_management_api.ServiceStatus
-	31, // 48: inf.user_management_api.UserManagementApi.LoginWithEmail:output_type -> inf.tokens.TokenResponse
-	31, // 49: inf.user_management_api.UserManagementApi.LoginWithTempToken:output_type -> inf.tokens.TokenResponse
-	31, // 50: inf.user_management_api.UserManagementApi.SignupWithEmail:output_type -> inf.tokens.TokenResponse
-	31, // 51: inf.user_management_api.UserManagementApi.SwitchProfile:output_type -> inf.tokens.TokenResponse
-	23, // 52: inf.user_management_api.UserManagementApi.ValidateJWT:output_type -> inf.tokens.TokenInfos
-	31, // 53: inf.user_management_api.UserManagementApi.RenewJWT:output_type -> inf.tokens.TokenResponse
-	1,  // 54: inf.user_management_api.UserManagementApi.RevokeAllRefreshTokens:output_type -> inf.user_management_api.ServiceStatus
-	27, // 55: inf.user_management_api.UserManagementApi.VerifyContact:output_type -> inf.user.User
-	8,  // 56: inf.user_management_api.UserManagementApi.ValidateAppToken:output_type -> inf.user_management_api.AppTokenValidation
-	29, // 57: inf.user_management_api.UserManagementApi.GenerateTempToken:output_type -> inf.tokens.TempToken
-	32, // 58: inf.user_management_api.UserManagementApi.GetTempTokens:output_type -> inf.tokens.TempTokenInfos
-	1,  // 59: inf.user_management_api.UserManagementApi.DeleteTempToken:output_type -> inf.user_management_api.ServiceStatus
-	1,  // 60: inf.user_management_api.UserManagementApi.PurgeUserTempTokens:output_type -> inf.user_management_api.ServiceStatus
-	27, // 61: inf.user_management_api.UserManagementApi.GetUser:output_type -> inf.user.User
-	1,  // 62: inf.user_management_api.UserManagementApi.ChangePassword:output_type -> inf.user_management_api.ServiceStatus
-	27, // 63: inf.user_management_api.UserManagementApi.ChangeAccountIDEmail:output_type -> inf.user.User
-	1,  // 64: inf.user_management_api.UserManagementApi.DeleteAccount:output_type -> inf.user_management_api.ServiceStatus
-	27, // 65: inf.user_management_api.UserManagementApi.ChangePreferredLanguage:output_type -> inf.user.User
-	27, // 66: inf.user_management_api.UserManagementApi.SaveProfile:output_type -> inf.user.User
-	27, // 67: inf.user_management_api.UserManagementApi.RemoveProfile:output_type -> inf.user.User
-	27, // 68: inf.user_management_api.UserManagementApi.UpdateContactPreferences:output_type -> inf.user.User
-	27, // 69: inf.user_management_api.UserManagementApi.AddEmail:output_type -> inf.user.User
-	27, // 70: inf.user_management_api.UserManagementApi.RemoveEmail:output_type -> inf.user.User
-	27, // 71: inf.user_management_api.UserManagementApi.CreateUser:output_type -> inf.user.User
-	27, // 72: inf.user_management_api.UserManagementApi.AddRoleForUser:output_type -> inf.user.User
-	27, // 73: inf.user_management_api.UserManagementApi.RemoveRoleForUser:output_type -> inf.user.User
-	22, // 74: inf.user_management_api.UserManagementApi.FindNonParticipantUsers:output_type -> inf.user_management_api.UserListMsg
-	47, // [47:75] is the sub-list for method output_type
-	19, // [19:47] is the sub-list for method input_type
-	19, // [19:19] is the sub-list for extension type_name
-	19, // [19:19] is the sub-list for extension extendee
-	0,  // [0:19] is the sub-list for field type_name
+	27, // 1: inf.user_management_api.UserReference.token:type_name -> inf.tokens.TokenInfos
+	27, // 2: inf.user_management_api.RevokeRefreshTokensReq.token:type_name -> inf.tokens.TokenInfos
+	27, // 3: inf.user_management_api.SwitchProfileRequest.token:type_name -> inf.tokens.TokenInfos
+	27, // 4: inf.user_management_api.ProfileRequest.token:type_name -> inf.tokens.TokenInfos
+	28, // 5: inf.user_management_api.ProfileRequest.profile:type_name -> inf.user.Profile
+	28, // 6: inf.user_management_api.UserAuthInfo.profiles:type_name -> inf.user.Profile
+	28, // 7: inf.user_management_api.UserAuthInfo.selected_profile:type_name -> inf.user.Profile
+	27, // 8: inf.user_management_api.PasswordChangeMsg.token:type_name -> inf.tokens.TokenInfos
+	29, // 9: inf.user_management_api.GetInfosForResetPasswordMsg.token:type_name -> inf.tokens.TempToken
+	29, // 10: inf.user_management_api.ResetPasswordMsg.token:type_name -> inf.tokens.TempToken
+	27, // 11: inf.user_management_api.EmailChangeMsg.token:type_name -> inf.tokens.TokenInfos
+	27, // 12: inf.user_management_api.LanguageChangeMsg.token:type_name -> inf.tokens.TokenInfos
+	27, // 13: inf.user_management_api.ContactPreferencesMsg.token:type_name -> inf.tokens.TokenInfos
+	30, // 14: inf.user_management_api.ContactPreferencesMsg.contact_preferences:type_name -> inf.user.ContactPreferences
+	27, // 15: inf.user_management_api.ContactInfoMsg.token:type_name -> inf.tokens.TokenInfos
+	31, // 16: inf.user_management_api.ContactInfoMsg.contact_info:type_name -> inf.user.ContactInfo
+	27, // 17: inf.user_management_api.CreateUserReq.token:type_name -> inf.tokens.TokenInfos
+	27, // 18: inf.user_management_api.RoleMsg.token:type_name -> inf.tokens.TokenInfos
+	27, // 19: inf.user_management_api.FindNonParticipantUsersMsg.token:type_name -> inf.tokens.TokenInfos
+	32, // 20: inf.user_management_api.UserListMsg.users:type_name -> inf.user.User
+	33, // 21: inf.user_management_api.UserManagementApi.Status:input_type -> google.protobuf.Empty
+	3,  // 22: inf.user_management_api.UserManagementApi.LoginWithEmail:input_type -> inf.user_management_api.LoginWithEmailMsg
+	21, // 23: inf.user_management_api.UserManagementApi.LoginWithTempToken:input_type -> inf.user_management_api.JWTRequest
+	2,  // 24: inf.user_management_api.UserManagementApi.SignupWithEmail:input_type -> inf.user_management_api.SignupWithEmailMsg
+	9,  // 25: inf.user_management_api.UserManagementApi.SwitchProfile:input_type -> inf.user_management_api.SwitchProfileRequest
+	21, // 26: inf.user_management_api.UserManagementApi.ValidateJWT:input_type -> inf.user_management_api.JWTRequest
+	22, // 27: inf.user_management_api.UserManagementApi.RenewJWT:input_type -> inf.user_management_api.RefreshJWTRequest
+	5,  // 28: inf.user_management_api.UserManagementApi.RevokeAllRefreshTokens:input_type -> inf.user_management_api.RevokeRefreshTokensReq
+	29, // 29: inf.user_management_api.UserManagementApi.VerifyContact:input_type -> inf.tokens.TempToken
+	7,  // 30: inf.user_management_api.UserManagementApi.ValidateAppToken:input_type -> inf.user_management_api.AppTokenRequest
+	34, // 31: inf.user_management_api.UserManagementApi.GenerateTempToken:input_type -> inf.tokens.TempTokenInfo
+	34, // 32: inf.user_management_api.UserManagementApi.GetTempTokens:input_type -> inf.tokens.TempTokenInfo
+	29, // 33: inf.user_management_api.UserManagementApi.DeleteTempToken:input_type -> inf.tokens.TempToken
+	34, // 34: inf.user_management_api.UserManagementApi.PurgeUserTempTokens:input_type -> inf.tokens.TempTokenInfo
+	4,  // 35: inf.user_management_api.UserManagementApi.GetUser:input_type -> inf.user_management_api.UserReference
+	12, // 36: inf.user_management_api.UserManagementApi.ChangePassword:input_type -> inf.user_management_api.PasswordChangeMsg
+	17, // 37: inf.user_management_api.UserManagementApi.ChangeAccountIDEmail:input_type -> inf.user_management_api.EmailChangeMsg
+	4,  // 38: inf.user_management_api.UserManagementApi.DeleteAccount:input_type -> inf.user_management_api.UserReference
+	18, // 39: inf.user_management_api.UserManagementApi.ChangePreferredLanguage:input_type -> inf.user_management_api.LanguageChangeMsg
+	13, // 40: inf.user_management_api.UserManagementApi.InitiatePasswordReset:input_type -> inf.user_management_api.InitiateResetPasswordMsg
+	14, // 41: inf.user_management_api.UserManagementApi.GetInfosForPasswordReset:input_type -> inf.user_management_api.GetInfosForResetPasswordMsg
+	16, // 42: inf.user_management_api.UserManagementApi.ResetPassword:input_type -> inf.user_management_api.ResetPasswordMsg
+	10, // 43: inf.user_management_api.UserManagementApi.SaveProfile:input_type -> inf.user_management_api.ProfileRequest
+	10, // 44: inf.user_management_api.UserManagementApi.RemoveProfile:input_type -> inf.user_management_api.ProfileRequest
+	19, // 45: inf.user_management_api.UserManagementApi.UpdateContactPreferences:input_type -> inf.user_management_api.ContactPreferencesMsg
+	20, // 46: inf.user_management_api.UserManagementApi.AddEmail:input_type -> inf.user_management_api.ContactInfoMsg
+	20, // 47: inf.user_management_api.UserManagementApi.RemoveEmail:input_type -> inf.user_management_api.ContactInfoMsg
+	23, // 48: inf.user_management_api.UserManagementApi.CreateUser:input_type -> inf.user_management_api.CreateUserReq
+	24, // 49: inf.user_management_api.UserManagementApi.AddRoleForUser:input_type -> inf.user_management_api.RoleMsg
+	24, // 50: inf.user_management_api.UserManagementApi.RemoveRoleForUser:input_type -> inf.user_management_api.RoleMsg
+	25, // 51: inf.user_management_api.UserManagementApi.FindNonParticipantUsers:input_type -> inf.user_management_api.FindNonParticipantUsersMsg
+	1,  // 52: inf.user_management_api.UserManagementApi.Status:output_type -> inf.user_management_api.ServiceStatus
+	35, // 53: inf.user_management_api.UserManagementApi.LoginWithEmail:output_type -> inf.tokens.TokenResponse
+	35, // 54: inf.user_management_api.UserManagementApi.LoginWithTempToken:output_type -> inf.tokens.TokenResponse
+	35, // 55: inf.user_management_api.UserManagementApi.SignupWithEmail:output_type -> inf.tokens.TokenResponse
+	35, // 56: inf.user_management_api.UserManagementApi.SwitchProfile:output_type -> inf.tokens.TokenResponse
+	27, // 57: inf.user_management_api.UserManagementApi.ValidateJWT:output_type -> inf.tokens.TokenInfos
+	35, // 58: inf.user_management_api.UserManagementApi.RenewJWT:output_type -> inf.tokens.TokenResponse
+	1,  // 59: inf.user_management_api.UserManagementApi.RevokeAllRefreshTokens:output_type -> inf.user_management_api.ServiceStatus
+	32, // 60: inf.user_management_api.UserManagementApi.VerifyContact:output_type -> inf.user.User
+	8,  // 61: inf.user_management_api.UserManagementApi.ValidateAppToken:output_type -> inf.user_management_api.AppTokenValidation
+	29, // 62: inf.user_management_api.UserManagementApi.GenerateTempToken:output_type -> inf.tokens.TempToken
+	36, // 63: inf.user_management_api.UserManagementApi.GetTempTokens:output_type -> inf.tokens.TempTokenInfos
+	1,  // 64: inf.user_management_api.UserManagementApi.DeleteTempToken:output_type -> inf.user_management_api.ServiceStatus
+	1,  // 65: inf.user_management_api.UserManagementApi.PurgeUserTempTokens:output_type -> inf.user_management_api.ServiceStatus
+	32, // 66: inf.user_management_api.UserManagementApi.GetUser:output_type -> inf.user.User
+	1,  // 67: inf.user_management_api.UserManagementApi.ChangePassword:output_type -> inf.user_management_api.ServiceStatus
+	32, // 68: inf.user_management_api.UserManagementApi.ChangeAccountIDEmail:output_type -> inf.user.User
+	1,  // 69: inf.user_management_api.UserManagementApi.DeleteAccount:output_type -> inf.user_management_api.ServiceStatus
+	32, // 70: inf.user_management_api.UserManagementApi.ChangePreferredLanguage:output_type -> inf.user.User
+	1,  // 71: inf.user_management_api.UserManagementApi.InitiatePasswordReset:output_type -> inf.user_management_api.ServiceStatus
+	15, // 72: inf.user_management_api.UserManagementApi.GetInfosForPasswordReset:output_type -> inf.user_management_api.UserInfoForPWReset
+	35, // 73: inf.user_management_api.UserManagementApi.ResetPassword:output_type -> inf.tokens.TokenResponse
+	32, // 74: inf.user_management_api.UserManagementApi.SaveProfile:output_type -> inf.user.User
+	32, // 75: inf.user_management_api.UserManagementApi.RemoveProfile:output_type -> inf.user.User
+	32, // 76: inf.user_management_api.UserManagementApi.UpdateContactPreferences:output_type -> inf.user.User
+	32, // 77: inf.user_management_api.UserManagementApi.AddEmail:output_type -> inf.user.User
+	32, // 78: inf.user_management_api.UserManagementApi.RemoveEmail:output_type -> inf.user.User
+	32, // 79: inf.user_management_api.UserManagementApi.CreateUser:output_type -> inf.user.User
+	32, // 80: inf.user_management_api.UserManagementApi.AddRoleForUser:output_type -> inf.user.User
+	32, // 81: inf.user_management_api.UserManagementApi.RemoveRoleForUser:output_type -> inf.user.User
+	26, // 82: inf.user_management_api.UserManagementApi.FindNonParticipantUsers:output_type -> inf.user_management_api.UserListMsg
+	52, // [52:83] is the sub-list for method output_type
+	21, // [21:52] is the sub-list for method input_type
+	21, // [21:21] is the sub-list for extension type_name
+	21, // [21:21] is the sub-list for extension extendee
+	0,  // [0:21] is the sub-list for field type_name
 }
 
 func init() { file_api_user_magement_service_proto_init() }
@@ -2029,7 +2275,7 @@ func file_api_user_magement_service_proto_init() {
 			}
 		}
 		file_api_user_magement_service_proto_msgTypes[12].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*EmailChangeMsg); i {
+			switch v := v.(*InitiateResetPasswordMsg); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2041,7 +2287,7 @@ func file_api_user_magement_service_proto_init() {
 			}
 		}
 		file_api_user_magement_service_proto_msgTypes[13].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*LanguageChangeMsg); i {
+			switch v := v.(*GetInfosForResetPasswordMsg); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2053,7 +2299,7 @@ func file_api_user_magement_service_proto_init() {
 			}
 		}
 		file_api_user_magement_service_proto_msgTypes[14].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ContactPreferencesMsg); i {
+			switch v := v.(*UserInfoForPWReset); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2065,7 +2311,7 @@ func file_api_user_magement_service_proto_init() {
 			}
 		}
 		file_api_user_magement_service_proto_msgTypes[15].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*ContactInfoMsg); i {
+			switch v := v.(*ResetPasswordMsg); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2077,7 +2323,7 @@ func file_api_user_magement_service_proto_init() {
 			}
 		}
 		file_api_user_magement_service_proto_msgTypes[16].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*JWTRequest); i {
+			switch v := v.(*EmailChangeMsg); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2089,7 +2335,7 @@ func file_api_user_magement_service_proto_init() {
 			}
 		}
 		file_api_user_magement_service_proto_msgTypes[17].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RefreshJWTRequest); i {
+			switch v := v.(*LanguageChangeMsg); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2101,7 +2347,7 @@ func file_api_user_magement_service_proto_init() {
 			}
 		}
 		file_api_user_magement_service_proto_msgTypes[18].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*CreateUserReq); i {
+			switch v := v.(*ContactPreferencesMsg); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2113,7 +2359,7 @@ func file_api_user_magement_service_proto_init() {
 			}
 		}
 		file_api_user_magement_service_proto_msgTypes[19].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*RoleMsg); i {
+			switch v := v.(*ContactInfoMsg); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2125,7 +2371,7 @@ func file_api_user_magement_service_proto_init() {
 			}
 		}
 		file_api_user_magement_service_proto_msgTypes[20].Exporter = func(v interface{}, i int) interface{} {
-			switch v := v.(*FindNonParticipantUsersMsg); i {
+			switch v := v.(*JWTRequest); i {
 			case 0:
 				return &v.state
 			case 1:
@@ -2137,6 +2383,54 @@ func file_api_user_magement_service_proto_init() {
 			}
 		}
 		file_api_user_magement_service_proto_msgTypes[21].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*RefreshJWTRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_api_user_magement_service_proto_msgTypes[22].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*CreateUserReq); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_api_user_magement_service_proto_msgTypes[23].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*RoleMsg); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_api_user_magement_service_proto_msgTypes[24].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*FindNonParticipantUsersMsg); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_api_user_magement_service_proto_msgTypes[25].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*UserListMsg); i {
 			case 0:
 				return &v.state
@@ -2155,7 +2449,7 @@ func file_api_user_magement_service_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_api_user_magement_service_proto_rawDesc,
 			NumEnums:      1,
-			NumMessages:   22,
+			NumMessages:   26,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
@@ -2205,6 +2499,10 @@ type UserManagementApiClient interface {
 	ChangeAccountIDEmail(ctx context.Context, in *EmailChangeMsg, opts ...grpc.CallOption) (*User, error)
 	DeleteAccount(ctx context.Context, in *UserReference, opts ...grpc.CallOption) (*ServiceStatus, error)
 	ChangePreferredLanguage(ctx context.Context, in *LanguageChangeMsg, opts ...grpc.CallOption) (*User, error)
+	// PW reset:
+	InitiatePasswordReset(ctx context.Context, in *InitiateResetPasswordMsg, opts ...grpc.CallOption) (*ServiceStatus, error)
+	GetInfosForPasswordReset(ctx context.Context, in *GetInfosForResetPasswordMsg, opts ...grpc.CallOption) (*UserInfoForPWReset, error)
+	ResetPassword(ctx context.Context, in *ResetPasswordMsg, opts ...grpc.CallOption) (*TokenResponse, error)
 	// Profile methods:
 	SaveProfile(ctx context.Context, in *ProfileRequest, opts ...grpc.CallOption) (*User, error)
 	RemoveProfile(ctx context.Context, in *ProfileRequest, opts ...grpc.CallOption) (*User, error)
@@ -2398,6 +2696,33 @@ func (c *userManagementApiClient) ChangePreferredLanguage(ctx context.Context, i
 	return out, nil
 }
 
+func (c *userManagementApiClient) InitiatePasswordReset(ctx context.Context, in *InitiateResetPasswordMsg, opts ...grpc.CallOption) (*ServiceStatus, error) {
+	out := new(ServiceStatus)
+	err := c.cc.Invoke(ctx, "/inf.user_management_api.UserManagementApi/InitiatePasswordReset", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userManagementApiClient) GetInfosForPasswordReset(ctx context.Context, in *GetInfosForResetPasswordMsg, opts ...grpc.CallOption) (*UserInfoForPWReset, error) {
+	out := new(UserInfoForPWReset)
+	err := c.cc.Invoke(ctx, "/inf.user_management_api.UserManagementApi/GetInfosForPasswordReset", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *userManagementApiClient) ResetPassword(ctx context.Context, in *ResetPasswordMsg, opts ...grpc.CallOption) (*TokenResponse, error) {
+	out := new(TokenResponse)
+	err := c.cc.Invoke(ctx, "/inf.user_management_api.UserManagementApi/ResetPassword", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *userManagementApiClient) SaveProfile(ctx context.Context, in *ProfileRequest, opts ...grpc.CallOption) (*User, error) {
 	out := new(User)
 	err := c.cc.Invoke(ctx, "/inf.user_management_api.UserManagementApi/SaveProfile", in, out, opts...)
@@ -2504,6 +2829,10 @@ type UserManagementApiServer interface {
 	ChangeAccountIDEmail(context.Context, *EmailChangeMsg) (*User, error)
 	DeleteAccount(context.Context, *UserReference) (*ServiceStatus, error)
 	ChangePreferredLanguage(context.Context, *LanguageChangeMsg) (*User, error)
+	// PW reset:
+	InitiatePasswordReset(context.Context, *InitiateResetPasswordMsg) (*ServiceStatus, error)
+	GetInfosForPasswordReset(context.Context, *GetInfosForResetPasswordMsg) (*UserInfoForPWReset, error)
+	ResetPassword(context.Context, *ResetPasswordMsg) (*TokenResponse, error)
 	// Profile methods:
 	SaveProfile(context.Context, *ProfileRequest) (*User, error)
 	RemoveProfile(context.Context, *ProfileRequest) (*User, error)
@@ -2578,6 +2907,15 @@ func (*UnimplementedUserManagementApiServer) DeleteAccount(context.Context, *Use
 }
 func (*UnimplementedUserManagementApiServer) ChangePreferredLanguage(context.Context, *LanguageChangeMsg) (*User, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ChangePreferredLanguage not implemented")
+}
+func (*UnimplementedUserManagementApiServer) InitiatePasswordReset(context.Context, *InitiateResetPasswordMsg) (*ServiceStatus, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method InitiatePasswordReset not implemented")
+}
+func (*UnimplementedUserManagementApiServer) GetInfosForPasswordReset(context.Context, *GetInfosForResetPasswordMsg) (*UserInfoForPWReset, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetInfosForPasswordReset not implemented")
+}
+func (*UnimplementedUserManagementApiServer) ResetPassword(context.Context, *ResetPasswordMsg) (*TokenResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ResetPassword not implemented")
 }
 func (*UnimplementedUserManagementApiServer) SaveProfile(context.Context, *ProfileRequest) (*User, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SaveProfile not implemented")
@@ -2953,6 +3291,60 @@ func _UserManagementApi_ChangePreferredLanguage_Handler(srv interface{}, ctx con
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserManagementApi_InitiatePasswordReset_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(InitiateResetPasswordMsg)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserManagementApiServer).InitiatePasswordReset(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/inf.user_management_api.UserManagementApi/InitiatePasswordReset",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserManagementApiServer).InitiatePasswordReset(ctx, req.(*InitiateResetPasswordMsg))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserManagementApi_GetInfosForPasswordReset_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetInfosForResetPasswordMsg)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserManagementApiServer).GetInfosForPasswordReset(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/inf.user_management_api.UserManagementApi/GetInfosForPasswordReset",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserManagementApiServer).GetInfosForPasswordReset(ctx, req.(*GetInfosForResetPasswordMsg))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _UserManagementApi_ResetPassword_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ResetPasswordMsg)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserManagementApiServer).ResetPassword(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/inf.user_management_api.UserManagementApi/ResetPassword",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserManagementApiServer).ResetPassword(ctx, req.(*ResetPasswordMsg))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _UserManagementApi_SaveProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(ProfileRequest)
 	if err := dec(in); err != nil {
@@ -3194,6 +3586,18 @@ var _UserManagementApi_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ChangePreferredLanguage",
 			Handler:    _UserManagementApi_ChangePreferredLanguage_Handler,
+		},
+		{
+			MethodName: "InitiatePasswordReset",
+			Handler:    _UserManagementApi_InitiatePasswordReset_Handler,
+		},
+		{
+			MethodName: "GetInfosForPasswordReset",
+			Handler:    _UserManagementApi_GetInfosForPasswordReset_Handler,
+		},
+		{
+			MethodName: "ResetPassword",
+			Handler:    _UserManagementApi_ResetPassword_Handler,
 		},
 		{
 			MethodName: "SaveProfile",

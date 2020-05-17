@@ -40,6 +40,12 @@ service UserManagementApi {
   rpc DeleteAccount(UserReference) returns (ServiceStatus);
   rpc ChangePreferredLanguage(LanguageChangeMsg) returns (inf.user.User);
 
+  // PW reset:
+  rpc InitiatePasswordReset(InitiateResetPasswordMsg) returns (ServiceStatus);
+  rpc GetInfosForPasswordReset(GetInfosForResetPasswordMsg)
+      returns (UserInfoForPWReset);
+  rpc ResetPassword(ResetPasswordMsg) returns (inf.tokens.TokenResponse);
+
   // Profile methods:
   rpc SaveProfile(ProfileRequest)
       returns (inf.user.User); // add or update a profle
@@ -130,6 +136,15 @@ message PasswordChangeMsg {
   inf.tokens.TokenInfos token = 1;
   string old_password = 2;
   string new_password = 3;
+}
+
+message InitiateResetPasswordMsg { string account_id = 1; }
+message GetInfosForResetPasswordMsg { inf.tokens.TempToken token = 1; }
+message UserInfoForPWReset { string account_id = 1; }
+
+message ResetPasswordMsg {
+  inf.tokens.TempToken token = 1;
+  string new_password = 2;
 }
 
 message EmailChangeMsg {
