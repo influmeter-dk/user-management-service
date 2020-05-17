@@ -285,6 +285,13 @@ func (s *userManagementServer) UpdateContactPreferences(ctx context.Context, req
 	return user.ToAPI(), nil
 }
 
+func (s *userManagementServer) UseUnsubscribeToken(ctx context.Context, req *api.TempToken) (*api.ServiceStatus, error) {
+	if req == nil || req.Token == "" {
+		return nil, status.Error(codes.InvalidArgument, "missing argument")
+	}
+	return nil, status.Error(codes.Unimplemented, "unimplemented")
+}
+
 func (s *userManagementServer) AddEmail(ctx context.Context, req *api.ContactInfoMsg) (*api.User, error) {
 	if req == nil || utils.IsTokenEmpty(req.Token) || req.ContactInfo == nil {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")

@@ -131,3 +131,7 @@ func (s *userManagementServer) FindNonParticipantUsers(ctx context.Context, req 
 	}
 	return &resp, nil
 }
+
+func (s *userManagementServer) StreamUsers(req *api.StreamUsersMsg, stream api.UserManagementApi_StreamUsersServer) error {
+	return status.Error(codes.Unimplemented, "unimplemented")
+}

@@ -853,6 +853,16 @@ func TestUpdateContactPreferencesEndpoint(t *testing.T) {
 	})
 }
 
+func TestUseUnsubscribeTokenEndpoint(t *testing.T) {
+	// create user with subscribed newletter
+	// add unsubscribe token for user
+	// with missing req
+	// with empty req
+	// with wrong token
+	// with valid token
+	t.Error("test unimplemented")
+}
+
 func TestAddEmailEndpoint(t *testing.T) {
 	s := userManagementServer{
 		userDBservice:   testUserDBService,

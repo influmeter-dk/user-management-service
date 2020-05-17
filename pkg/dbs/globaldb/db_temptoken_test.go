@@ -124,8 +124,8 @@ func TestDbInterfaceMethodsForTempToken(t *testing.T) {
 
 	t.Run("Try delete not existing temporary token", func(t *testing.T) {
 		err := testDBService.DeleteTempToken(tokenStr + "1")
-		if err != nil {
-			t.Error(err)
+		if err == nil {
+			t.Error("doc should not be found")
 			return
 		}
 	})
@@ -158,9 +158,8 @@ func TestDbInterfaceMethodsForTempToken(t *testing.T) {
 
 	t.Run("Try to delete all temporary token of a user_id with wrong id, correct instance_id", func(t *testing.T) {
 		err := testDBService.DeleteAllTempTokenForUser(testTempToken.InstanceID, testTempToken.UserID+"3", "")
-		if err == nil {
-			t.Error("should not be deleted, because user id is wrong")
-			return
+		if err != nil {
+			t.Error(err)
 		}
 	})
 

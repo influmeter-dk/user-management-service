@@ -52,6 +52,7 @@ service UserManagementApi {
   rpc RemoveProfile(ProfileRequest) returns (inf.user.User);
 
   // Contacts:
+  rpc UseUnsubscribeToken(inf.tokens.TempToken) returns (ServiceStatus);
   rpc UpdateContactPreferences(ContactPreferencesMsg) returns (inf.user.User);
   rpc AddEmail(ContactInfoMsg) returns (inf.user.User);
   rpc RemoveEmail(ContactInfoMsg) returns (inf.user.User);
@@ -61,6 +62,7 @@ service UserManagementApi {
   rpc AddRoleForUser(RoleMsg) returns (inf.user.User);
   rpc RemoveRoleForUser(RoleMsg) returns (inf.user.User);
   rpc FindNonParticipantUsers(FindNonParticipantUsersMsg) returns (UserListMsg);
+  rpc StreamUsers(StreamUsersMsg) returns (stream inf.user.User);
 }
 
 /*
@@ -189,6 +191,7 @@ message RoleMsg {
   string role = 3;
 }
 
+message StreamUsersMsg { string instance_id = 1; }
 message FindNonParticipantUsersMsg { inf.tokens.TokenInfos token = 1; }
 
 message UserListMsg { repeated inf.user.User users = 1; }

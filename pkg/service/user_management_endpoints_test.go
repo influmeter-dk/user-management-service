@@ -402,3 +402,12 @@ func TestFindNonParticipantUsersEndpoint(t *testing.T) {
 		}
 	})
 }
+
+func TestStreamUsersEndpoint(t *testing.T) {
+	// create users
+
+	// call with emtpy req
+	// with missing req
+	// with valid req
+	t.Error("test unimplemented")
+}
