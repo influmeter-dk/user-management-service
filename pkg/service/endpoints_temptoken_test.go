@@ -273,12 +273,12 @@ func TestPurgeUserTempTokensEndpoint(t *testing.T) {
 	})
 
 	t.Run("with not exisiting wrong instance_id", func(t *testing.T) {
-		resp, err := s.PurgeUserTempTokens(context.Background(), &api.TempTokenInfo{
+		_, err := s.PurgeUserTempTokens(context.Background(), &api.TempTokenInfo{
 			InstanceId: testTempToken.InstanceID + "1",
 			UserId:     testTempToken.UserID,
 		})
-		if err == nil || resp != nil {
-			t.Errorf("wrong response: %s", resp)
+		if err != nil {
+			t.Errorf("unexpected error: %s", err.Error())
 			return
 		}
 		tokens, err := testGlobalDBService.GetTempTokenForUser(testTempToken.InstanceID, testTempToken.UserID, "")
@@ -293,12 +293,12 @@ func TestPurgeUserTempTokensEndpoint(t *testing.T) {
 	})
 
 	t.Run("with not exisiting wrong user_id", func(t *testing.T) {
-		resp, err := s.PurgeUserTempTokens(context.Background(), &api.TempTokenInfo{
+		_, err := s.PurgeUserTempTokens(context.Background(), &api.TempTokenInfo{
 			InstanceId: testTempToken.InstanceID,
 			UserId:     testTempToken.UserID + "1",
 		})
-		if err == nil || resp != nil {
-			t.Errorf("wrong response: %s", resp)
+		if err != nil {
+			t.Errorf("unexpected error: %s", err.Error())
 			return
 		}
 		tokens, err := testGlobalDBService.GetTempTokenForUser(testTempToken.InstanceID, testTempToken.UserID, "")

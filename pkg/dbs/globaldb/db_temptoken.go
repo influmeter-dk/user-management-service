@@ -90,12 +90,9 @@ func (dbService *GlobalDBService) DeleteAllTempTokenForUser(instanceID string, u
 	if len(purpose) > 0 {
 		filter["purpose"] = purpose
 	}
-	res, err := dbService.collectionRefTempToken().DeleteMany(ctx, filter)
+	_, err := dbService.collectionRefTempToken().DeleteMany(ctx, filter)
 	if err != nil {
 		return err
-	}
-	if res.DeletedCount < 1 {
-		return errors.New("document not found")
 	}
 	return nil
 }

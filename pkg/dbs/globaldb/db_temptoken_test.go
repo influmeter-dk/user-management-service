@@ -124,8 +124,8 @@ func TestDbInterfaceMethodsForTempToken(t *testing.T) {
 
 	t.Run("Try delete not existing temporary token", func(t *testing.T) {
 		err := testDBService.DeleteTempToken(tokenStr + "1")
-		if err == nil {
-			t.Error("should not be deleted")
+		if err != nil {
+			t.Error(err)
 			return
 		}
 	})
@@ -150,8 +150,8 @@ func TestDbInterfaceMethodsForTempToken(t *testing.T) {
 
 	t.Run("Delete all temporary token of a user_id with empty instance_id", func(t *testing.T) {
 		err := testDBService.DeleteAllTempTokenForUser("", testTempToken.UserID, "")
-		if err == nil {
-			t.Error("should not be deleted, since instance id is missing")
+		if err != nil {
+			t.Error(err)
 			return
 		}
 	})

@@ -87,6 +87,11 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
+	// remove all temptokens for password reset:
+	if err := s.globalDBService.DeleteAllTempTokenForUser(instanceID, user.ID.Hex(), "password-reset"); err != nil {
+		log.Printf("LoginWithEmail: %s", err.Error())
+	}
+
 	response := &api.TokenResponse{
 		AccessToken:       token,
 		RefreshToken:      rt,

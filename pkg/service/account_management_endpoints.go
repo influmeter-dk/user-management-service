@@ -67,6 +67,11 @@ func (s *userManagementServer) ChangePassword(ctx context.Context, req *api.Pass
 
 	// TODO: initiate email notification for user about password update
 
+	// remove all temptokens for password reset:
+	if err := s.globalDBService.DeleteAllTempTokenForUser(req.Token.InstanceId, req.Token.Id, "password-reset"); err != nil {
+		log.Printf("ChangePassword: %s", err.Error())
+	}
+
 	return &api.ServiceStatus{
 		Status: api.ServiceStatus_NORMAL,
 		Msg:    "password changed",
