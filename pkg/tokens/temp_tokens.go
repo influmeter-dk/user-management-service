@@ -11,7 +11,7 @@ func GenerateUniqueTokenString() (string, error) {
 	t := time.Now()
 	ms := uint64(t.Unix())*1000 + uint64(t.Nanosecond()/int(time.Millisecond))
 
-	token := make([]byte, 16)
+	token := make([]byte, 24)
 	token[0] = byte(ms >> 40)
 	token[1] = byte(ms >> 32)
 	token[2] = byte(ms >> 24)
@@ -25,6 +25,7 @@ func GenerateUniqueTokenString() (string, error) {
 	}
 
 	tokenStr := b32.StdEncoding.WithPadding(b32.NoPadding).EncodeToString(token)
+	tokenStr = strings.ToLower(tokenStr)
 	return tokenStr, nil
 }
 

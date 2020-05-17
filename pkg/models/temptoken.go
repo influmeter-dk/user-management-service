@@ -12,7 +12,7 @@ type TempToken struct {
 	Expiration int64              `bson:"expiration" json:"expiration"`
 	Purpose    string             `bson:"purpose" json:"purpose"`
 	UserID     string             `bson:"userID" json:"userID"`
-	Info       string             `bson:"info" json:"info"`
+	Info       map[string]string  `bson:"info" json:"info"`
 	InstanceID string             `bson:"instanceID" json:"instanceID"`
 }
 

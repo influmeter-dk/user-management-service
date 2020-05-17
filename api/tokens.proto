@@ -21,7 +21,7 @@ message TempTokenInfo {
   int64 expiration = 2;
   string purpose = 3;
   string user_id = 4;
-  string info = 5;
+  map<string, string> info = 5; // optional infos
   string instance_id = 6;
 }
 

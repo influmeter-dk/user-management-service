@@ -179,7 +179,9 @@ func TestLoginWithTempToken(t *testing.T) {
 		Purpose:    "survey-login",
 		UserID:     testUser.ID.Hex(),
 		InstanceID: testInstanceID,
-		Info:       "currentstudykey",
+		Info: map[string]string{
+			"studyKey": "currentstudykey",
+		},
 	})
 	if err != nil {
 		t.Error(err)
@@ -190,7 +192,9 @@ func TestLoginWithTempToken(t *testing.T) {
 		Purpose:    "survey-login",
 		UserID:     testUser.ID.Hex(),
 		InstanceID: testInstanceID,
-		Info:       "currentstudykey",
+		Info: map[string]string{
+			"studyKey": "currentstudykey",
+		},
 	})
 	if err != nil {
 		t.Error(err)
@@ -468,4 +472,8 @@ func TestSwitchProfileEndpoint(t *testing.T) {
 			return
 		}
 	})
+}
+
+func TestVerifyAccountEndpoint(t *testing.T) {
+	t.Error("test unimplemented")
 }

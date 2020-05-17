@@ -3,10 +3,12 @@ package service
 import (
 	"context"
 	"log"
+	"time"
 
 	"github.com/influenzanet/user-management-service/pkg/api"
 	"github.com/influenzanet/user-management-service/pkg/models"
 	"github.com/influenzanet/user-management-service/pkg/pwhash"
+	"github.com/influenzanet/user-management-service/pkg/tokens"
 	"github.com/influenzanet/user-management-service/pkg/utils"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -124,8 +126,23 @@ func (s *userManagementServer) ChangeAccountIDEmail(ctx context.Context, req *ap
 
 	// start confirmation workflow of necessary:
 	if user.Account.AccountConfirmedAt <= 0 {
-		log.Println("TODO: prepare token for account email confirmation")
-		log.Println("TODO: trigger email sending to new address")
+		// TempToken for contact verification:
+		tempTokenInfos := models.TempToken{
+			UserID:     user.ID.Hex(),
+			InstanceID: req.Token.InstanceId,
+			Purpose:    "contact-verification",
+			Info: map[string]string{
+				"type":  "email",
+				"email": user.Account.AccountID,
+			},
+			Expiration: tokens.GetExpirationTime(time.Hour * 24 * 30),
+		}
+		tempToken, err := s.globalDBService.AddTempToken(tempTokenInfos)
+		if err != nil {
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+
+		log.Printf("TODO: trigger email sending to new address with %s", tempToken)
 	}
 
 	if !req.KeepOldEmail {
@@ -264,8 +281,23 @@ func (s *userManagementServer) AddEmail(ctx context.Context, req *api.ContactInf
 	}
 
 	user.AddNewEmail(req.ContactInfo.GetEmail(), false)
-	log.Println("TODO: generate token for email confirmation")
-	log.Println("TODO: trigger sending a message when registering email")
+
+	// TempToken for contact verification:
+	tempTokenInfos := models.TempToken{
+		UserID:     user.ID.Hex(),
+		InstanceID: req.Token.InstanceId,
+		Purpose:    "contact-verification",
+		Info: map[string]string{
+			"type":  "email",
+			"email": req.ContactInfo.GetEmail(),
+		},
+		Expiration: tokens.GetExpirationTime(time.Hour * 24 * 30),
+	}
+	tempToken, err := s.globalDBService.AddTempToken(tempTokenInfos)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	log.Printf("TODO: trigger sending a message when registering email with %s", tempToken)
 
 	updUser, err := s.userDBservice.UpdateUser(req.Token.InstanceId, user)
 	if err != nil {

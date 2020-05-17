@@ -25,7 +25,9 @@ func TestGenerateTempTokenEndpoint(t *testing.T) {
 		UserId:     "test_user_id",
 		InstanceId: testInstanceID,
 		Purpose:    "test_purpose",
-		Info:       "test_info",
+		Info: map[string]string{
+			"key": "test_info",
+		},
 	}
 
 	t.Run("without payload", func(t *testing.T) {
@@ -76,7 +78,9 @@ func TestValidateTempTokenEndpoint(t *testing.T) {
 		UserID:     "test_user_id",
 		InstanceID: testInstanceID,
 		Purpose:    "test_purpose_validation",
-		Info:       "test_info",
+		Info: map[string]string{
+			"key": "test_info",
+		},
 		Expiration: tokens.GetExpirationTime(10 * time.Second),
 	}
 	token, err := testGlobalDBService.AddTempToken(testTempToken)
@@ -129,7 +133,7 @@ func TestValidateTempTokenEndpoint(t *testing.T) {
 			t.Errorf("unexpected error: %s", err.Error())
 			return
 		}
-		if resp.UserId != testTempToken.UserID || resp.InstanceId != testTempToken.InstanceID || resp.Purpose != testTempToken.Purpose || resp.Info != testTempToken.Info || resp.Expiration != testTempToken.Expiration {
+		if resp.UserId != testTempToken.UserID || resp.InstanceId != testTempToken.InstanceID || resp.Purpose != testTempToken.Purpose || resp.Info["key"] != testTempToken.Info["key"] || resp.Expiration != testTempToken.Expiration {
 			t.Error(resp)
 			t.Error("wrong token infos")
 			return
@@ -151,7 +155,9 @@ func TestGetTempTokensEndpoint(t *testing.T) {
 		UserID:     "test_user_id",
 		InstanceID: testInstanceID,
 		Purpose:    "test_purpose_get_tokens",
-		Info:       "test_info",
+		Info: map[string]string{
+			"key": "test_info",
+		},
 		Expiration: tokens.GetExpirationTime(10 * time.Second),
 	}
 	token, err := testGlobalDBService.AddTempToken(testTempToken)
@@ -229,7 +235,9 @@ func TestDeleteTempTokenEndpoint(t *testing.T) {
 		UserID:     "test_user_id",
 		InstanceID: testInstanceID,
 		Purpose:    "test_purpose_delete_token",
-		Info:       "test_info",
+		Info: map[string]string{
+			"key": "test_info",
+		},
 		Expiration: tokens.GetExpirationTime(10 * time.Second),
 	}
 	token, err := testGlobalDBService.AddTempToken(testTempToken)
@@ -307,7 +315,9 @@ func TestPurgeUserTempTokensEndpoint(t *testing.T) {
 		UserID:     "test_user_id",
 		InstanceID: testInstanceID,
 		Purpose:    "test_purpose_purging",
-		Info:       "test_info",
+		Info: map[string]string{
+			"key": "test_info",
+		},
 		Expiration: tokens.GetExpirationTime(10 * time.Second),
 	}
 	token, err := testGlobalDBService.AddTempToken(testTempToken)

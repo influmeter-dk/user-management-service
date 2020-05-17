@@ -19,6 +19,8 @@ service UserManagementApi {
   rpc RenewJWT(RefreshJWTRequest) returns (inf.tokens.TokenResponse);
   rpc RevokeAllRefreshTokens(RevokeRefreshTokensReq) returns (ServiceStatus);
 
+  rpc VerifyContact(inf.tokens.TempToken) returns (inf.user.User);
+
   rpc ValidateAppToken(AppTokenRequest) returns (AppTokenValidation);
 
   // Temporary Tokens handling:

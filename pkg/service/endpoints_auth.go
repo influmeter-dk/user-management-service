@@ -204,9 +204,23 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 	}
 	newUser.ID, _ = primitive.ObjectIDFromHex(id)
 
-	log.Println("TODO: generate account confirmation token for newly created user")
-	log.Println("TODO: send email for newly created user")
-	// TODO: generate email confirmation token
+	// TempToken for contact verification:
+	tempTokenInfos := models.TempToken{
+		UserID:     id,
+		InstanceID: instanceID,
+		Purpose:    "contact-verification",
+		Info: map[string]string{
+			"type":  "email",
+			"email": newUser.Account.AccountID,
+		},
+		Expiration: tokens.GetExpirationTime(time.Hour * 24 * 30),
+	}
+	tempToken, err := s.globalDBService.AddTempToken(tempTokenInfos)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	log.Printf("TODO: send email for newly created user with %s", tempToken)
 	// TODO: send email with confirmation request
 
 	var username string
@@ -315,4 +329,8 @@ func (s *userManagementServer) SwitchProfile(ctx context.Context, req *api.Switc
 		PreferredLanguage: apiUser.Account.PreferredLanguage,
 	}
 	return response, nil
+}
+
+func (s *userManagementServer) VerifyContact(ctx context.Context, req *api.TempToken) (*api.User, error) {
+	return nil, status.Error(codes.Unimplemented, "unimplemented")
 }
