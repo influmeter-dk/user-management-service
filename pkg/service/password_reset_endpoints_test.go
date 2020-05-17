@@ -70,7 +70,8 @@ func TestInitiatePasswordResetEndpoint(t *testing.T) {
 
 	t.Run("with valid account id", func(t *testing.T) {
 		_, err := s.InitiatePasswordReset(context.Background(), &api.InitiateResetPasswordMsg{
-			AccountId: testUsers[0].Account.AccountID,
+			InstanceId: testInstanceID,
+			AccountId:  testUsers[0].Account.AccountID,
 		})
 		if err != nil {
 			t.Errorf("unexpected error: %s", err.Error())
