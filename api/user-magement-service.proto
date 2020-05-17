@@ -26,8 +26,6 @@ service UserManagementApi {
   // Temporary Tokens handling:
   rpc GenerateTempToken(inf.tokens.TempTokenInfo)
       returns (inf.tokens.TempToken);
-  rpc ValidateTempToken(inf.tokens.TempToken)
-      returns (inf.tokens.TempTokenInfo);
   rpc GetTempTokens(inf.tokens.TempTokenInfo)
       returns (inf.tokens.TempTokenInfos); // by user_id, instance and/or type
   rpc DeleteTempToken(inf.tokens.TempToken) returns (ServiceStatus);

@@ -8,6 +8,7 @@ import (
 	"github.com/influenzanet/user-management-service/pkg/api"
 	"github.com/influenzanet/user-management-service/pkg/models"
 	"github.com/influenzanet/user-management-service/pkg/pwhash"
+	"github.com/influenzanet/user-management-service/pkg/tokens"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc/status"
 )
@@ -475,5 +476,164 @@ func TestSwitchProfileEndpoint(t *testing.T) {
 }
 
 func TestVerifyAccountEndpoint(t *testing.T) {
-	t.Error("test unimplemented")
+	s := userManagementServer{
+		userDBservice:   testUserDBService,
+		globalDBService: testGlobalDBService,
+		JWT: models.JWTConfig{
+			TokenMinimumAgeMin:  time.Second * 1,
+			TokenExpiryInterval: time.Second * 2,
+		},
+	}
+
+	testUsers, err := addTestUsers([]models.User{
+		{
+			Account: models.Account{
+				Type:      "email",
+				AccountID: "test_for_verify_contact@test.com",
+			},
+			Profiles: []models.Profile{
+				{
+					ID:    primitive.NewObjectID(),
+					Alias: "main",
+				},
+			},
+			ContactInfos: []models.ContactInfo{
+				{
+					Type:  "email",
+					Email: "test_for_verify_contact@test.com",
+				},
+				{
+					Type:  "email",
+					Email: "testadd@test.com",
+				},
+			},
+		},
+	})
+	if err != nil {
+		t.Errorf("failed to create testusers: %s", err.Error())
+		return
+	}
+
+	t.Run("without payload", func(t *testing.T) {
+		_, err := s.VerifyContact(context.Background(), nil)
+		ok, msg := shouldHaveGrpcErrorStatus(err, "missing argument")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	t.Run("with empty payload", func(t *testing.T) {
+		req := &api.TempToken{}
+		_, err := s.VerifyContact(context.Background(), req)
+		ok, msg := shouldHaveGrpcErrorStatus(err, "missing argument")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	t.Run("with wrong payload", func(t *testing.T) {
+		req := &api.TempToken{
+			Token: "wrong",
+		}
+		_, err := s.VerifyContact(context.Background(), req)
+		ok, msg := shouldHaveGrpcErrorStatus(err, "wrong token")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	t.Run("with wrong token purpose", func(t *testing.T) {
+		tempTokenInfos := models.TempToken{
+			UserID:     testUsers[0].ID.Hex(),
+			InstanceID: testInstanceID,
+			Purpose:    "wrong-purpose",
+			Info: map[string]string{
+				"type":  "email",
+				"email": testUsers[0].Account.AccountID,
+			},
+			Expiration: tokens.GetExpirationTime(time.Hour * 24 * 30),
+		}
+		tempToken, err := s.globalDBService.AddTempToken(tempTokenInfos)
+		if err != nil {
+			t.Errorf("unexpected error: %s", err.Error())
+			return
+		}
+		req := &api.TempToken{
+			Token: tempToken,
+		}
+
+		_, err = s.VerifyContact(context.Background(), req)
+		ok, msg := shouldHaveGrpcErrorStatus(err, "wrong token purpose")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	t.Run("verify secondary address", func(t *testing.T) {
+		tempTokenInfos := models.TempToken{
+			UserID:     testUsers[0].ID.Hex(),
+			InstanceID: testInstanceID,
+			Purpose:    "contact-verification",
+			Info: map[string]string{
+				"type":  "email",
+				"email": testUsers[0].ContactInfos[1].Email,
+			},
+			Expiration: tokens.GetExpirationTime(time.Hour * 24 * 30),
+		}
+		tempToken, err := s.globalDBService.AddTempToken(tempTokenInfos)
+		if err != nil {
+			t.Errorf("unexpected error: %s", err.Error())
+			return
+		}
+		req := &api.TempToken{
+			Token: tempToken,
+		}
+
+		resp, err := s.VerifyContact(context.Background(), req)
+		if err != nil {
+			t.Errorf("unexpected error: %s", err.Error())
+			return
+		}
+
+		if resp.Account.AccountConfirmedAt > 0 {
+			t.Error("account should not be confirmed")
+		}
+		if len(resp.ContactInfos) != 2 || resp.ContactInfos[1].ConfirmedAt < 1 {
+			t.Error("email not confirmed yet")
+		}
+	})
+
+	t.Run("verify main address", func(t *testing.T) {
+		tempTokenInfos := models.TempToken{
+			UserID:     testUsers[0].ID.Hex(),
+			InstanceID: testInstanceID,
+			Purpose:    "contact-verification",
+			Info: map[string]string{
+				"type":  "email",
+				"email": testUsers[0].Account.AccountID,
+			},
+			Expiration: tokens.GetExpirationTime(time.Hour * 24 * 30),
+		}
+		tempToken, err := s.globalDBService.AddTempToken(tempTokenInfos)
+		if err != nil {
+			t.Errorf("unexpected error: %s", err.Error())
+			return
+		}
+		req := &api.TempToken{
+			Token: tempToken,
+		}
+
+		resp, err := s.VerifyContact(context.Background(), req)
+		if err != nil {
+			t.Errorf("unexpected error: %s", err.Error())
+			return
+		}
+
+		if resp.Account.AccountConfirmedAt < 1 {
+			t.Error("account not confirmed yet")
+		}
+		if len(resp.ContactInfos) != 2 || resp.ContactInfos[0].ConfirmedAt < 1 {
+			t.Error("email not confirmed yet")
+		}
+	})
 }

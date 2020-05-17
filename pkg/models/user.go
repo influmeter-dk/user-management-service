@@ -86,9 +86,12 @@ func (u *User) AddNewEmail(addr string, confirmed bool) {
 	u.ContactInfos = append(u.ContactInfos, contactInfo)
 }
 
-func (u *User) ConfirmContactInfo(id string) error {
+func (u *User) ConfirmContactInfo(t string, addr string) error {
 	for i, ci := range u.ContactInfos {
-		if ci.ID.Hex() == id {
+		if t == "email" && ci.Email == addr {
+			u.ContactInfos[i].ConfirmedAt = time.Now().Unix()
+			return nil
+		} else if t == "phone" && ci.Phone == addr {
 			u.ContactInfos[i].ConfirmedAt = time.Now().Unix()
 			return nil
 		}

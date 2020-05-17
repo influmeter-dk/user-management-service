@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"log"
 	"time"
 
 	"github.com/influenzanet/user-management-service/pkg/api"
@@ -37,24 +36,6 @@ func (s *userManagementServer) GenerateTempToken(ctx context.Context, t *api.Tem
 	return &api.TempToken{
 		Token: token,
 	}, nil
-}
-
-func (s *userManagementServer) ValidateTempToken(ctx context.Context, t *api.TempToken) (*api.TempTokenInfo, error) {
-	if t == nil || t.Token == "" {
-		return nil, status.Error(codes.InvalidArgument, "missing argument")
-	}
-
-	tempToken, err := s.globalDBService.GetTempToken(t.Token)
-	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-	if time.Now().Unix() > tempToken.Expiration {
-		err = s.globalDBService.DeleteTempToken(tempToken.Token)
-		log.Println(err)
-		return nil, status.Error(codes.InvalidArgument, "token expired")
-	}
-
-	return tempToken.ToAPI(), nil
 }
 
 func (s *userManagementServer) GetTempTokens(ctx context.Context, t *api.TempTokenInfo) (*api.TempTokenInfos, error) {

@@ -332,5 +332,36 @@ func (s *userManagementServer) SwitchProfile(ctx context.Context, req *api.Switc
 }
 
 func (s *userManagementServer) VerifyContact(ctx context.Context, req *api.TempToken) (*api.User, error) {
-	return nil, status.Error(codes.Unimplemented, "unimplemented")
+	if req == nil || req.Token == "" {
+		return nil, status.Error(codes.InvalidArgument, "missing argument")
+	}
+
+	tokenInfos, err := s.ValidateTempToken(req.Token, "contact-verification")
+	if err != nil {
+		log.Printf("VerifyContact: %s", err.Error())
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	user, err := s.userDBservice.GetUserByID(tokenInfos.InstanceID, tokenInfos.UserID)
+	if err != nil {
+		log.Printf("VerifyContact: %s", err.Error())
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	cType, ok1 := tokenInfos.Info["type"]
+	email, ok2 := tokenInfos.Info["email"]
+	if !ok1 || !ok2 {
+		return nil, status.Error(codes.InvalidArgument, "missing token info")
+	}
+
+	if err := user.ConfirmContactInfo(cType, email); err != nil {
+		log.Printf("VerifyContact: %s", err.Error())
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	if user.Account.Type == "email" && user.Account.AccountID == email {
+		user.Account.AccountConfirmedAt = time.Now().Unix()
+	}
+	user, err = s.userDBservice.UpdateUser(tokenInfos.InstanceID, user)
+	return user.ToAPI(), err
 }
