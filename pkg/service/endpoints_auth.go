@@ -271,9 +271,13 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 }
 
 func (s *userManagementServer) SwitchProfile(ctx context.Context, req *api.SwitchProfileRequest) (*api.TokenResponse, error) {
-	if req == nil || utils.IsTokenEmpty(req.Token) || req.ProfileId == "" || req.RefreshToken == "" {
+	if req == nil || utils.IsTokenEmpty(req.Token) || req.ProfileId == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
+	if req.Token.TempToken == nil && req.RefreshToken == "" {
+		return nil, status.Error(codes.InvalidArgument, "missing argument")
+	}
+
 	user, err := s.userDBservice.GetUserByID(req.Token.InstanceId, req.Token.Id)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "user not found")
@@ -284,8 +288,23 @@ func (s *userManagementServer) SwitchProfile(ctx context.Context, req *api.Switc
 		return nil, status.Error(codes.Internal, "profile not found")
 	}
 
-	if err := user.RemoveRefreshToken(req.RefreshToken); err != nil {
-		return nil, status.Error(codes.Internal, "wrong refresh token")
+	var rt string
+	if req.RefreshToken != "" {
+		// only if not temptoken
+		if err := user.RemoveRefreshToken(req.RefreshToken); err != nil {
+			return nil, status.Error(codes.Internal, "wrong refresh token")
+		}
+		// Refresh Token
+		rt, err = tokens.GenerateUniqueTokenString()
+		if err != nil {
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		user.AddRefreshToken(rt)
+
+		user, err = s.userDBservice.UpdateUser(req.Token.InstanceId, user)
+		if err != nil {
+			return nil, status.Error(codes.Internal, err.Error())
+		}
 	}
 
 	var username string
@@ -304,18 +323,6 @@ func (s *userManagementServer) SwitchProfile(ctx context.Context, req *api.Switc
 		username,
 		models.TempTokenFromAPI(req.Token.TempToken),
 	)
-	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	// Refresh Token
-	rt, err := tokens.GenerateUniqueTokenString()
-	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-	user.AddRefreshToken(rt)
-
-	user, err = s.userDBservice.UpdateUser(req.Token.InstanceId, user)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
