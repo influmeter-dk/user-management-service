@@ -141,11 +141,11 @@ message PasswordChangeMsg {
 }
 
 message InitiateResetPasswordMsg { string account_id = 1; }
-message GetInfosForResetPasswordMsg { inf.tokens.TempToken token = 1; }
+message GetInfosForResetPasswordMsg { string token = 1; }
 message UserInfoForPWReset { string account_id = 1; }
 
 message ResetPasswordMsg {
-  inf.tokens.TempToken token = 1;
+  string token = 1;
   string new_password = 2;
 }
 
