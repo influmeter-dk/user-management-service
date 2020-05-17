@@ -99,11 +99,25 @@ func (s *userManagementServer) ChangeAccountIDEmail(ctx context.Context, req *ap
 
 	if user.Account.AccountConfirmedAt > 0 {
 		// Old AccountID already confirmed
-		log.Println("TODO: prepare token for restoring email address")
-		log.Println("TODO: trigger email sending to old address")
+
+		// TempToken for contact verification:
+		tempTokenInfos := models.TempToken{
+			UserID:     user.ID.Hex(),
+			InstanceID: req.Token.InstanceId,
+			Purpose:    "restore-account-id",
+			Info: map[string]string{
+				"oldEmail": user.Account.AccountID,
+				"newEmail": req.NewEmail,
+			},
+			Expiration: tokens.GetExpirationTime(time.Hour * 24 * 7),
+		}
+		tempToken, err := s.globalDBService.AddTempToken(tempTokenInfos)
+		if err != nil {
+			return nil, status.Error(codes.Internal, err.Error())
+		}
+		log.Printf("TODO: trigger email sending to old address: %s", tempToken)
 	}
 	// if old AccountID was not confirmed probably wrong address used in the first place
-
 	user.Account.AccountID = req.NewEmail
 	user.Account.AccountConfirmedAt = 0
 
