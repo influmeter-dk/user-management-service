@@ -14,8 +14,8 @@ func (s *userManagementServer) ValidateTempToken(token string, withPurpose strin
 	}
 
 	if time.Now().Unix() > tokenInfos.Expiration {
-		err = s.globalDBService.DeleteTempToken(tokenInfos.Token)
-		return nil, err
+		_ = s.globalDBService.DeleteTempToken(tokenInfos.Token)
+		return nil, errors.New("token expired")
 	}
 
 	if withPurpose != "" && withPurpose != tokenInfos.Purpose {

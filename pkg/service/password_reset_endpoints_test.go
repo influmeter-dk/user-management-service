@@ -114,7 +114,7 @@ func TestGetInfosForPasswordResetEndpoint(t *testing.T) {
 		UserID:     testUsers[0].ID.Hex(),
 		InstanceID: testInstanceID,
 		Purpose:    "password-reset",
-		Expiration: tokens.GetExpirationTime(-10 * time.Second),
+		Expiration: time.Now().Unix() - 10,
 	}
 	token, err := testGlobalDBService.AddTempToken(testTempTokenOld)
 	if err != nil {
@@ -222,7 +222,7 @@ func TestResetPasswordEndpoint(t *testing.T) {
 		UserID:     testUsers[0].ID.Hex(),
 		InstanceID: testInstanceID,
 		Purpose:    "password-reset",
-		Expiration: tokens.GetExpirationTime(-10 * time.Second),
+		Expiration: time.Now().Unix() - 10,
 	}
 	token, err := testGlobalDBService.AddTempToken(testTempTokenOld)
 	if err != nil {
@@ -284,7 +284,7 @@ func TestResetPasswordEndpoint(t *testing.T) {
 
 	t.Run("with weak password", func(t *testing.T) {
 		_, err := s.ResetPassword(context.Background(), &api.ResetPasswordMsg{
-			Token:       testTempTokenOld.Token,
+			Token:       testTempToken.Token,
 			NewPassword: "123",
 		})
 		ok, msg := shouldHaveGrpcErrorStatus(err, "password too weak")
@@ -294,16 +294,13 @@ func TestResetPasswordEndpoint(t *testing.T) {
 	})
 
 	t.Run("with valid arguments", func(t *testing.T) {
-		resp, err := s.ResetPassword(context.Background(), &api.ResetPasswordMsg{
+		_, err := s.ResetPassword(context.Background(), &api.ResetPasswordMsg{
 			Token:       testTempToken.Token,
 			NewPassword: "tokmefn4n2p3rnp32mne-sd",
 		})
 		if err != nil {
 			t.Errorf("unexpected error: %s", err.Error())
 			return
-		}
-		if len(resp.AccessToken) < 1 {
-			t.Errorf("unexpected response: %s", resp)
 		}
 	})
 }

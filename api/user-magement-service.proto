@@ -44,7 +44,7 @@ service UserManagementApi {
   rpc InitiatePasswordReset(InitiateResetPasswordMsg) returns (ServiceStatus);
   rpc GetInfosForPasswordReset(GetInfosForResetPasswordMsg)
       returns (UserInfoForPWReset);
-  rpc ResetPassword(ResetPasswordMsg) returns (inf.tokens.TokenResponse);
+  rpc ResetPassword(ResetPasswordMsg) returns (ServiceStatus);
 
   // Profile methods:
   rpc SaveProfile(ProfileRequest)
