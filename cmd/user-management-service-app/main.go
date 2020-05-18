@@ -7,8 +7,8 @@ import (
 	"github.com/influenzanet/user-management-service/internal/config"
 	"github.com/influenzanet/user-management-service/pkg/dbs/globaldb"
 	"github.com/influenzanet/user-management-service/pkg/dbs/userdb"
+	"github.com/influenzanet/user-management-service/pkg/grpc/service"
 	"github.com/influenzanet/user-management-service/pkg/models"
-	"github.com/influenzanet/user-management-service/pkg/service"
 )
 
 func main() {
