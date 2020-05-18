@@ -1,4 +1,4 @@
-.PHONY: build test install-dev docker api
+.PHONY: build test install-dev mock docker api
 
 PROTO_BUILD_DIR = ./pkg
 DOCKER_OPTS ?= --rm
@@ -28,9 +28,13 @@ build:
 test:
 	./test/test.sh $(TEST_ARGS)
 
-#install-dev:
-#	go get github.com/golang/mock/gomock
-#	go install github.com/golang/mock/mockgen
+install-dev:
+	go get github.com/golang/mock/gomock
+	go install github.com/golang/mock/mockgen
+
+mock:
+	# messaging service repo has to be in the relative path as here:
+	mockgen -source=../messaging-service/pkg/api/manage/message-service.pb.go MessagingServiceApiClient > test/mocks/messaging-service.go
 
 docker:
 	docker build -t  github.com/influenzanet/user-management-service:$(VERSION)  -f build/docker/Dockerfile $(DOCKER_OPTS) .
