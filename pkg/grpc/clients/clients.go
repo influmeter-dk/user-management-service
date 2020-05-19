@@ -3,7 +3,7 @@ package clients
 import (
 	"log"
 
-	messageAPI "github.com/influenzanet/messaging-service/pkg/api/manage"
+	messageAPI "github.com/influenzanet/messaging-service/pkg/api/messaging_service"
 	"google.golang.org/grpc"
 )
 

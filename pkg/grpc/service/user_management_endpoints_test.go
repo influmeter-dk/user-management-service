@@ -8,7 +8,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/influenzanet/user-management-service/pkg/api"
 	"github.com/influenzanet/user-management-service/pkg/models"
-	messageMock "github.com/influenzanet/user-management-service/test/mocks/mock_manage"
+	messageMock "github.com/influenzanet/user-management-service/test/mocks/messaging_service"
 )
 
 func TestCreateUserEndpoint(t *testing.T) {

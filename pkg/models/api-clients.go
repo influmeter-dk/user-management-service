@@ -1,7 +1,7 @@
 package models
 
 import (
-	messageAPI "github.com/influenzanet/messaging-service/pkg/api/manage"
+	messageAPI "github.com/influenzanet/messaging-service/pkg/api/messaging_service"
 )
 
 // APIClients holds the service clients to the internal services

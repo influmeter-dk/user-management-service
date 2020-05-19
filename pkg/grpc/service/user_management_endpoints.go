@@ -5,7 +5,7 @@ import (
 	"log"
 	"time"
 
-	messageAPI "github.com/influenzanet/messaging-service/pkg/api/manage"
+	messageAPI "github.com/influenzanet/messaging-service/pkg/api/messaging_service"
 	"github.com/influenzanet/user-management-service/pkg/api"
 	"github.com/influenzanet/user-management-service/pkg/models"
 	"github.com/influenzanet/user-management-service/pkg/pwhash"

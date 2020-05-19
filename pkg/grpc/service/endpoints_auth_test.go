@@ -10,7 +10,7 @@ import (
 	"github.com/influenzanet/user-management-service/pkg/models"
 	"github.com/influenzanet/user-management-service/pkg/pwhash"
 	"github.com/influenzanet/user-management-service/pkg/tokens"
-	messageMock "github.com/influenzanet/user-management-service/test/mocks/mock_manage"
+	messageMock "github.com/influenzanet/user-management-service/test/mocks/messaging_service"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc/status"
 )
