@@ -81,6 +81,7 @@ func (s *userManagementServer) CreateUser(ctx context.Context, req *api.CreateUs
 
 	// ---> Trigger message sending
 	_, err = s.clients.MessagingService.SendInstantEmail(ctx, &messageAPI.SendEmailReq{
+		InstanceId:  instanceID,
 		To:          []string{newUser.Account.AccountID},
 		MessageType: "registration",
 		ContentInfos: map[string]string{

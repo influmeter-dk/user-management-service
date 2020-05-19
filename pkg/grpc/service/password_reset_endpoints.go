@@ -47,6 +47,7 @@ func (s *userManagementServer) InitiatePasswordReset(ctx context.Context, req *a
 
 	// ---> Trigger message sending
 	_, err = s.clients.MessagingService.SendInstantEmail(ctx, &messageAPI.SendEmailReq{
+		InstanceId:  instanceID,
 		To:          []string{user.Account.AccountID},
 		MessageType: "password-reset",
 		ContentInfos: map[string]string{
@@ -120,6 +121,7 @@ func (s *userManagementServer) ResetPassword(ctx context.Context, req *api.Reset
 
 	// Trigger message sending
 	_, err = s.clients.MessagingService.SendInstantEmail(ctx, &messageAPI.SendEmailReq{
+		InstanceId:        tokenInfos.InstanceID,
 		To:                []string{user.Account.AccountID},
 		MessageType:       "password-changed",
 		PreferredLanguage: user.Account.PreferredLanguage,

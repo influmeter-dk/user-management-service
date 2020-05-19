@@ -69,6 +69,7 @@ func (s *userManagementServer) ChangePassword(ctx context.Context, req *api.Pass
 
 	// Trigger message sending
 	_, err = s.clients.MessagingService.SendInstantEmail(ctx, &messageAPI.SendEmailReq{
+		InstanceId:        req.Token.InstanceId,
 		To:                []string{user.Account.AccountID},
 		MessageType:       "password-changed",
 		PreferredLanguage: user.Account.PreferredLanguage,
@@ -134,6 +135,7 @@ func (s *userManagementServer) ChangeAccountIDEmail(ctx context.Context, req *ap
 
 		// ---> Trigger message sending
 		_, err = s.clients.MessagingService.SendInstantEmail(ctx, &messageAPI.SendEmailReq{
+			InstanceId:        req.Token.InstanceId,
 			To:                []string{user.Account.AccountID},
 			MessageType:       "account-id-changed",
 			PreferredLanguage: user.Account.PreferredLanguage,
@@ -189,6 +191,7 @@ func (s *userManagementServer) ChangeAccountIDEmail(ctx context.Context, req *ap
 
 		// ---> Trigger message sending
 		_, err = s.clients.MessagingService.SendInstantEmail(ctx, &messageAPI.SendEmailReq{
+			InstanceId:        req.Token.InstanceId,
 			To:                []string{user.Account.AccountID},
 			MessageType:       "verify-email",
 			PreferredLanguage: user.Account.PreferredLanguage,
@@ -236,6 +239,7 @@ func (s *userManagementServer) DeleteAccount(ctx context.Context, req *api.UserR
 
 	// ---> Trigger message sending
 	_, err = s.clients.MessagingService.SendInstantEmail(ctx, &messageAPI.SendEmailReq{
+		InstanceId:        req.Token.InstanceId,
 		To:                []string{user.Account.AccountID},
 		MessageType:       "account-deleted",
 		PreferredLanguage: user.Account.PreferredLanguage,
@@ -377,6 +381,7 @@ func (s *userManagementServer) AddEmail(ctx context.Context, req *api.ContactInf
 
 	// ---> Trigger message sending
 	_, err = s.clients.MessagingService.SendInstantEmail(ctx, &messageAPI.SendEmailReq{
+		InstanceId:  req.Token.InstanceId,
 		To:          []string{user.Account.AccountID},
 		MessageType: "verify-email",
 		ContentInfos: map[string]string{
