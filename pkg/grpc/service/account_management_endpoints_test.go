@@ -5,9 +5,11 @@ import (
 	"testing"
 	"time"
 
+	"github.com/golang/mock/gomock"
 	"github.com/influenzanet/user-management-service/pkg/api"
 	"github.com/influenzanet/user-management-service/pkg/models"
 	"github.com/influenzanet/user-management-service/pkg/pwhash"
+	messageMock "github.com/influenzanet/user-management-service/test/mocks/mock_manage"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc/status"
 )
@@ -123,12 +125,19 @@ func TestGetUserEndpoint(t *testing.T) {
 }
 
 func TestChangePasswordEndpoint(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockMessagingClient := messageMock.NewMockMessagingServiceApiClient(mockCtrl)
+
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
 		JWT: models.JWTConfig{
 			TokenMinimumAgeMin:  time.Second * 1,
 			TokenExpiryInterval: time.Second * 2,
+		},
+		clients: &models.APIClients{
+			MessagingService: mockMessagingClient,
 		},
 	}
 
@@ -235,6 +244,11 @@ func TestChangePasswordEndpoint(t *testing.T) {
 	})
 
 	t.Run("with valid data and new password", func(t *testing.T) {
+		mockMessagingClient.EXPECT().SendInstantEmail(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
+
 		req := &api.PasswordChangeMsg{
 			Token: &api.TokenInfos{
 				Id:         id,
@@ -272,12 +286,19 @@ func TestChangePasswordEndpoint(t *testing.T) {
 }
 
 func TestChangeAccountIDEmailEndpoint(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockMessagingClient := messageMock.NewMockMessagingServiceApiClient(mockCtrl)
+
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
 		JWT: models.JWTConfig{
 			TokenMinimumAgeMin:  time.Second * 1,
 			TokenExpiryInterval: time.Second * 2,
+		},
+		clients: &models.APIClients{
+			MessagingService: mockMessagingClient,
 		},
 	}
 
@@ -384,6 +405,11 @@ func TestChangeAccountIDEmailEndpoint(t *testing.T) {
 	})
 
 	t.Run("for confirmed new email", func(t *testing.T) {
+		mockMessagingClient.EXPECT().SendInstantEmail(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
+
 		req := &api.EmailChangeMsg{
 			Token: &api.TokenInfos{
 				Id:         testUsers[1].ID.Hex(),
@@ -412,6 +438,11 @@ func TestChangeAccountIDEmailEndpoint(t *testing.T) {
 	})
 
 	t.Run("for not confirmed old email", func(t *testing.T) {
+		mockMessagingClient.EXPECT().SendInstantEmail(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
+
 		req := &api.EmailChangeMsg{
 			Token: &api.TokenInfos{
 				Id:         testUsers[2].ID.Hex(),
@@ -435,6 +466,11 @@ func TestChangeAccountIDEmailEndpoint(t *testing.T) {
 	})
 
 	t.Run("for confirmed old email", func(t *testing.T) {
+		mockMessagingClient.EXPECT().SendInstantEmail(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil).Times(2)
+
 		req := &api.EmailChangeMsg{
 			Token: &api.TokenInfos{
 				Id:         testUsers[3].ID.Hex(),
@@ -459,12 +495,19 @@ func TestChangeAccountIDEmailEndpoint(t *testing.T) {
 }
 
 func TestDeleteAccountEndpoint(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockMessagingClient := messageMock.NewMockMessagingServiceApiClient(mockCtrl)
+
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
 		JWT: models.JWTConfig{
 			TokenMinimumAgeMin:  time.Second * 1,
 			TokenExpiryInterval: time.Second * 2,
+		},
+		clients: &models.APIClients{
+			MessagingService: mockMessagingClient,
 		},
 	}
 
@@ -530,6 +573,11 @@ func TestDeleteAccountEndpoint(t *testing.T) {
 	})
 
 	t.Run("with same user", func(t *testing.T) {
+		mockMessagingClient.EXPECT().SendInstantEmail(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
+
 		req := &api.UserReference{
 			Token: &api.TokenInfos{
 				Id:         testUsers[0].ID.Hex(),
@@ -864,12 +912,19 @@ func TestUseUnsubscribeTokenEndpoint(t *testing.T) {
 }
 
 func TestAddEmailEndpoint(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockMessagingClient := messageMock.NewMockMessagingServiceApiClient(mockCtrl)
+
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
 		JWT: models.JWTConfig{
 			TokenMinimumAgeMin:  time.Second * 1,
 			TokenExpiryInterval: time.Second * 2,
+		},
+		clients: &models.APIClients{
+			MessagingService: mockMessagingClient,
 		},
 	}
 	testUsers, err := addTestUsers([]models.User{
@@ -931,6 +986,11 @@ func TestAddEmailEndpoint(t *testing.T) {
 	})
 
 	t.Run("add email", func(t *testing.T) {
+		mockMessagingClient.EXPECT().SendInstantEmail(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
+
 		req := &api.ContactInfoMsg{
 			Token: &token,
 			ContactInfo: &api.ContactInfo{

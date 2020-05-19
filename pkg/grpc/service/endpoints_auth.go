@@ -10,6 +10,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
+	messageAPI "github.com/influenzanet/messaging-service/pkg/api/manage"
 	"github.com/influenzanet/user-management-service/pkg/api"
 	"github.com/influenzanet/user-management-service/pkg/models"
 	"github.com/influenzanet/user-management-service/pkg/pwhash"
@@ -225,8 +226,19 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	log.Printf("TODO: send email for newly created user with %s", tempToken)
-	// TODO: send email with confirmation request
+	// ---> Trigger message sending
+	_, err = s.clients.MessagingService.SendInstantEmail(ctx, &messageAPI.SendEmailReq{
+		To:          []string{newUser.Account.AccountID},
+		MessageType: "registration",
+		ContentInfos: map[string]string{
+			"token": tempToken,
+		},
+		PreferredLanguage: newUser.Account.PreferredLanguage,
+	})
+	if err != nil {
+		log.Printf("SignupWithEmail: %s", err.Error())
+	}
+	// <---
 
 	var username string
 	if len(newUser.Roles) > 1 || len(newUser.Roles) == 1 && newUser.Roles[0] != "PARTICIPANT" {

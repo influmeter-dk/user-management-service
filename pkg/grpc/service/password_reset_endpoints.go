@@ -45,16 +45,20 @@ func (s *userManagementServer) InitiatePasswordReset(ctx context.Context, req *a
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
+	// ---> Trigger message sending
 	_, err = s.clients.MessagingService.SendInstantEmail(ctx, &messageAPI.SendEmailReq{
 		To:          []string{user.Account.AccountID},
 		MessageType: "password-reset",
 		ContentInfos: map[string]string{
-			"token": tempToken,
+			"token":      tempToken,
+			"validUntil": "24", // hours
 		},
+		PreferredLanguage: user.Account.PreferredLanguage,
 	})
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+	// <---
 	return &api.ServiceStatus{
 		Msg:     "email sending triggered",
 		Version: apiVersion,
@@ -109,8 +113,21 @@ func (s *userManagementServer) ResetPassword(ctx context.Context, req *api.Reset
 	}
 	log.Printf("user %s initiated password change", tokenInfos.UserID)
 
-	// TODO: initiate email notification for user about password update
-	log.Println("TODO: Password Reset - send email")
+	user, err := s.userDBservice.GetUserByID(tokenInfos.InstanceID, tokenInfos.UserID)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	// Trigger message sending
+	_, err = s.clients.MessagingService.SendInstantEmail(ctx, &messageAPI.SendEmailReq{
+		To:                []string{user.Account.AccountID},
+		MessageType:       "password-changed",
+		PreferredLanguage: user.Account.PreferredLanguage,
+	})
+	if err != nil {
+		log.Printf("ChangePassword: %s", err.Error())
+	}
+	// ---
 
 	// remove all temptokens for password reset:
 	if err := s.globalDBService.DeleteAllTempTokenForUser(tokenInfos.InstanceID, tokenInfos.UserID, "password-reset"); err != nil {
@@ -121,5 +138,5 @@ func (s *userManagementServer) ResetPassword(ctx context.Context, req *api.Reset
 		Version: apiVersion,
 		Msg:     "password changed",
 		Status:  api.ServiceStatus_NORMAL,
-	}, status.Error(codes.Unimplemented, "unimplemented: send email about successful password reset")
+	}, nil
 }

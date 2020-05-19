@@ -5,17 +5,26 @@ import (
 	"testing"
 	"time"
 
+	"github.com/golang/mock/gomock"
 	"github.com/influenzanet/user-management-service/pkg/api"
 	"github.com/influenzanet/user-management-service/pkg/models"
+	messageMock "github.com/influenzanet/user-management-service/test/mocks/mock_manage"
 )
 
 func TestCreateUserEndpoint(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockMessagingClient := messageMock.NewMockMessagingServiceApiClient(mockCtrl)
+
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
 		JWT: models.JWTConfig{
 			TokenMinimumAgeMin:  time.Second * 1,
 			TokenExpiryInterval: time.Second * 2,
+		},
+		clients: &models.APIClients{
+			MessagingService: mockMessagingClient,
 		},
 	}
 
@@ -56,6 +65,11 @@ func TestCreateUserEndpoint(t *testing.T) {
 	})
 
 	t.Run("with valid arguments", func(t *testing.T) {
+		mockMessagingClient.EXPECT().SendInstantEmail(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
+
 		req := &api.CreateUserReq{
 			Token: &api.TokenInfos{
 				Id:         "testuserid",

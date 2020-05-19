@@ -3,8 +3,10 @@ package service
 import (
 	"context"
 	"log"
+	"strconv"
 	"time"
 
+	messageAPI "github.com/influenzanet/messaging-service/pkg/api/manage"
 	"github.com/influenzanet/user-management-service/pkg/api"
 	"github.com/influenzanet/user-management-service/pkg/models"
 	"github.com/influenzanet/user-management-service/pkg/pwhash"
@@ -65,7 +67,16 @@ func (s *userManagementServer) ChangePassword(ctx context.Context, req *api.Pass
 	}
 	log.Printf("user %s initiated password change", req.Token.Id)
 
-	// TODO: initiate email notification for user about password update
+	// Trigger message sending
+	_, err = s.clients.MessagingService.SendInstantEmail(ctx, &messageAPI.SendEmailReq{
+		To:                []string{user.Account.AccountID},
+		MessageType:       "password-changed",
+		PreferredLanguage: user.Account.PreferredLanguage,
+	})
+	if err != nil {
+		log.Printf("ChangePassword: %s", err.Error())
+	}
+	// ---
 
 	// remove all temptokens for password reset:
 	if err := s.globalDBService.DeleteAllTempTokenForUser(req.Token.InstanceId, req.Token.Id, "password-reset"); err != nil {
@@ -120,7 +131,22 @@ func (s *userManagementServer) ChangeAccountIDEmail(ctx context.Context, req *ap
 		if err != nil {
 			return nil, status.Error(codes.Internal, err.Error())
 		}
-		log.Printf("TODO: trigger email sending to old address: %s", tempToken)
+
+		// ---> Trigger message sending
+		_, err = s.clients.MessagingService.SendInstantEmail(ctx, &messageAPI.SendEmailReq{
+			To:                []string{user.Account.AccountID},
+			MessageType:       "account-id-changed",
+			PreferredLanguage: user.Account.PreferredLanguage,
+			ContentInfos: map[string]string{
+				"restoreToken": tempToken,
+				"validUntil":   strconv.Itoa(24 * 7 * 60),
+				"newEmail":     req.NewEmail,
+			},
+		})
+		if err != nil {
+			log.Printf("ChangeAccountIDEmail: %s", err.Error())
+		}
+		// <---
 	}
 	// if old AccountID was not confirmed probably wrong address used in the first place
 	user.Account.AccountID = req.NewEmail
@@ -161,7 +187,19 @@ func (s *userManagementServer) ChangeAccountIDEmail(ctx context.Context, req *ap
 			return nil, status.Error(codes.Internal, err.Error())
 		}
 
-		log.Printf("TODO: trigger email sending to new address with %s", tempToken)
+		// ---> Trigger message sending
+		_, err = s.clients.MessagingService.SendInstantEmail(ctx, &messageAPI.SendEmailReq{
+			To:                []string{user.Account.AccountID},
+			MessageType:       "verify-email",
+			PreferredLanguage: user.Account.PreferredLanguage,
+			ContentInfos: map[string]string{
+				"token": tempToken,
+			},
+		})
+		if err != nil {
+			log.Printf("ChangeAccountIDEmail: %s", err.Error())
+		}
+		// <---
 	}
 
 	if !req.KeepOldEmail {
@@ -191,8 +229,21 @@ func (s *userManagementServer) DeleteAccount(ctx context.Context, req *api.UserR
 	}
 	log.Printf("user %s initiated account removal for user id %s", req.Token.Id, req.UserId)
 
-	// TODO: send message to email
-	log.Println("TODO: send email about successful account deletion")
+	user, err := s.userDBservice.GetUserByID(req.Token.InstanceId, req.UserId)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	// ---> Trigger message sending
+	_, err = s.clients.MessagingService.SendInstantEmail(ctx, &messageAPI.SendEmailReq{
+		To:                []string{user.Account.AccountID},
+		MessageType:       "account-deleted",
+		PreferredLanguage: user.Account.PreferredLanguage,
+	})
+	if err != nil {
+		log.Printf("DeleteAccount: %s", err.Error())
+	}
+	// <---
 
 	if err := s.userDBservice.DeleteUser(req.Token.InstanceId, req.UserId); err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -323,7 +374,20 @@ func (s *userManagementServer) AddEmail(ctx context.Context, req *api.ContactInf
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	log.Printf("TODO: trigger sending a message when registering email with %s", tempToken)
+
+	// ---> Trigger message sending
+	_, err = s.clients.MessagingService.SendInstantEmail(ctx, &messageAPI.SendEmailReq{
+		To:          []string{user.Account.AccountID},
+		MessageType: "verify-email",
+		ContentInfos: map[string]string{
+			"token": tempToken,
+		},
+		PreferredLanguage: user.Account.PreferredLanguage,
+	})
+	if err != nil {
+		log.Printf("AddEmail: %s", err.Error())
+	}
+	// <---
 
 	updUser, err := s.userDBservice.UpdateUser(req.Token.InstanceId, user)
 	if err != nil {

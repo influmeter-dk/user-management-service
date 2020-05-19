@@ -202,12 +202,19 @@ func TestGetInfosForPasswordResetEndpoint(t *testing.T) {
 }
 
 func TestResetPasswordEndpoint(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockMessagingClient := messageMock.NewMockMessagingServiceApiClient(mockCtrl)
+
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
 		JWT: models.JWTConfig{
 			TokenMinimumAgeMin:  time.Second * 1,
 			TokenExpiryInterval: time.Second * 2,
+		},
+		clients: &models.APIClients{
+			MessagingService: mockMessagingClient,
 		},
 	}
 
@@ -308,6 +315,10 @@ func TestResetPasswordEndpoint(t *testing.T) {
 	})
 
 	t.Run("with valid arguments", func(t *testing.T) {
+		mockMessagingClient.EXPECT().SendInstantEmail(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
 		_, err := s.ResetPassword(context.Background(), &api.ResetPasswordMsg{
 			Token:       testTempToken.Token,
 			NewPassword: "tokmefn4n2p3rnp32mne-sd",

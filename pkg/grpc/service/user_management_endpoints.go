@@ -3,10 +3,13 @@ package service
 import (
 	"context"
 	"log"
+	"time"
 
+	messageAPI "github.com/influenzanet/messaging-service/pkg/api/manage"
 	"github.com/influenzanet/user-management-service/pkg/api"
 	"github.com/influenzanet/user-management-service/pkg/models"
 	"github.com/influenzanet/user-management-service/pkg/pwhash"
+	"github.com/influenzanet/user-management-service/pkg/tokens"
 	"github.com/influenzanet/user-management-service/pkg/utils"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc/codes"
@@ -60,10 +63,35 @@ func (s *userManagementServer) CreateUser(ctx context.Context, req *api.CreateUs
 	}
 	newUser.ID, _ = primitive.ObjectIDFromHex(id)
 
-	log.Println("TODO: generate account confirmation token for newly created user")
-	log.Println("TODO: send email for newly created user")
-	// TODO: generate email confirmation token
-	// TODO: send email with confirmation request
+	// TempToken for contact verification:
+	tempTokenInfos := models.TempToken{
+		UserID:     id,
+		InstanceID: instanceID,
+		Purpose:    "contact-verification",
+		Info: map[string]string{
+			"type":  "email",
+			"email": newUser.Account.AccountID,
+		},
+		Expiration: tokens.GetExpirationTime(time.Hour * 24 * 30),
+	}
+	tempToken, err := s.globalDBService.AddTempToken(tempTokenInfos)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	// ---> Trigger message sending
+	_, err = s.clients.MessagingService.SendInstantEmail(ctx, &messageAPI.SendEmailReq{
+		To:          []string{newUser.Account.AccountID},
+		MessageType: "registration",
+		ContentInfos: map[string]string{
+			"token": tempToken,
+		},
+		PreferredLanguage: newUser.Account.PreferredLanguage,
+	})
+	if err != nil {
+		log.Printf("CreateUser: %s", err.Error())
+	}
+	// <---
 
 	return newUser.ToAPI(), nil
 }

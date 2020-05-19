@@ -5,10 +5,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/golang/mock/gomock"
 	"github.com/influenzanet/user-management-service/pkg/api"
 	"github.com/influenzanet/user-management-service/pkg/models"
 	"github.com/influenzanet/user-management-service/pkg/pwhash"
 	"github.com/influenzanet/user-management-service/pkg/tokens"
+	messageMock "github.com/influenzanet/user-management-service/test/mocks/mock_manage"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc/status"
 )
@@ -273,12 +275,19 @@ func TestLoginWithTempToken(t *testing.T) {
 }
 
 func TestSignupWithEmail(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockMessagingClient := messageMock.NewMockMessagingServiceApiClient(mockCtrl)
+
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
 		JWT: models.JWTConfig{
 			TokenMinimumAgeMin:  time.Second * 1,
 			TokenExpiryInterval: time.Second * 2,
+		},
+		clients: &models.APIClients{
+			MessagingService: mockMessagingClient,
 		},
 	}
 
@@ -336,6 +345,11 @@ func TestSignupWithEmail(t *testing.T) {
 	})
 
 	t.Run("with valid fields", func(t *testing.T) {
+		mockMessagingClient.EXPECT().SendInstantEmail(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
+
 		resp, err := s.SignupWithEmail(context.Background(), validNewUserReq)
 		if err != nil {
 			t.Errorf("unexpected error: %s", err.Error())
@@ -356,6 +370,11 @@ func TestSignupWithEmail(t *testing.T) {
 	})
 
 	t.Run("with duplicate user (same email)", func(t *testing.T) {
+		mockMessagingClient.EXPECT().SendInstantEmail(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
+
 		req := &api.SignupWithEmailMsg{
 			Email:      "test-signup-1@test.com",
 			Password:   "SuperSecurePassword123!§$",
