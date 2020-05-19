@@ -5,19 +5,28 @@ import (
 	"testing"
 	"time"
 
+	"github.com/golang/mock/gomock"
 	"github.com/influenzanet/user-management-service/pkg/api"
 	"github.com/influenzanet/user-management-service/pkg/models"
 	"github.com/influenzanet/user-management-service/pkg/tokens"
+	messageMock "github.com/influenzanet/user-management-service/test/mocks/mock_manage"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func TestInitiatePasswordResetEndpoint(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockMessagingClient := messageMock.NewMockMessagingServiceApiClient(mockCtrl)
+
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
 		JWT: models.JWTConfig{
 			TokenMinimumAgeMin:  time.Second * 1,
 			TokenExpiryInterval: time.Second * 2,
+		},
+		clients: &models.APIClients{
+			MessagingService: mockMessagingClient,
 		},
 	}
 
@@ -69,6 +78,11 @@ func TestInitiatePasswordResetEndpoint(t *testing.T) {
 	})
 
 	t.Run("with valid account id", func(t *testing.T) {
+		mockMessagingClient.EXPECT().SendInstantEmail(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
+
 		_, err := s.InitiatePasswordReset(context.Background(), &api.InitiateResetPasswordMsg{
 			InstanceId: testInstanceID,
 			AccountId:  testUsers[0].Account.AccountID,

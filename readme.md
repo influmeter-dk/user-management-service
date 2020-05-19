@@ -6,6 +6,12 @@ It provides operations to manage User accounts and profiles for an InfluenzaNet 
 
 
 ## Test
+Before running the test first you have to generate the client mock services:
+```
+make mock
+```
+This assumes that the other services (messaging-service) is in the same parent folder as this package.
+
 With a running go setup, you can use the command
 ```
 make test

@@ -7,6 +7,7 @@ import (
 	"github.com/influenzanet/user-management-service/internal/config"
 	"github.com/influenzanet/user-management-service/pkg/dbs/globaldb"
 	"github.com/influenzanet/user-management-service/pkg/dbs/userdb"
+	gc "github.com/influenzanet/user-management-service/pkg/grpc/clients"
 	"github.com/influenzanet/user-management-service/pkg/grpc/service"
 	"github.com/influenzanet/user-management-service/pkg/models"
 )
@@ -15,12 +16,10 @@ func main() {
 	conf := config.InitConfig()
 
 	clients := &models.APIClients{}
-	// Connect to authentication service
-	// authenticationServerConn := connectToAuthService()
-	// defer authenticationServerConn.Close()
-	// clients.authService = api.NewAuthServiceApiClient(authenticationServerConn)
-	/*
-	 */
+
+	messagingClient, close := gc.ConnectToMessagingSerive(conf.ServiceURLs.MessagingService)
+	defer close()
+	clients.MessagingService = messagingClient
 
 	userDBService := userdb.NewUserDBService(conf.UserDBConfig)
 	globalDBService := globaldb.NewGlobalDBService(conf.GlobalDBConfig)

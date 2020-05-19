@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	messageAPI "github.com/influenzanet/messaging-service/pkg/api/manage"
 	"github.com/influenzanet/user-management-service/pkg/api"
 	"github.com/influenzanet/user-management-service/pkg/models"
 	"github.com/influenzanet/user-management-service/pkg/pwhash"
@@ -44,8 +45,21 @@ func (s *userManagementServer) InitiatePasswordReset(ctx context.Context, req *a
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	log.Printf("TODO: send email for password reset with %s", tempToken)
-	return nil, status.Error(codes.Unimplemented, "unimplemented: send email")
+	_, err = s.clients.MessagingService.SendInstantEmail(ctx, &messageAPI.SendEmailReq{
+		To:          []string{user.Account.AccountID},
+		MessageType: "password-reset",
+		ContentInfos: map[string]string{
+			"token": tempToken,
+		},
+	})
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	return &api.ServiceStatus{
+		Msg:     "email sending triggered",
+		Version: apiVersion,
+		Status:  api.ServiceStatus_NORMAL,
+	}, nil
 }
 
 func (s *userManagementServer) GetInfosForPasswordReset(ctx context.Context, req *api.GetInfosForResetPasswordMsg) (*api.UserInfoForPWReset, error) {
@@ -103,9 +117,6 @@ func (s *userManagementServer) ResetPassword(ctx context.Context, req *api.Reset
 		log.Printf("ChangePassword: %s", err.Error())
 	}
 
-	// TODO: check password strength
-	// TODO: hash password
-	// TODO: update passwords
 	return &api.ServiceStatus{
 		Version: apiVersion,
 		Msg:     "password changed",
