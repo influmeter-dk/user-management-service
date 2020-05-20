@@ -34,7 +34,7 @@ install-dev:
 
 mock:
 	# messaging service repo has to be in the relative path as here:
-	mockgen -source=../messaging-service/pkg/api/messaging_service/message-service.pb.go MessagingServiceApiClient > test/mocks/messaging_service/messaging-service.go
+	mockgen -source=../messaging-service/pkg/api/messaging_service/message-service.pb.go MessagingServiceApiClient > test/mocks/messaging_service/messaging_service.go
 
 docker:
 	docker build -t  github.com/influenzanet/user-management-service:$(VERSION)  -f build/docker/Dockerfile $(DOCKER_OPTS) .

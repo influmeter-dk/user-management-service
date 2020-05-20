@@ -15,7 +15,7 @@ func connectToGRPCServer(addr string) *grpc.ClientConn {
 	return conn
 }
 
-func ConnectToMessagingSerive(addr string) (client messageAPI.MessagingServiceApiClient, close func() error) {
+func ConnectToMessagingService(addr string) (client messageAPI.MessagingServiceApiClient, close func() error) {
 	// Connect to user management service
 	serverConn := connectToGRPCServer(addr)
 	return messageAPI.NewMessagingServiceApiClient(serverConn), serverConn.Close

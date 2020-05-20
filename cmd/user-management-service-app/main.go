@@ -17,7 +17,7 @@ func main() {
 
 	clients := &models.APIClients{}
 
-	messagingClient, close := gc.ConnectToMessagingSerive(conf.ServiceURLs.MessagingService)
+	messagingClient, close := gc.ConnectToMessagingService(conf.ServiceURLs.MessagingService)
 	defer close()
 	clients.MessagingService = messagingClient
 
