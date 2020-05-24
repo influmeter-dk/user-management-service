@@ -20,6 +20,8 @@ service UserManagementApi {
   rpc RevokeAllRefreshTokens(RevokeRefreshTokensReq) returns (ServiceStatus);
 
   rpc VerifyContact(inf.tokens.TempToken) returns (inf.user.User);
+  rpc ResendContactVerification(ResendContactVerificationReq)
+      returns (ServiceStatus);
 
   rpc ValidateAppToken(AppTokenRequest) returns (AppTokenValidation);
 
@@ -132,6 +134,12 @@ message UserAuthInfo {
   inf.user.Profile selected_profile = 6;
   bool account_confirmed = 7;
   string preferred_language = 8;
+}
+
+message ResendContactVerificationReq {
+  inf.tokens.TokenInfos token = 1;
+  string type = 2;
+  string address = 3;
 }
 
 message PasswordChangeMsg {

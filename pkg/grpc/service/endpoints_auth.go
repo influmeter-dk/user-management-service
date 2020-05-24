@@ -394,3 +394,57 @@ func (s *userManagementServer) VerifyContact(ctx context.Context, req *api.TempT
 	}
 	return user.ToAPI(), err
 }
+
+func (s *userManagementServer) ResendContactVerification(ctx context.Context, req *api.ResendContactVerificationReq) (*api.ServiceStatus, error) {
+	if req == nil || utils.IsTokenEmpty(req.Token) || req.Address == "" || req.Type == "" {
+		return nil, status.Error(codes.InvalidArgument, "missing argument")
+	}
+
+	user, err := s.userDBservice.GetUserByID(req.Token.InstanceId, req.Token.Id)
+	if err != nil {
+		log.Printf("ResendContactVerification: %s", err.Error())
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	ci, found := user.FindContactInfoByTypeAndAddr("email", req.Address)
+	if !found {
+		return nil, status.Error(codes.InvalidArgument, "address not found")
+	}
+
+	// TempToken for contact verification:
+	tempTokenInfos := models.TempToken{
+		UserID:     req.Token.Id,
+		InstanceID: req.Token.InstanceId,
+		Purpose:    "contact-verification",
+		Info: map[string]string{
+			"type":  "email",
+			"email": ci.Email,
+		},
+		Expiration: tokens.GetExpirationTime(time.Hour * 24 * 30),
+	}
+	tempToken, err := s.globalDBService.AddTempToken(tempTokenInfos)
+	if err != nil {
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+
+	// ---> Trigger message sending
+	_, err = s.clients.MessagingService.SendInstantEmail(ctx, &messageAPI.SendEmailReq{
+		InstanceId:  req.Token.InstanceId,
+		To:          []string{req.Address},
+		MessageType: "verify-email",
+		ContentInfos: map[string]string{
+			"token": tempToken,
+		},
+		PreferredLanguage: user.Account.PreferredLanguage,
+	})
+	if err != nil {
+		log.Printf("ResendContactVerification: %s", err.Error())
+	}
+	// <---
+
+	return &api.ServiceStatus{
+		Status:  api.ServiceStatus_NORMAL,
+		Msg:     "message sent",
+		Version: apiVersion,
+	}, nil
+}

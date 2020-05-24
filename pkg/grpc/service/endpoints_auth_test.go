@@ -656,3 +656,100 @@ func TestVerifyAccountEndpoint(t *testing.T) {
 		}
 	})
 }
+
+func TestResendContactVerificationEndpoint(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockMessagingClient := messageMock.NewMockMessagingServiceApiClient(mockCtrl)
+
+	s := userManagementServer{
+		userDBservice:   testUserDBService,
+		globalDBService: testGlobalDBService,
+		JWT: models.JWTConfig{
+			TokenMinimumAgeMin:  time.Second * 1,
+			TokenExpiryInterval: time.Second * 2,
+		},
+		clients: &models.APIClients{
+			MessagingService: mockMessagingClient,
+		},
+	}
+
+	testUsers, err := addTestUsers([]models.User{
+		{
+			Account: models.Account{
+				Type:      "email",
+				AccountID: "test_for_resend_verify_contact@test.com",
+			},
+			Profiles: []models.Profile{
+				{
+					ID:    primitive.NewObjectID(),
+					Alias: "main",
+				},
+			},
+			ContactInfos: []models.ContactInfo{
+				{
+					Type:  "email",
+					Email: "test_for_resend_verify_contact@test.com",
+				},
+			},
+		},
+	})
+	if err != nil {
+		t.Errorf("failed to create testusers: %s", err.Error())
+		return
+	}
+
+	t.Run("without payload", func(t *testing.T) {
+		_, err := s.ResendContactVerification(context.Background(), nil)
+		ok, msg := shouldHaveGrpcErrorStatus(err, "missing argument")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	t.Run("with empty payload", func(t *testing.T) {
+		req := &api.ResendContactVerificationReq{}
+		_, err := s.ResendContactVerification(context.Background(), req)
+		ok, msg := shouldHaveGrpcErrorStatus(err, "missing argument")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	t.Run("with wrong payload", func(t *testing.T) {
+		req := &api.ResendContactVerificationReq{
+			Token: &api.TokenInfos{
+				Id:         testUsers[0].ID.Hex(),
+				InstanceId: testInstanceID,
+			},
+			Address: "wrong@wrong.de",
+			Type:    "email",
+		}
+		_, err := s.ResendContactVerification(context.Background(), req)
+		ok, msg := shouldHaveGrpcErrorStatus(err, "")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	t.Run("with correct info", func(t *testing.T) {
+		mockMessagingClient.EXPECT().SendInstantEmail(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
+
+		req := &api.ResendContactVerificationReq{
+			Token: &api.TokenInfos{
+				Id:         testUsers[0].ID.Hex(),
+				InstanceId: testInstanceID,
+			},
+			Address: "test_for_resend_verify_contact@test.com",
+			Type:    "email",
+		}
+		_, err := s.ResendContactVerification(context.Background(), req)
+		if err != nil {
+			t.Errorf("unexpected error: %s", err.Error())
+			return
+		}
+	})
+}
