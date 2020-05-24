@@ -388,5 +388,9 @@ func (s *userManagementServer) VerifyContact(ctx context.Context, req *api.TempT
 		user.Account.AccountConfirmedAt = time.Now().Unix()
 	}
 	user, err = s.userDBservice.UpdateUser(tokenInfos.InstanceID, user)
+
+	if err := s.globalDBService.DeleteTempToken(req.Token); err != nil {
+		log.Printf("VerifyContact delete token: %s", err.Error())
+	}
 	return user.ToAPI(), err
 }

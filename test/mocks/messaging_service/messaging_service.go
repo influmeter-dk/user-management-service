@@ -76,6 +76,66 @@ func (mr *MockMessagingServiceApiClientMockRecorder) SendInstantEmail(ctx, in in
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendInstantEmail", reflect.TypeOf((*MockMessagingServiceApiClient)(nil).SendInstantEmail), varargs...)
 }
 
+// GetEmailTemplates mocks base method
+func (m *MockMessagingServiceApiClient) GetEmailTemplates(ctx context.Context, in *messaging_service.GetEmailTemplatesReq, opts ...grpc.CallOption) (*messaging_service.EmailTemplates, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetEmailTemplates", varargs...)
+	ret0, _ := ret[0].(*messaging_service.EmailTemplates)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetEmailTemplates indicates an expected call of GetEmailTemplates
+func (mr *MockMessagingServiceApiClientMockRecorder) GetEmailTemplates(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetEmailTemplates", reflect.TypeOf((*MockMessagingServiceApiClient)(nil).GetEmailTemplates), varargs...)
+}
+
+// SaveEmailTemplate mocks base method
+func (m *MockMessagingServiceApiClient) SaveEmailTemplate(ctx context.Context, in *messaging_service.SaveEmailTemplateReq, opts ...grpc.CallOption) (*messaging_service.EmailTemplate, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SaveEmailTemplate", varargs...)
+	ret0, _ := ret[0].(*messaging_service.EmailTemplate)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SaveEmailTemplate indicates an expected call of SaveEmailTemplate
+func (mr *MockMessagingServiceApiClientMockRecorder) SaveEmailTemplate(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveEmailTemplate", reflect.TypeOf((*MockMessagingServiceApiClient)(nil).SaveEmailTemplate), varargs...)
+}
+
+// DeleteEmailTemplate mocks base method
+func (m *MockMessagingServiceApiClient) DeleteEmailTemplate(ctx context.Context, in *messaging_service.DeleteEmailTemplateReq, opts ...grpc.CallOption) (*messaging_service.ServiceStatus, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DeleteEmailTemplate", varargs...)
+	ret0, _ := ret[0].(*messaging_service.ServiceStatus)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteEmailTemplate indicates an expected call of DeleteEmailTemplate
+func (mr *MockMessagingServiceApiClientMockRecorder) DeleteEmailTemplate(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteEmailTemplate", reflect.TypeOf((*MockMessagingServiceApiClient)(nil).DeleteEmailTemplate), varargs...)
+}
+
 // MockMessagingServiceApiServer is a mock of MessagingServiceApiServer interface
 type MockMessagingServiceApiServer struct {
 	ctrl     *gomock.Controller
@@ -127,4 +187,49 @@ func (m *MockMessagingServiceApiServer) SendInstantEmail(arg0 context.Context, a
 func (mr *MockMessagingServiceApiServerMockRecorder) SendInstantEmail(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendInstantEmail", reflect.TypeOf((*MockMessagingServiceApiServer)(nil).SendInstantEmail), arg0, arg1)
+}
+
+// GetEmailTemplates mocks base method
+func (m *MockMessagingServiceApiServer) GetEmailTemplates(arg0 context.Context, arg1 *messaging_service.GetEmailTemplatesReq) (*messaging_service.EmailTemplates, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetEmailTemplates", arg0, arg1)
+	ret0, _ := ret[0].(*messaging_service.EmailTemplates)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetEmailTemplates indicates an expected call of GetEmailTemplates
+func (mr *MockMessagingServiceApiServerMockRecorder) GetEmailTemplates(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetEmailTemplates", reflect.TypeOf((*MockMessagingServiceApiServer)(nil).GetEmailTemplates), arg0, arg1)
+}
+
+// SaveEmailTemplate mocks base method
+func (m *MockMessagingServiceApiServer) SaveEmailTemplate(arg0 context.Context, arg1 *messaging_service.SaveEmailTemplateReq) (*messaging_service.EmailTemplate, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SaveEmailTemplate", arg0, arg1)
+	ret0, _ := ret[0].(*messaging_service.EmailTemplate)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SaveEmailTemplate indicates an expected call of SaveEmailTemplate
+func (mr *MockMessagingServiceApiServerMockRecorder) SaveEmailTemplate(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveEmailTemplate", reflect.TypeOf((*MockMessagingServiceApiServer)(nil).SaveEmailTemplate), arg0, arg1)
+}
+
+// DeleteEmailTemplate mocks base method
+func (m *MockMessagingServiceApiServer) DeleteEmailTemplate(arg0 context.Context, arg1 *messaging_service.DeleteEmailTemplateReq) (*messaging_service.ServiceStatus, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteEmailTemplate", arg0, arg1)
+	ret0, _ := ret[0].(*messaging_service.ServiceStatus)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteEmailTemplate indicates an expected call of DeleteEmailTemplate
+func (mr *MockMessagingServiceApiServerMockRecorder) DeleteEmailTemplate(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteEmailTemplate", reflect.TypeOf((*MockMessagingServiceApiServer)(nil).DeleteEmailTemplate), arg0, arg1)
 }
