@@ -35,5 +35,5 @@ JWT_TOKEN_KEY=<secret key to sign jwts>
 #################
 # grpc services
 #################
-USER_MANAGEMENT_LISTEN_PORT=5202
-ADDR_MESSAGING_SERVICE=localhost:5204
+USER_MANAGEMENT_LISTEN_PORT=5002
+ADDR_MESSAGING_SERVICE=localhost:5004
