@@ -9,6 +9,7 @@ import (
 	"github.com/influenzanet/user-management-service/pkg/api"
 	"github.com/influenzanet/user-management-service/pkg/models"
 	messageMock "github.com/influenzanet/user-management-service/test/mocks/messaging_service"
+	"google.golang.org/grpc"
 )
 
 func TestCreateUserEndpoint(t *testing.T) {
@@ -417,11 +418,94 @@ func TestFindNonParticipantUsersEndpoint(t *testing.T) {
 	})
 }
 
-func TestStreamUsersEndpoint(t *testing.T) {
-	// create users
+type UserManagementServiceAPI_GetUsers struct {
+	grpc.ServerStream
+	Results []*api.User
+}
 
-	// call with emtpy req
-	// with missing req
-	// with valid req
-	t.Error("test unimplemented")
+func (_m *UserManagementServiceAPI_GetUsers) Send(user *api.User) error {
+	_m.Results = append(_m.Results, user)
+	return nil
+}
+
+func TestStreamUsersEndpoint(t *testing.T) {
+	s := userManagementServer{
+		userDBservice:   testUserDBService,
+		globalDBService: testGlobalDBService,
+		JWT: models.JWTConfig{
+			TokenMinimumAgeMin:  time.Second * 1,
+			TokenExpiryInterval: time.Second * 2,
+		},
+	}
+
+	_, err := addTestUsers([]models.User{
+		{
+			Account: models.Account{
+				Type:      "email",
+				AccountID: "test_for_streamusers_1@test.com",
+			},
+			Roles: []string{"PARTICIPANT", "RESEARCHER"},
+		},
+		{
+			Account: models.Account{
+				Type:      "email",
+				AccountID: "test_for_streamusers_2@test.com",
+			},
+			Roles: []string{"PARTICIPANT", "ADMIN"},
+		},
+		{
+			Account: models.Account{
+				Type:      "email",
+				AccountID: "test_for_streamusers_3@test.com",
+			},
+			Roles: []string{"PARTICIPANT"},
+		},
+	})
+	if err != nil {
+		t.Errorf("failed to create testusers: %s", err.Error())
+		return
+	}
+
+	t.Run("without payload", func(t *testing.T) {
+		err := s.StreamUsers(nil, nil)
+		ok, msg := shouldHaveGrpcErrorStatus(err, "missing arguments")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	t.Run("without stream", func(t *testing.T) {
+		req := &api.StreamUsersMsg{
+			InstanceId: testInstanceID,
+		}
+		err := s.StreamUsers(req, nil)
+		ok, msg := shouldHaveGrpcErrorStatus(err, "missing arguments")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	t.Run("with empty payload", func(t *testing.T) {
+		mock := &UserManagementServiceAPI_GetUsers{}
+		req := &api.StreamUsersMsg{}
+		err := s.StreamUsers(req, mock)
+		ok, msg := shouldHaveGrpcErrorStatus(err, "missing arguments")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	t.Run("with valid args", func(t *testing.T) {
+		mock := &UserManagementServiceAPI_GetUsers{}
+		req := &api.StreamUsersMsg{InstanceId: testInstanceID}
+		err := s.StreamUsers(req, mock)
+		if err != nil {
+			t.Errorf("unexpected error: %s", err.Error())
+			return
+		}
+		if len(mock.Results) < 3 {
+			t.Errorf("unexpected number of users: %d", len(mock.Results))
+			return
+		}
+	})
 }

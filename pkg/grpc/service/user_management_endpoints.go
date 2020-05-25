@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"log"
 	"time"
 
@@ -162,5 +163,28 @@ func (s *userManagementServer) FindNonParticipantUsers(ctx context.Context, req 
 }
 
 func (s *userManagementServer) StreamUsers(req *api.StreamUsersMsg, stream api.UserManagementApi_StreamUsersServer) error {
-	return status.Error(codes.Unimplemented, "unimplemented")
+	if req == nil || stream == nil || req.InstanceId == "" {
+		return status.Error(codes.InvalidArgument, "missing arguments")
+	}
+
+	sendUserOverGrpc := func(instanceID string, user models.User, args ...interface{}) error {
+		if len(args) != 1 {
+			return errors.New("StreamUsers callback: unexpected number of args")
+		}
+		stream, ok := args[0].(api.UserManagementApi_StreamUsersServer)
+		if !ok {
+			return errors.New(("StreamUsers callback: can't parse stream"))
+		}
+
+		if err := stream.Send(user.ToAPI()); err != nil {
+			return err
+		}
+		return nil
+	}
+
+	err := s.userDBservice.PerfomActionForUsers(req.InstanceId, sendUserOverGrpc, stream)
+	if err != nil {
+		return status.Error(codes.Internal, err.Error())
+	}
+	return nil
 }
