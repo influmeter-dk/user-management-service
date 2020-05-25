@@ -2,6 +2,7 @@ package userdb
 
 import (
 	"errors"
+	"log"
 	"time"
 
 	"github.com/influenzanet/user-management-service/pkg/models"
@@ -189,4 +190,39 @@ func (dbService *UserDBService) FindNonParticipantUsers(instanceID string) (user
 	}
 
 	return users, nil
+}
+
+func (dbService *UserDBService) PerfomActionForUsers(
+	instanceID string,
+	cbk func(instanceID string, user models.User, args ...interface{}) error,
+	args ...interface{},
+) (err error) {
+	ctx, cancel := dbService.getContext()
+	defer cancel()
+
+	filter := bson.M{}
+	cur, err := dbService.collectionRefUsers(instanceID).Find(
+		ctx,
+		filter,
+	)
+	if err != nil {
+		return err
+	}
+	defer cur.Close(ctx)
+
+	for cur.Next(ctx) {
+		var result models.User
+		err := cur.Decode(&result)
+		if err != nil {
+			return err
+		}
+
+		if err := cbk(instanceID, result, args...); err != nil {
+			log.Printf("PerfomActionForUsers: %v", err)
+		}
+	}
+	if err := cur.Err(); err != nil {
+		return err
+	}
+	return nil
 }

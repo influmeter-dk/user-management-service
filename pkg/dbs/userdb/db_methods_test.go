@@ -2,6 +2,7 @@ package userdb
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -189,4 +190,47 @@ func TestDbInterfaceMethods(t *testing.T) {
 			return
 		}
 	})
+}
+
+func TestDbPerformActionForUsers(t *testing.T) {
+	testUsers := []models.User{
+		{Account: models.Account{AccountID: "1"}},
+		{Account: models.Account{AccountID: "2"}},
+		{Account: models.Account{AccountID: "3"}},
+	}
+	for _, u := range testUsers {
+		_, err := testDBService.AddUser(testInstanceID, u)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	// define callback - create users - test if action is performed
+	testCallback := func(instanceID string, user models.User, args ...interface{}) error {
+		if len(args) != 2 {
+			t.Errorf("unexpected number of args: %d", len(args))
+			return errors.New("test failed")
+		}
+		v, ok := args[0].(int)
+		if !ok || v != 2 {
+			t.Errorf("unexpected value of args[0]: %v", args[0])
+			return errors.New("test failed")
+		}
+		v2, ok2 := args[1].(string)
+		if !ok2 || v2 != "hello" {
+			t.Errorf("unexpected value of args[1]: %v", args[1])
+			return errors.New("test failed")
+		}
+		return nil
+	}
+
+	err := testDBService.PerfomActionForUsers(
+		testInstanceID,
+		testCallback,
+		2,
+		"hello",
+	)
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+	}
 }
