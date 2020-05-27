@@ -20,11 +20,12 @@ var (
 
 // UserClaims - Information a token enocodes
 type UserClaims struct {
-	ID             string            `json:"id,omitempty"`
-	InstanceID     string            `json:"instance_id,omitempty"`
-	ProfileID      string            `json:"profile_id,omitempty"`
-	Payload        map[string]string `json:"payload,omitempty"`
-	TempTokenInfos *models.TempToken `json:"temptoken,omitempty"`
+	ID              string            `json:"id,omitempty"`
+	InstanceID      string            `json:"instance_id,omitempty"`
+	ProfileID       string            `json:"profile_id,omitempty"`
+	Payload         map[string]string `json:"payload,omitempty"`
+	TempTokenInfos  *models.TempToken `json:"temptoken,omitempty"`
+	OtherProfileIDs []string          `json:"other_profile_ids,omitempty"`
 	jwt.StandardClaims
 }
 
@@ -51,7 +52,7 @@ func getSecretKey() (newSecretKey []byte, err error) {
 }
 
 // GenerateNewToken create and signes a new token
-func GenerateNewToken(userID string, profileID string, userRoles []string, instanceID string, experiresIn time.Duration, username string, tempTokenInfos *models.TempToken) (string, error) {
+func GenerateNewToken(userID string, profileID string, userRoles []string, instanceID string, experiresIn time.Duration, username string, tempTokenInfos *models.TempToken, otherProfileIDs []string) (string, error) {
 	payload := map[string]string{}
 
 	if len(userRoles) > 0 {
@@ -68,6 +69,7 @@ func GenerateNewToken(userID string, profileID string, userRoles []string, insta
 		profileID,
 		payload,
 		tempTokenInfos,
+		otherProfileIDs,
 		jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(experiresIn).Unix(),
 			IssuedAt:  time.Now().Unix(),

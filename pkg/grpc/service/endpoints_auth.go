@@ -58,6 +58,12 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 	}
 
 	apiUser := user.ToAPI()
+	otherProfileIDs := []string{}
+	for _, p := range apiUser.Profiles {
+		if p.Id != apiUser.Profiles[0].Id {
+			otherProfileIDs = append(otherProfileIDs, p.Id)
+		}
+	}
 	// Access Token
 	token, err := tokens.GenerateNewToken(
 		apiUser.Id,
@@ -67,6 +73,7 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 		s.JWT.TokenExpiryInterval,
 		username,
 		nil,
+		otherProfileIDs,
 	)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -129,6 +136,12 @@ func (s *userManagementServer) LoginWithTempToken(ctx context.Context, req *api.
 	currentRoles := []string{"PARTICIPANT"}
 
 	apiUser := user.ToAPI()
+	otherProfileIDs := []string{}
+	for _, p := range apiUser.Profiles {
+		if p.Id != apiUser.Profiles[0].Id {
+			otherProfileIDs = append(otherProfileIDs, p.Id)
+		}
+	}
 	// Access Token
 	token, err := tokens.GenerateNewToken(
 		apiUser.Id,
@@ -138,6 +151,7 @@ func (s *userManagementServer) LoginWithTempToken(ctx context.Context, req *api.
 		s.JWT.TokenExpiryInterval,
 		"",
 		&tokenInfos,
+		otherProfileIDs,
 	)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -256,6 +270,7 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 		s.JWT.TokenExpiryInterval,
 		username,
 		nil,
+		[]string{},
 	)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
@@ -330,6 +345,12 @@ func (s *userManagementServer) SwitchProfile(ctx context.Context, req *api.Switc
 		username = user.Account.AccountID
 	}
 	apiUser := user.ToAPI()
+	otherProfileIDs := []string{}
+	for _, p := range apiUser.Profiles {
+		if p.Id != req.ProfileId {
+			otherProfileIDs = append(otherProfileIDs, p.Id)
+		}
+	}
 
 	// Access Token
 	token, err := tokens.GenerateNewToken(
@@ -340,6 +361,7 @@ func (s *userManagementServer) SwitchProfile(ctx context.Context, req *api.Switc
 		s.JWT.TokenExpiryInterval,
 		username,
 		models.TempTokenFromAPI(req.Token.TempToken),
+		otherProfileIDs,
 	)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
