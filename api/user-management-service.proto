@@ -11,8 +11,8 @@ service UserManagementApi {
   rpc Status(google.protobuf.Empty) returns (ServiceStatus);
 
   // Auth and Token handling:
-  rpc LoginWithEmail(LoginWithEmailMsg) returns (inf.tokens.TokenResponse);
-  rpc LoginWithTempToken(JWTRequest) returns (inf.tokens.TokenResponse);
+  rpc LoginWithEmail(LoginWithEmailMsg) returns (LoginResponse);
+  rpc LoginWithTempToken(JWTRequest) returns (LoginResponse);
   rpc SignupWithEmail(SignupWithEmailMsg) returns (inf.tokens.TokenResponse);
   rpc SwitchProfile(SwitchProfileRequest) returns (inf.tokens.TokenResponse);
   rpc ValidateJWT(JWTRequest) returns (inf.tokens.TokenInfos);
@@ -95,6 +95,11 @@ message LoginWithEmailMsg {
   string password = 2;
   string instance_id = 3;
   bool as_participant = 4;
+}
+
+message LoginResponse {
+  inf.tokens.TokenResponse token = 1;
+  inf.user.User user = 2;
 }
 
 message UserReference {

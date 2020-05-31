@@ -26,7 +26,7 @@ func (s *userManagementServer) Status(ctx context.Context, _ *empty.Empty) (*api
 	}, nil
 }
 
-func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.LoginWithEmailMsg) (*api.TokenResponse, error) {
+func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.LoginWithEmailMsg) (*api.LoginResponse, error) {
 	if req == nil || req.Email == "" || req.Password == "" {
 		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
 	}
@@ -100,19 +100,22 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 		log.Printf("LoginWithEmail: %s", err.Error())
 	}
 
-	response := &api.TokenResponse{
-		AccessToken:       token,
-		RefreshToken:      rt,
-		ExpiresIn:         int32(s.JWT.TokenExpiryInterval / time.Minute),
-		Profiles:          apiUser.Profiles,
-		SelectedProfileId: apiUser.Profiles[0].Id,
-		PreferredLanguage: apiUser.Account.PreferredLanguage,
+	response := &api.LoginResponse{
+		Token: &api.TokenResponse{
+			AccessToken:       token,
+			RefreshToken:      rt,
+			ExpiresIn:         int32(s.JWT.TokenExpiryInterval / time.Minute),
+			Profiles:          apiUser.Profiles,
+			SelectedProfileId: apiUser.Profiles[0].Id,
+			PreferredLanguage: apiUser.Account.PreferredLanguage,
+		},
+		User: user.ToAPI(),
 	}
 	return response, nil
 
 }
 
-func (s *userManagementServer) LoginWithTempToken(ctx context.Context, req *api.JWTRequest) (*api.TokenResponse, error) {
+func (s *userManagementServer) LoginWithTempToken(ctx context.Context, req *api.JWTRequest) (*api.LoginResponse, error) {
 	if req == nil || req.Token == "" {
 		return nil, status.Error(codes.InvalidArgument, "invalid token")
 	}
@@ -161,12 +164,20 @@ func (s *userManagementServer) LoginWithTempToken(ctx context.Context, req *api.
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	response := &api.TokenResponse{
-		AccessToken:       token,
-		ExpiresIn:         int32(s.JWT.TokenExpiryInterval / time.Minute),
-		Profiles:          apiUser.Profiles,
-		SelectedProfileId: apiUser.Profiles[0].Id,
-		PreferredLanguage: apiUser.Account.PreferredLanguage,
+	apiUser.ContactInfos = []*api.ContactInfo{}
+	apiUser.Timestamps = nil
+	apiUser.ContactPreferences = nil
+	apiUser.Roles = []string{}
+
+	response := &api.LoginResponse{
+		Token: &api.TokenResponse{
+			AccessToken:       token,
+			ExpiresIn:         int32(s.JWT.TokenExpiryInterval / time.Minute),
+			Profiles:          apiUser.Profiles,
+			SelectedProfileId: apiUser.Profiles[0].Id,
+			PreferredLanguage: apiUser.Account.PreferredLanguage,
+		},
+		User: apiUser,
 	}
 	return response, nil
 }

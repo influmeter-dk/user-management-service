@@ -278,7 +278,7 @@ func TestChangePasswordEndpoint(t *testing.T) {
 			t.Errorf("unexpected error: %s", err.Error())
 			return
 		}
-		if resp2 == nil || len(resp2.AccessToken) < 3 || len(resp2.RefreshToken) < 1 {
+		if resp2 == nil || resp2.Token == nil || len(resp2.Token.AccessToken) < 3 || len(resp2.Token.RefreshToken) < 1 {
 			t.Errorf("unexpected response: %s", resp2)
 			return
 		}

@@ -129,12 +129,12 @@ func TestLogin(t *testing.T) {
 			t.Errorf("unexpected error: %s", err.Error())
 			return
 		}
-		if resp == nil || len(resp.AccessToken) < 1 || len(resp.RefreshToken) < 1 {
+		if resp == nil || len(resp.Token.AccessToken) < 1 || len(resp.Token.RefreshToken) < 1 {
 			t.Errorf("unexpected response: %s", resp)
 			return
 		}
 
-		if resp.PreferredLanguage != "de" || resp.SelectedProfileId != testUser.Profiles[0].ID.Hex() {
+		if resp.Token.PreferredLanguage != "de" || resp.Token.SelectedProfileId != testUser.Profiles[0].ID.Hex() {
 			t.Errorf("unexpected PreferredLanguage or AccountConfirmed: %s", resp)
 			return
 		}
@@ -262,13 +262,13 @@ func TestLoginWithTempToken(t *testing.T) {
 			t.Errorf("unexpected error: %s", err.Error())
 			return
 		}
-		if resp.RefreshToken != "" {
+		if resp.Token.RefreshToken != "" {
 			t.Error("unexpected refreshtoken")
 		}
-		if resp.AccessToken == "" {
+		if resp.Token.AccessToken == "" {
 			t.Error("unexpected access token")
 		}
-		if len(resp.Profiles) != 1 && resp.Profiles[0].Alias != "test" {
+		if len(resp.Token.Profiles) != 1 && resp.Token.Profiles[0].Alias != "test" {
 			t.Error("unexpected profile")
 		}
 	})
