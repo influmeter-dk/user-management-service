@@ -35,7 +35,7 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 	if instanceID == "" {
 		instanceID = "default"
 	}
-	user, err := s.userDBservice.GetUserByEmail(instanceID, req.Email)
+	user, err := s.userDBservice.GetUserByAccountID(instanceID, req.Email)
 
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")

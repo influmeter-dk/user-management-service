@@ -13,7 +13,7 @@ import (
 
 func (dbService *UserDBService) AddUser(instanceID string, user models.User) (id string, err error) {
 	if user.Account.Type == "email" {
-		_, err = dbService.GetUserByEmail(instanceID, user.Account.AccountID)
+		_, err = dbService.GetUserByAccountID(instanceID, user.Account.AccountID)
 		if err == nil {
 			err = errors.New("user already exists")
 			return
@@ -67,7 +67,7 @@ func (dbService *UserDBService) GetUserByID(instanceID string, id string) (model
 	return elem, err
 }
 
-func (dbService *UserDBService) GetUserByEmail(instanceID string, username string) (models.User, error) {
+func (dbService *UserDBService) GetUserByAccountID(instanceID string, username string) (models.User, error) {
 	ctx, cancel := dbService.getContext()
 	defer cancel()
 

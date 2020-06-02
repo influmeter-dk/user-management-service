@@ -130,7 +130,7 @@ func TestDbInterfaceMethods(t *testing.T) {
 	})
 
 	t.Run("Testing find existing user by email", func(t *testing.T) {
-		user, err := testDBService.GetUserByEmail(testInstanceID, testUser.Account.AccountID)
+		user, err := testDBService.GetUserByAccountID(testInstanceID, testUser.Account.AccountID)
 		if err != nil {
 			t.Errorf(err.Error())
 			return
@@ -142,7 +142,7 @@ func TestDbInterfaceMethods(t *testing.T) {
 	})
 
 	t.Run("Testing find not existing user by email", func(t *testing.T) {
-		_, err := testDBService.GetUserByEmail(testInstanceID, testUser.Account.AccountID+"1")
+		_, err := testDBService.GetUserByAccountID(testInstanceID, testUser.Account.AccountID+"1")
 		if err == nil {
 			t.Errorf("user should not be found")
 			return

@@ -106,7 +106,7 @@ func (s *userManagementServer) AddRoleForUser(ctx context.Context, req *api.Role
 		return nil, status.Error(codes.PermissionDenied, "permission denied")
 	}
 
-	user, err := s.userDBservice.GetUserByEmail(req.Token.InstanceId, req.AccountId)
+	user, err := s.userDBservice.GetUserByAccountID(req.Token.InstanceId, req.AccountId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
@@ -127,7 +127,7 @@ func (s *userManagementServer) RemoveRoleForUser(ctx context.Context, req *api.R
 	if !utils.CheckRoleInToken(req.Token, "ADMIN") {
 		return nil, status.Error(codes.PermissionDenied, "permission denied")
 	}
-	user, err := s.userDBservice.GetUserByEmail(req.Token.InstanceId, req.AccountId)
+	user, err := s.userDBservice.GetUserByAccountID(req.Token.InstanceId, req.AccountId)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}

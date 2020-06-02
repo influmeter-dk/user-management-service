@@ -96,7 +96,7 @@ func (s *userManagementServer) ChangeAccountIDEmail(ctx context.Context, req *ap
 	}
 
 	// is email address still free to use?
-	_, err := s.userDBservice.GetUserByEmail(req.Token.InstanceId, req.NewEmail)
+	_, err := s.userDBservice.GetUserByAccountID(req.Token.InstanceId, req.NewEmail)
 	if err == nil {
 		return nil, status.Error(codes.InvalidArgument, "already in use")
 	}

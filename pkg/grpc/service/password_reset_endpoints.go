@@ -24,7 +24,7 @@ func (s *userManagementServer) InitiatePasswordReset(ctx context.Context, req *a
 		instanceID = "default"
 	}
 
-	user, err := s.userDBservice.GetUserByEmail(instanceID, req.AccountId)
+	user, err := s.userDBservice.GetUserByAccountID(instanceID, req.AccountId)
 	if err != nil {
 		log.Printf("InitiatePasswordReset: %s", err.Error())
 		return nil, status.Error(codes.InvalidArgument, "invalid account id")
