@@ -902,13 +902,97 @@ func TestUpdateContactPreferencesEndpoint(t *testing.T) {
 }
 
 func TestUseUnsubscribeTokenEndpoint(t *testing.T) {
-	// create user with subscribed newletter
-	// add unsubscribe token for user
-	// with missing req
-	// with empty req
-	// with wrong token
-	// with valid token
-	t.Error("test unimplemented")
+	s := userManagementServer{
+		userDBservice:   testUserDBService,
+		globalDBService: testGlobalDBService,
+		JWT: models.JWTConfig{
+			TokenMinimumAgeMin:  time.Second * 1,
+			TokenExpiryInterval: time.Second * 2,
+		},
+	}
+	testUsers, err := addTestUsers([]models.User{
+		{
+			Account: models.Account{
+				Type:      "email",
+				AccountID: "test_unsubscribe_for_newletter@test.com",
+			},
+			ContactPreferences: models.ContactPreferences{
+				SubscribedToNewsletter: true,
+			},
+			ContactInfos: []models.ContactInfo{
+				{
+					ID:          primitive.NewObjectID(),
+					Type:        "email",
+					Email:       "test_unsubscribe_for_newletter@test.com",
+					ConfirmedAt: time.Now().Unix(),
+				},
+			},
+		},
+	})
+	if err != nil {
+		t.Errorf("failed to create testusers: %s", err.Error())
+		return
+	}
+
+	unsubscribeTokenInfos := models.TempToken{
+		InstanceID: testInstanceID,
+		UserID:     testUsers[0].ID.Hex(),
+		Purpose:    "unsubscribe-newsletter",
+		Expiration: time.Now().Unix() + 5000000,
+	}
+	unsubscribeToken, err := s.globalDBService.AddTempToken(unsubscribeTokenInfos)
+	if err != nil {
+		t.Errorf("failed to create test token: %s", err.Error())
+		return
+	}
+
+	t.Run("without payload", func(t *testing.T) {
+		_, err := s.UseUnsubscribeToken(context.Background(), nil)
+		ok, msg := shouldHaveGrpcErrorStatus(err, "missing argument")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	t.Run("with empty payload", func(t *testing.T) {
+		req := &api.TempToken{}
+		_, err := s.UseUnsubscribeToken(context.Background(), req)
+		ok, msg := shouldHaveGrpcErrorStatus(err, "missing argument")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	t.Run("with wrong token", func(t *testing.T) {
+		req := &api.TempToken{
+			Token: "wrong",
+		}
+		_, err := s.UseUnsubscribeToken(context.Background(), req)
+		ok, msg := shouldHaveGrpcErrorStatus(err, "wrong token")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	t.Run("with valid token", func(t *testing.T) {
+		req := &api.TempToken{
+			Token: unsubscribeToken,
+		}
+		_, err := s.UseUnsubscribeToken(context.Background(), req)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+			return
+		}
+
+		user, err := s.userDBservice.GetUserByID(testInstanceID, testUsers[0].ID.Hex())
+		if err != nil {
+			t.Errorf("unexpected token: %v", err)
+			return
+		}
+		if user.ContactPreferences.SubscribedToNewsletter {
+			t.Error("should be unsubscribed")
+		}
+	})
 }
 
 func TestAddEmailEndpoint(t *testing.T) {

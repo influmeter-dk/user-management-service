@@ -344,7 +344,29 @@ func (s *userManagementServer) UseUnsubscribeToken(ctx context.Context, req *api
 	if req == nil || req.Token == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
-	return nil, status.Error(codes.Unimplemented, "unimplemented")
+	tokenInfos, err := s.ValidateTempToken(req.Token, "unsubscribe-newsletter")
+	if err != nil {
+		log.Printf("UseUnsubscribeToken: %s", err.Error())
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	user, err := s.userDBservice.GetUserByID(tokenInfos.InstanceID, tokenInfos.UserID)
+	if err != nil {
+		log.Printf("UseUnsubscribeToken: %s", err.Error())
+		return nil, status.Error(codes.InvalidArgument, err.Error())
+	}
+
+	user.ContactPreferences.SubscribedToNewsletter = false
+
+	_, err = s.userDBservice.UpdateContactPreferences(tokenInfos.InstanceID, user.ID.Hex(), user.ContactPreferences)
+	if err != nil {
+		log.Printf("UseUnsubscribeToken: %s", err.Error())
+		return nil, status.Error(codes.Internal, err.Error())
+	}
+	return &api.ServiceStatus{
+		Status: api.ServiceStatus_NORMAL,
+		Msg:    "unsubscribed",
+	}, nil
 }
 
 func (s *userManagementServer) AddEmail(ctx context.Context, req *api.ContactInfoMsg) (*api.User, error) {
