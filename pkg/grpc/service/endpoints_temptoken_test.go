@@ -11,6 +11,81 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+func TestGetOrCreateTemptokenEndpoint(t *testing.T) {
+	s := userManagementServer{
+		userDBservice:   testUserDBService,
+		globalDBService: testGlobalDBService,
+		JWT: models.JWTConfig{
+			TokenMinimumAgeMin:  time.Second * 1,
+			TokenExpiryInterval: time.Second * 2,
+		},
+	}
+
+	testTempToken := models.TempToken{
+		UserID:     "test_user_id",
+		InstanceID: testInstanceID,
+		Purpose:    "test_purpose_get_or_create_token",
+		Info: map[string]string{
+			"key": "test_info",
+		},
+		Expiration: tokens.GetExpirationTime(10 * time.Second),
+	}
+	token, err := testGlobalDBService.AddTempToken(testTempToken)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+	testTempToken.Token = token
+
+	t.Run("without payload", func(t *testing.T) {
+		_, err := s.GetOrCreateTemptoken(context.Background(), nil)
+		ok, msg := shouldHaveGrpcErrorStatus(err, "missing argument")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	t.Run("with empty payload", func(t *testing.T) {
+		_, err := s.GetOrCreateTemptoken(context.Background(), &api.TempTokenInfo{})
+		ok, msg := shouldHaveGrpcErrorStatus(err, "missing argument")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	t.Run("with not existing token", func(t *testing.T) {
+		resp, err := s.GetOrCreateTemptoken(context.Background(), &api.TempTokenInfo{
+			Purpose:    testTempToken.Purpose,
+			UserId:     "otheruserhere",
+			InstanceId: testInstanceID,
+		})
+		if err != nil {
+			t.Errorf("unexpected error: %s", err.Error())
+			return
+		}
+		if len(resp.Token) < 1 {
+			t.Error("token should be found.")
+			return
+		}
+	})
+
+	t.Run("with existing token", func(t *testing.T) {
+		resp, err := s.GetOrCreateTemptoken(context.Background(), &api.TempTokenInfo{
+			Purpose:    testTempToken.Purpose,
+			UserId:     testTempToken.UserID,
+			InstanceId: testInstanceID,
+		})
+		if err != nil {
+			t.Errorf("unexpected error: %s", err.Error())
+			return
+		}
+		if resp.Token != testTempToken.Token {
+			t.Errorf("unexpected token: %s,  want: %s", resp.Token, testTempToken.Token)
+			return
+		}
+	})
+}
+
 func TestGenerateTempTokenEndpoint(t *testing.T) {
 	s := userManagementServer{
 		userDBservice:   testUserDBService,

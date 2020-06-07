@@ -26,6 +26,8 @@ service UserManagementApi {
   rpc ValidateAppToken(AppTokenRequest) returns (AppTokenValidation);
 
   // Temporary Tokens handling:
+  rpc GetOrCreateTemptoken(inf.tokens.TempTokenInfo)
+      returns (inf.tokens.TempToken);
   rpc GenerateTempToken(inf.tokens.TempTokenInfo)
       returns (inf.tokens.TempToken);
   rpc GetTempTokens(inf.tokens.TempTokenInfo)
