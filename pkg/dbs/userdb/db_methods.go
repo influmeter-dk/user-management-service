@@ -23,8 +23,6 @@ func (dbService *UserDBService) AddUser(instanceID string, user models.User) (id
 	ctx, cancel := dbService.getContext()
 	defer cancel()
 
-	user.Timestamps.CreatedAt = time.Now().Unix()
-
 	res, err := dbService.collectionRefUsers(instanceID).InsertOne(ctx, user)
 	if err != nil {
 		return

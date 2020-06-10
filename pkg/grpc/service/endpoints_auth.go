@@ -216,6 +216,9 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 				AvatarID:           "default",
 			},
 		},
+		Timestamps: models.Timestamps{
+			CreatedAt: time.Now().Unix(),
+		},
 	}
 	newUser.AddNewEmail(req.Email, false)
 
