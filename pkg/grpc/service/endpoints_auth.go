@@ -293,14 +293,11 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	newUser.AddRefreshToken(rt)
+	newUser.Timestamps.LastLogin = time.Now().Unix()
 
 	newUser, err = s.userDBservice.UpdateUser(req.InstanceId, newUser)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	if err := s.userDBservice.UpdateLoginTime(instanceID, newUser.ID.Hex()); err != nil {
-		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	response := &api.TokenResponse{
