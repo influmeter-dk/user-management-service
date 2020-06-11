@@ -85,14 +85,11 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	user.AddRefreshToken(rt)
+	user.Timestamps.LastLogin = time.Now().Unix()
 
 	user, err = s.userDBservice.UpdateUser(req.InstanceId, user)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	if err := s.userDBservice.UpdateLoginTime(instanceID, user.ID.Hex()); err != nil {
-		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
 	// remove all temptokens for password reset:
