@@ -6,20 +6,23 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
+	"log"
+	"os"
+	"strconv"
 	"strings"
 
 	"golang.org/x/crypto/argon2"
 )
 
 const (
-	argon2Memory      = 64 * 1024
-	argon2Iterations  = 3
-	argon2Parallelism = 2
-	argon2SaltLength  = 16
-	argon2KeyLength   = 32
+	argon2SaltLength = 16
+	argon2KeyLength  = 32
 )
 
 var (
+	argon2Memory      = uint32(64 * 1024)
+	argon2Iterations  = uint32(4)
+	argon2Parallelism = uint8(1)
 	// ErrInvalidHash when hash is not in the correct formant
 	ErrInvalidHash = errors.New("the encoded hash is not in the correct format")
 	// ErrIncompatibleVersion in case of version incompatibility
@@ -34,6 +37,23 @@ type hashParams struct {
 	keyLength   uint32
 }
 
+func init() {
+	a2m, err := strconv.Atoi(os.Getenv("ARGON2_MEMORY"))
+	if err == nil && a2m > 0 {
+		argon2Memory = uint32(a2m)
+	}
+
+	a2i, err := strconv.Atoi(os.Getenv("ARGON2_ITERATIONS"))
+	if err == nil && a2i > 0 {
+		argon2Iterations = uint32(a2i)
+	}
+
+	a2p, err := strconv.Atoi(os.Getenv("ARGON2_PARALLELISM"))
+	if err == nil && a2p > 0 {
+		argon2Parallelism = uint8(a2p)
+	}
+}
+
 // HashPassword to create password hash
 func HashPassword(password string) (encodedHash string, err error) {
 	// Generate a cryptographically secure random salt.
@@ -41,7 +61,9 @@ func HashPassword(password string) (encodedHash string, err error) {
 	if err != nil {
 		return "", err
 	}
-
+	log.Println(argon2Iterations)
+	log.Println(argon2Memory)
+	log.Println(argon2Parallelism)
 	// Pass the plaintext password, salt and parameters to the argon2.IDKey
 	// function. This will generate a hash of the password using the Argon2id
 	// variant.

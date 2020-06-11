@@ -33,6 +33,13 @@ TOKEN_MINIMUM_AGE_MIN=2
 JWT_TOKEN_KEY=<secret key to sign jwts>
 
 #################
+# Password Hash
+#################
+ARGON2_MEMORY=65536
+ARGON2_ITERATIONS=4
+ARGON2_PARALLELISM=2
+
+#################
 # grpc services
 #################
 USER_MANAGEMENT_LISTEN_PORT=5002
