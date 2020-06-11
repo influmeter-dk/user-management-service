@@ -12,22 +12,27 @@ import (
 )
 
 func (dbService *UserDBService) AddUser(instanceID string, user models.User) (id string, err error) {
-	if user.Account.Type == "email" {
-		_, err = dbService.GetUserByAccountID(instanceID, user.Account.AccountID)
-		if err == nil {
-			err = errors.New("user already exists")
-			return
-		}
-	}
-
 	ctx, cancel := dbService.getContext()
 	defer cancel()
 
-	res, err := dbService.collectionRefUsers(instanceID).InsertOne(ctx, user)
+	filter := bson.M{"account.accountID": user.Account.AccountID}
+	upsert := true
+	opts := options.UpdateOptions{
+		Upsert: &upsert,
+	}
+	res, err := dbService.collectionRefUsers(instanceID).UpdateOne(ctx, filter, bson.M{
+		"$setOnInsert": user,
+	}, &opts)
 	if err != nil {
 		return
 	}
-	id = res.InsertedID.(primitive.ObjectID).Hex()
+
+	if res.UpsertedCount < 1 {
+		err = errors.New("user already exists")
+		return
+	}
+
+	id = res.UpsertedID.(primitive.ObjectID).Hex()
 	return
 }
 

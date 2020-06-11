@@ -86,6 +86,7 @@ func TestDbInterfaceMethods(t *testing.T) {
 			AccountID: "test@test.com",
 			Password:  "testhashedpassword-youcantreadme",
 		},
+		Roles: []string{"TEST"},
 	}
 
 	t.Run("Testing create user", func(t *testing.T) {
@@ -103,9 +104,20 @@ func TestDbInterfaceMethods(t *testing.T) {
 	})
 
 	t.Run("Testing creating existing user", func(t *testing.T) {
-		_, err := testDBService.AddUser(testInstanceID, testUser)
+		testUser2 := testUser
+		testUser2.Roles = []string{"TEST2"}
+		_, err := testDBService.AddUser(testInstanceID, testUser2)
 		if err == nil {
 			t.Errorf("user already existed, but created again")
+			return
+		}
+		u, e := testDBService.GetUserByAccountID(testInstanceID, testUser2.Account.AccountID)
+		if e != nil {
+			t.Errorf(e.Error())
+			return
+		}
+		if len(u.Roles) > 0 && u.Roles[0] == "TEST2" {
+			t.Error("user should not be updated")
 		}
 	})
 
