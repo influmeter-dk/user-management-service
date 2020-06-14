@@ -252,18 +252,20 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 	}
 
 	// ---> Trigger message sending
-	_, err = s.clients.MessagingService.SendInstantEmail(ctx, &messageAPI.SendEmailReq{
-		InstanceId:  instanceID,
-		To:          []string{newUser.Account.AccountID},
-		MessageType: "registration",
-		ContentInfos: map[string]string{
-			"token": tempToken,
-		},
-		PreferredLanguage: newUser.Account.PreferredLanguage,
-	})
-	if err != nil {
-		log.Printf("SignupWithEmail: %s", err.Error())
-	}
+	go func(instanceID string, accountID string, tempToken string, preferredLang string) {
+		_, err = s.clients.MessagingService.SendInstantEmail(context.TODO(), &messageAPI.SendEmailReq{
+			InstanceId:  instanceID,
+			To:          []string{accountID},
+			MessageType: "registration",
+			ContentInfos: map[string]string{
+				"token": tempToken,
+			},
+			PreferredLanguage: preferredLang,
+		})
+		if err != nil {
+			log.Printf("SignupWithEmail: %s", err.Error())
+		}
+	}(instanceID, newUser.Account.AccountID, tempToken, newUser.Account.PreferredLanguage)
 	// <---
 
 	var username string
