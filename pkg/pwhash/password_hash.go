@@ -6,7 +6,6 @@ import (
 	"encoding/base64"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -61,9 +60,6 @@ func HashPassword(password string) (encodedHash string, err error) {
 	if err != nil {
 		return "", err
 	}
-	log.Println(argon2Iterations)
-	log.Println(argon2Memory)
-	log.Println(argon2Parallelism)
 	// Pass the plaintext password, salt and parameters to the argon2.IDKey
 	// function. This will generate a hash of the password using the Argon2id
 	// variant.
