@@ -67,6 +67,7 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 	// Access Token
 	token, err := tokens.GenerateNewToken(
 		apiUser.Id,
+		apiUser.Account.AccountConfirmedAt > 0,
 		apiUser.Profiles[0].Id,
 		currentRoles,
 		instanceID,
@@ -145,6 +146,7 @@ func (s *userManagementServer) LoginWithTempToken(ctx context.Context, req *api.
 	// Access Token
 	token, err := tokens.GenerateNewToken(
 		apiUser.Id,
+		apiUser.Account.AccountConfirmedAt > 0,
 		apiUser.Profiles[0].Id,
 		currentRoles,
 		tokenInfos.InstanceID,
@@ -277,6 +279,7 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 	// Access Token
 	token, err := tokens.GenerateNewToken(
 		apiUser.Id,
+		apiUser.Account.AccountConfirmedAt > 0,
 		apiUser.Profiles[0].Id,
 		newUser.Roles,
 		instanceID,
@@ -365,6 +368,7 @@ func (s *userManagementServer) SwitchProfile(ctx context.Context, req *api.Switc
 	// Access Token
 	token, err := tokens.GenerateNewToken(
 		apiUser.Id,
+		apiUser.Account.AccountConfirmedAt > 0,
 		profile.ID.Hex(),
 		user.Roles,
 		req.Token.InstanceId,

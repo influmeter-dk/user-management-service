@@ -24,12 +24,13 @@ func (s *userManagementServer) ValidateJWT(ctx context.Context, req *api.JWTRequ
 	}
 
 	return &api.TokenInfos{
-		Id:         parsedToken.ID,
-		InstanceId: parsedToken.InstanceID,
-		IssuedAt:   parsedToken.IssuedAt,
-		Payload:    parsedToken.Payload,
-		ProfilId:   parsedToken.ProfileID,
-		TempToken:  parsedToken.TempTokenInfos.ToAPI(),
+		Id:               parsedToken.ID,
+		InstanceId:       parsedToken.InstanceID,
+		IssuedAt:         parsedToken.IssuedAt,
+		AccountConfirmed: parsedToken.AccountConfirmed,
+		Payload:          parsedToken.Payload,
+		ProfilId:         parsedToken.ProfileID,
+		TempToken:        parsedToken.TempTokenInfos.ToAPI(),
 	}, nil
 }
 
@@ -64,7 +65,7 @@ func (s *userManagementServer) RenewJWT(ctx context.Context, req *api.RefreshJWT
 	username := tokens.GetUsernameFromPayload(parsedToken.Payload)
 
 	// Generate new access token:
-	newToken, err := tokens.GenerateNewToken(parsedToken.ID, parsedToken.ProfileID, roles, parsedToken.InstanceID, s.JWT.TokenExpiryInterval, username, nil, parsedToken.OtherProfileIDs)
+	newToken, err := tokens.GenerateNewToken(parsedToken.ID, user.Account.AccountConfirmedAt > 0, parsedToken.ProfileID, roles, parsedToken.InstanceID, s.JWT.TokenExpiryInterval, username, nil, parsedToken.OtherProfileIDs)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
