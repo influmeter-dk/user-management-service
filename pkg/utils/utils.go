@@ -9,6 +9,9 @@ import (
 
 // CheckEmailFormat to check if input string is a correct email address
 func CheckEmailFormat(email string) bool {
+	if len(email) > 254 {
+		return false
+	}
 	re := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$")
 
 	return re.MatchString(email)
@@ -16,7 +19,8 @@ func CheckEmailFormat(email string) bool {
 
 // CheckPasswordFormat to check if password fulfills password rules
 func CheckPasswordFormat(password string) bool {
-	if len(password) < 8 {
+	pl := len(password)
+	if pl < 8 || pl > 512 {
 		return false
 	}
 
@@ -34,6 +38,11 @@ func CheckPasswordFormat(password string) bool {
 		res++
 	}
 	return res == 2
+}
+
+func CheckLanguageCode(code string) bool {
+	codeRule := regexp.MustCompile("^[a-z]{2}$")
+	return codeRule.MatchString(code)
 }
 
 // IsTokenEmpty check a token from api if it's empty

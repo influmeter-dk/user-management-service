@@ -188,6 +188,9 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 	if !utils.CheckEmailFormat(req.Email) {
 		return nil, status.Error(codes.InvalidArgument, "email not valid")
 	}
+	if !utils.CheckLanguageCode(req.PreferredLanguage) {
+		return nil, status.Error(codes.InvalidArgument, "language code wrong")
+	}
 	if !utils.CheckPasswordFormat(req.Password) {
 		return nil, status.Error(codes.InvalidArgument, "password too weak")
 	}

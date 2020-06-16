@@ -73,6 +73,45 @@ func TestCheckEmailFormat(t *testing.T) {
 	})
 }
 
+func TestLanguageCodeFormat(t *testing.T) {
+	t.Run("with t", func(t *testing.T) {
+		if CheckLanguageCode("t") {
+			t.Error("should be false")
+		}
+	})
+
+	t.Run("with ttt", func(t *testing.T) {
+		if CheckLanguageCode("ttt") {
+			t.Error("should be false")
+		}
+	})
+
+	t.Run("with 1t", func(t *testing.T) {
+		if CheckLanguageCode("1t") {
+			t.Error("should be false")
+		}
+	})
+
+	t.Run("with TT", func(t *testing.T) {
+		if CheckLanguageCode("TT") {
+			t.Error("should be false")
+		}
+	})
+
+	t.Run("with .t", func(t *testing.T) {
+		if CheckLanguageCode(".t") {
+			t.Error("should be false")
+		}
+	})
+
+	t.Run("with tt", func(t *testing.T) {
+		if !CheckLanguageCode("tt") {
+			t.Error("should be true")
+		}
+	})
+
+}
+
 func TestIsTokenEmpty(t *testing.T) {
 	t.Run("check with nil input", func(t *testing.T) {
 		if !IsTokenEmpty(nil) {

@@ -376,9 +376,10 @@ func TestSignupWithEmail(t *testing.T) {
 		).Return(nil, nil)
 
 		req := &api.SignupWithEmailMsg{
-			Email:      "test-signup-1@test.com",
-			Password:   "SuperSecurePassword123!§$",
-			InstanceId: testInstanceID,
+			Email:             "test-signup-1@test.com",
+			Password:          "SuperSecurePassword123!§$",
+			InstanceId:        testInstanceID,
+			PreferredLanguage: "en",
 		}
 		_, err := s.SignupWithEmail(context.Background(), req)
 		if err != nil {
