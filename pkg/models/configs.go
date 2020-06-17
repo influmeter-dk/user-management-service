@@ -11,6 +11,5 @@ type DBConfig struct {
 }
 
 type JWTConfig struct {
-	TokenMinimumAgeMin  time.Duration // interpreted in minutes later
 	TokenExpiryInterval time.Duration // interpreted in minutes later
 }

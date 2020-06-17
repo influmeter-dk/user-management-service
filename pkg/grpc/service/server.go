@@ -33,7 +33,6 @@ func NewUserManagementServer(
 	userDBservice *userdb.UserDBService,
 	globalDBservice *globaldb.GlobalDBService,
 	JWT struct {
-		TokenMinimumAgeMin  time.Duration // interpreted in minutes later
 		TokenExpiryInterval time.Duration // interpreted in minutes later
 	},
 ) api.UserManagementApiServer {
@@ -51,7 +50,6 @@ func RunServer(ctx context.Context, port string,
 	userDBservice *userdb.UserDBService,
 	globalDBservice *globaldb.GlobalDBService,
 	JWT struct {
-		TokenMinimumAgeMin  time.Duration // interpreted in minutes later
 		TokenExpiryInterval time.Duration // interpreted in minutes later
 	},
 ) error {

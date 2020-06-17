@@ -13,7 +13,7 @@ export DB_IDLE_CONN_TIMEOUT=45 # terminate idle connection after seconds
 export DB_MAX_POOL_SIZE=8
 export DB_DB_NAME_PREFIX="<db name prefix used in the test>" # DB names will be then > <DB_PREFIX>+"hard-coded-db-name-as-we-need-it"
 
-export STUDY_SERVICE_LISTEN_PORT=5203
+export STUDY_SERVICE_LISTEN_PORT=<PORT_STUDY>
 export STUDY_GLOBAL_SECRET="<global secret key for participant id encryption>"
 export STUDY_TIMER_EVENT_FREQUENCY=30
 export STUDY_TIMER_EVENT_CHECK_INTERVAL_MIN=5
@@ -22,14 +22,13 @@ export STUDY_TIMER_EVENT_CHECK_INTERVAL_VAR=3
 
 export JWT_TOKEN_KEY="<jwt signing secret key>"
 export TOKEN_EXPIRATION_MIN="10"
-export TOKEN_MINIMUM_AGE_MIN="2"
 
 export ARGON2_MEMORY=65536
 export ARGON2_ITERATIONS=3
 export ARGON2_PARALLELISM=1
 
-export USER_MANAGEMENT_LISTEN_PORT=5202
-export MESSAGING_SERVICE_LISTEN_PORT=5204
+export USER_MANAGEMENT_LISTEN_PORT=<PORT_USER>
+export MESSAGING_SERVICE_LISTEN_PORT=<PORT_MESSAGING>
 
 IP_ADDR="localhost"
 export ADDR_STUDY_SERVICE=$IP_ADDR:$STUDY_SERVICE_LISTEN_PORT

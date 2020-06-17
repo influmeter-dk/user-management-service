@@ -30,11 +30,6 @@ type UserClaims struct {
 	jwt.StandardClaims
 }
 
-// CheckTokenAgeMaturity to see if token age is old enough
-func CheckTokenAgeMaturity(issuedAt int64, minAge time.Duration) bool {
-	return time.Now().Unix() < time.Unix(issuedAt, 0).Add(minAge).Unix()
-}
-
 func getSecretKey() (newSecretKey []byte, err error) {
 	newSecretKeyEnc := os.Getenv("JWT_TOKEN_KEY")
 	if secretKeyEnc == newSecretKeyEnc {

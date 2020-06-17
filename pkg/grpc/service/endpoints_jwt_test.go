@@ -16,7 +16,7 @@ func TestValidateJWT(t *testing.T) {
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
 		JWT: models.JWTConfig{
-			TokenMinimumAgeMin:  time.Second * 1,
+
 			TokenExpiryInterval: time.Second * 2,
 		},
 	}
@@ -127,7 +127,6 @@ func TestRenewJWT(t *testing.T) {
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
 		JWT: models.JWTConfig{
-			TokenMinimumAgeMin:  time.Second * 1,
 			TokenExpiryInterval: time.Second * 2,
 		},
 	}
@@ -187,26 +186,6 @@ func TestRenewJWT(t *testing.T) {
 		}
 	})
 
-	// Test eagerly, when min age not reached yet
-	t.Run("too eagerly", func(t *testing.T) {
-		req := &api.RefreshJWTRequest{
-			AccessToken:  userToken,
-			RefreshToken: refreshToken,
-		}
-
-		_, err := s.RenewJWT(context.Background(), req)
-		ok, msg := shouldHaveGrpcErrorStatus(err, "can't renew token so often")
-		if !ok {
-			t.Error(msg)
-		}
-	})
-
-	if testing.Short() {
-		t.Skip("skipping renew token test in short mode, since it has to wait for token expiration.")
-	}
-
-	time.Sleep(s.JWT.TokenMinimumAgeMin)
-
 	t.Run("with wrong refresh token", func(t *testing.T) {
 		req := &api.RefreshJWTRequest{
 			AccessToken:  userToken,
@@ -219,7 +198,6 @@ func TestRenewJWT(t *testing.T) {
 		}
 	})
 
-	// Test renew after min age reached - wait 2 seconds
 	t.Run("with normal tokens", func(t *testing.T) {
 		req := &api.RefreshJWTRequest{
 			AccessToken:  userToken,
@@ -269,7 +247,6 @@ func TestRevokeAllRefreshTokens(t *testing.T) {
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
 		JWT: models.JWTConfig{
-			TokenMinimumAgeMin:  time.Second * 1,
 			TokenExpiryInterval: time.Second * 2,
 		},
 	}

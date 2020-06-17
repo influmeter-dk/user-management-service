@@ -36,13 +36,8 @@ func getJWTConfig() models.JWTConfig {
 	if err != nil {
 		log.Fatal("TOKEN_EXPIRATION_MIN: " + err.Error())
 	}
-	i2, err := strconv.Atoi(os.Getenv("TOKEN_MINIMUM_AGE_MIN"))
-	if err != nil {
-		log.Fatal("TOKEN_MINIMUM_AGE_MIN: " + err.Error())
-	}
 	return models.JWTConfig{
 		TokenExpiryInterval: time.Minute * time.Duration(accessTokenExpiration),
-		TokenMinimumAgeMin:  time.Minute * time.Duration(i2),
 	}
 }
 

@@ -20,7 +20,6 @@ func TestLogin(t *testing.T) {
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
 		JWT: models.JWTConfig{
-			TokenMinimumAgeMin:  time.Second * 1,
 			TokenExpiryInterval: time.Second * 2,
 		},
 	}
@@ -146,7 +145,6 @@ func TestLoginWithTempToken(t *testing.T) {
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
 		JWT: models.JWTConfig{
-			TokenMinimumAgeMin:  time.Second * 1,
 			TokenExpiryInterval: time.Second * 2,
 		},
 	}
@@ -283,7 +281,6 @@ func TestSignupWithEmail(t *testing.T) {
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
 		JWT: models.JWTConfig{
-			TokenMinimumAgeMin:  time.Second * 1,
 			TokenExpiryInterval: time.Second * 2,
 		},
 		clients: &models.APIClients{
@@ -401,7 +398,6 @@ func TestSwitchProfileEndpoint(t *testing.T) {
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
 		JWT: models.JWTConfig{
-			TokenMinimumAgeMin:  time.Second * 1,
 			TokenExpiryInterval: time.Second * 2,
 		},
 	}
@@ -500,7 +496,6 @@ func TestVerifyAccountEndpoint(t *testing.T) {
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
 		JWT: models.JWTConfig{
-			TokenMinimumAgeMin:  time.Second * 1,
 			TokenExpiryInterval: time.Second * 2,
 		},
 	}
@@ -667,7 +662,6 @@ func TestResendContactVerificationEndpoint(t *testing.T) {
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
 		JWT: models.JWTConfig{
-			TokenMinimumAgeMin:  time.Second * 1,
 			TokenExpiryInterval: time.Second * 2,
 		},
 		clients: &models.APIClients{

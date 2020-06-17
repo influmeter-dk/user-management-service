@@ -22,7 +22,6 @@ func TestInitiatePasswordResetEndpoint(t *testing.T) {
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
 		JWT: models.JWTConfig{
-			TokenMinimumAgeMin:  time.Second * 1,
 			TokenExpiryInterval: time.Second * 2,
 		},
 		clients: &models.APIClients{
@@ -98,7 +97,6 @@ func TestGetInfosForPasswordResetEndpoint(t *testing.T) {
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
 		JWT: models.JWTConfig{
-			TokenMinimumAgeMin:  time.Second * 1,
 			TokenExpiryInterval: time.Second * 2,
 		},
 	}
@@ -210,7 +208,6 @@ func TestResetPasswordEndpoint(t *testing.T) {
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
 		JWT: models.JWTConfig{
-			TokenMinimumAgeMin:  time.Second * 1,
 			TokenExpiryInterval: time.Second * 2,
 		},
 		clients: &models.APIClients{

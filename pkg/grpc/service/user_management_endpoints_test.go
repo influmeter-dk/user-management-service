@@ -21,7 +21,6 @@ func TestCreateUserEndpoint(t *testing.T) {
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
 		JWT: models.JWTConfig{
-			TokenMinimumAgeMin:  time.Second * 1,
 			TokenExpiryInterval: time.Second * 2,
 		},
 		clients: &models.APIClients{
@@ -121,7 +120,6 @@ func TestAddRoleForUserEndpoint(t *testing.T) {
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
 		JWT: models.JWTConfig{
-			TokenMinimumAgeMin:  time.Second * 1,
 			TokenExpiryInterval: time.Second * 2,
 		},
 	}
@@ -225,7 +223,6 @@ func TestRemoveRoleForUserEndpoint(t *testing.T) {
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
 		JWT: models.JWTConfig{
-			TokenMinimumAgeMin:  time.Second * 1,
 			TokenExpiryInterval: time.Second * 2,
 		},
 	}
@@ -328,7 +325,6 @@ func TestFindNonParticipantUsersEndpoint(t *testing.T) {
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
 		JWT: models.JWTConfig{
-			TokenMinimumAgeMin:  time.Second * 1,
 			TokenExpiryInterval: time.Second * 2,
 		},
 	}
@@ -433,7 +429,6 @@ func TestStreamUsersEndpoint(t *testing.T) {
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
 		JWT: models.JWTConfig{
-			TokenMinimumAgeMin:  time.Second * 1,
 			TokenExpiryInterval: time.Second * 2,
 		},
 	}

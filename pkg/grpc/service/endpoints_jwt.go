@@ -45,11 +45,6 @@ func (s *userManagementServer) RenewJWT(ctx context.Context, req *api.RefreshJWT
 		return nil, status.Error(codes.PermissionDenied, "wrong access token")
 	}
 
-	// Check for too frequent requests:
-	if tokens.CheckTokenAgeMaturity(parsedToken.StandardClaims.IssuedAt, s.JWT.TokenMinimumAgeMin) {
-		return nil, status.Error(codes.Unavailable, "can't renew token so often")
-	}
-
 	user, err := s.userDBservice.GetUserByID(parsedToken.InstanceID, parsedToken.ID)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "user not found")
