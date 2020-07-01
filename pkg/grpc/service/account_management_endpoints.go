@@ -26,7 +26,7 @@ func (s *userManagementServer) GetUser(ctx context.Context, req *api.UserReferen
 	}
 
 	if req.Token.Id != req.UserId { // Later can be overwritten
-		log.Printf("not authorized GetUser(): %s tried to access %s", req.Token.Id, req.UserId)
+		log.Printf("SECURITY WARNING: not authorized GetUser(): %s tried to access %s", req.Token.Id, req.UserId)
 		return nil, status.Error(codes.PermissionDenied, "not authorized")
 	}
 

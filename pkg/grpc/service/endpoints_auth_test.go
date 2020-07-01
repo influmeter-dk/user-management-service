@@ -15,6 +15,28 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+func TestSendVerificationCode(t *testing.T) {
+	// check with nil
+	// check with empty
+	// check with wrong password
+	// check with valid data
+	t.Error("test unimplemented")
+}
+
+func TestAutoValidateTempToken(t *testing.T) {
+	// add temp token with correct purpose not expired
+	// add temp token with correct purpose expired
+	// add temp token with wrong purpose not expired
+
+	// check with nil
+	// check with empty
+	// check without access token
+	// check with same user access token
+	// check with other user access token
+
+	t.Error("test unimplemented")
+}
+
 func TestLogin(t *testing.T) {
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
@@ -136,138 +158,6 @@ func TestLogin(t *testing.T) {
 		if resp.Token.PreferredLanguage != "de" || resp.Token.SelectedProfileId != testUser.Profiles[0].ID.Hex() {
 			t.Errorf("unexpected PreferredLanguage or AccountConfirmed: %s", resp)
 			return
-		}
-	})
-}
-
-func TestLoginWithTempToken(t *testing.T) {
-	s := userManagementServer{
-		userDBservice:   testUserDBService,
-		globalDBService: testGlobalDBService,
-		JWT: models.JWTConfig{
-			TokenExpiryInterval: time.Second * 2,
-		},
-	}
-	testUser := models.User{
-		Account: models.Account{
-			Type:               "email",
-			AccountID:          "test-login-with-temptoken@test.com",
-			AccountConfirmedAt: time.Now().Unix(),
-			PreferredLanguage:  "de",
-		},
-		Roles: []string{"PARTICIPANT"},
-		Profiles: []models.Profile{
-			{
-				ID:    primitive.NewObjectID(),
-				Alias: "test",
-			},
-		},
-	}
-
-	id, err := testUserDBService.AddUser(testInstanceID, testUser)
-	if err != nil {
-		t.Errorf("error creating user for testing login")
-		return
-	}
-	testUser.ID, err = primitive.ObjectIDFromHex(id)
-	if err != nil {
-		t.Errorf("error converting id")
-		return
-	}
-
-	tempToken1, err := s.globalDBService.AddTempToken(models.TempToken{
-		Expiration: time.Now().Unix() + 20,
-		Purpose:    "survey-login",
-		UserID:     testUser.ID.Hex(),
-		InstanceID: testInstanceID,
-		Info: map[string]string{
-			"studyKey": "currentstudykey",
-		},
-	})
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	tempToken2, err := s.globalDBService.AddTempToken(models.TempToken{
-		Expiration: time.Now().Unix() - 20,
-		Purpose:    "survey-login",
-		UserID:     testUser.ID.Hex(),
-		InstanceID: testInstanceID,
-		Info: map[string]string{
-			"studyKey": "currentstudykey",
-		},
-	})
-	if err != nil {
-		t.Error(err)
-		return
-	}
-	tempToken3, err := s.globalDBService.AddTempToken(models.TempToken{
-		Expiration: time.Now().Unix() + 20,
-		Purpose:    "unsubscribe-newsletter",
-		UserID:     testUser.ID.Hex(),
-		InstanceID: testInstanceID,
-	})
-	if err != nil {
-		t.Error(err)
-		return
-	}
-
-	t.Run("without payload", func(t *testing.T) {
-		_, err := s.LoginWithTempToken(context.Background(), nil)
-		ok, msg := shouldHaveGrpcErrorStatus(err, "invalid token")
-		if !ok {
-			t.Error(msg)
-		}
-	})
-
-	t.Run("with empty payload", func(t *testing.T) {
-		req := &api.JWTRequest{}
-		_, err := s.LoginWithTempToken(context.Background(), req)
-		ok, msg := shouldHaveGrpcErrorStatus(err, "invalid token")
-		if !ok {
-			t.Error(msg)
-		}
-	})
-
-	t.Run("with wrong purpose token", func(t *testing.T) {
-		req := &api.JWTRequest{
-			Token: tempToken3,
-		}
-		_, err := s.LoginWithTempToken(context.Background(), req)
-		ok, msg := shouldHaveGrpcErrorStatus(err, "invalid token")
-		if !ok {
-			t.Error(msg)
-		}
-	})
-
-	t.Run("with expired token", func(t *testing.T) {
-		req := &api.JWTRequest{
-			Token: tempToken2,
-		}
-		_, err := s.LoginWithTempToken(context.Background(), req)
-		ok, msg := shouldHaveGrpcErrorStatus(err, "invalid token")
-		if !ok {
-			t.Error(msg)
-		}
-	})
-
-	t.Run("with valid token", func(t *testing.T) {
-		req := &api.JWTRequest{
-			Token: tempToken1,
-		}
-		resp, err := s.LoginWithTempToken(context.Background(), req)
-		if err != nil {
-			t.Errorf("unexpected error: %s", err.Error())
-			return
-		}
-		if resp.Token.RefreshToken != "" {
-			t.Error("unexpected refreshtoken")
-		}
-		if resp.Token.AccessToken == "" {
-			t.Error("unexpected access token")
-		}
-		if len(resp.Token.Profiles) != 1 && resp.Token.Profiles[0].Alias != "test" {
-			t.Error("unexpected profile")
 		}
 	})
 }

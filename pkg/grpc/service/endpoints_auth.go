@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"log"
+	"strings"
 	"time"
 
 	"github.com/golang/protobuf/ptypes/empty"
@@ -26,6 +27,26 @@ func (s *userManagementServer) Status(ctx context.Context, _ *empty.Empty) (*api
 	}, nil
 }
 
+func (s *userManagementServer) SendVerificationCode(ctx context.Context, req *api.SendVerificationCodeReq) (*api.ServiceStatus, error) {
+	if req == nil || req.Email == "" || req.Password == "" || req.InstanceId == "" {
+		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
+	}
+
+	// vc, err := tokens.GenerateVerificationCode(6)
+
+	// if password wrong:
+	// log.Printf("SECURITY WARNING: login step 1 attempt with wrong password for %s", user.ID.Hex())
+	return nil, status.Error(codes.Unimplemented, "unimplemented")
+}
+
+func (s *userManagementServer) AutoValidateTempToken(ctx context.Context, req *api.AutoValidateReq) (*api.AutoValidateResponse, error) {
+	if req == nil || req.TempToken == "" {
+		return nil, status.Error(codes.InvalidArgument, "invalid token")
+	}
+
+	return nil, status.Error(codes.Unimplemented, "unimplemented")
+}
+
 func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.LoginWithEmailMsg) (*api.LoginResponse, error) {
 	if req == nil || req.Email == "" || req.Password == "" {
 		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
@@ -35,19 +56,41 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 	if instanceID == "" {
 		instanceID = "default"
 	}
-	user, err := s.userDBservice.GetUserByAccountID(instanceID, req.Email)
 
+	email := strings.ToLower(req.Email)
+	user, err := s.userDBservice.GetUserByAccountID(instanceID, email)
 	if err != nil {
+		log.Printf("SECURITY WARNING: login attempt with wrong email address for %s", email)
 		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
 	}
 
 	match, err := pwhash.ComparePasswordWithHash(user.Account.Password, req.Password)
 	if err != nil || !match {
+		log.Printf("SECURITY WARNING: login attempt with wrong password for %s", user.ID.Hex())
 		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
 	}
 
-	var username string
+	if user.Account.AuthMode == "2FA" {
+		if user.Account.VerificationCode.Code == "" {
+			log.Printf("SECURITY WARNING: login attempt with missing first step for %s", user.ID.Hex())
+			return nil, status.Error(codes.InvalidArgument, "missing verficiation code")
+		}
+		if user.Account.VerificationCode.ExpiresAt < time.Now().Unix() {
+			log.Printf("SECURITY WARNING: login attempt with expired verification code for %s", user.ID.Hex())
+			return nil, status.Error(codes.InvalidArgument, "expired verficiation code")
+		}
+		if user.Account.VerificationCode.Code != req.VerificationCode {
+			log.Printf("SECURITY WARNING: login attempt with wrong verification code for %s", user.ID.Hex())
+			user.Account.VerificationCode = models.VerificationCode{}
+			user, err = s.userDBservice.UpdateUser(req.InstanceId, user)
+			if err != nil {
+				log.Printf("LoginWithEmail: unexpected error when saving user -> %v", err)
+			}
+			return nil, status.Error(codes.InvalidArgument, "wrong verficiation code")
+		}
+	}
 
+	var username string
 	currentRoles := user.Roles
 	if req.AsParticipant {
 		currentRoles = []string{"PARTICIPANT"}
@@ -77,20 +120,23 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 		otherProfileIDs,
 	)
 	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
+		log.Printf("LoginWithEmail: unexpected error during token generation -> %v", err)
+		return nil, status.Error(codes.Internal, "token generation error")
 	}
 
 	// Refresh Token
 	rt, err := tokens.GenerateUniqueTokenString()
 	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
+		log.Printf("LoginWithEmail: unexpected error during refresh token generation -> %v", err)
+		return nil, status.Error(codes.Internal, "token generation error")
 	}
 	user.AddRefreshToken(rt)
 	user.Timestamps.LastLogin = time.Now().Unix()
 
 	user, err = s.userDBservice.UpdateUser(req.InstanceId, user)
 	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
+		log.Printf("LoginWithEmail: unexpected error when saving user -> %v", err)
+		return nil, status.Error(codes.Internal, "user couldn't be updated")
 	}
 
 	// remove all temptokens for password reset:
@@ -113,74 +159,6 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 
 }
 
-func (s *userManagementServer) LoginWithTempToken(ctx context.Context, req *api.JWTRequest) (*api.LoginResponse, error) {
-	if req == nil || req.Token == "" {
-		return nil, status.Error(codes.InvalidArgument, "invalid token")
-	}
-
-	tokenInfos, err := s.globalDBService.GetTempToken(req.Token)
-	if err != nil {
-		log.Println(err.Error())
-		return nil, status.Error(codes.InvalidArgument, "invalid token")
-	}
-	if tokenInfos.Purpose != "survey-login" || tokens.ReachedExpirationTime(tokenInfos.Expiration) {
-		log.Println("wrong token found for survey login:")
-		log.Println(tokenInfos)
-		return nil, status.Error(codes.InvalidArgument, "invalid token")
-	}
-
-	user, err := s.userDBservice.GetUserByID(tokenInfos.InstanceID, tokenInfos.UserID)
-	if err != nil {
-		return nil, status.Error(codes.InvalidArgument, "user not found")
-	}
-
-	currentRoles := []string{"PARTICIPANT"}
-
-	apiUser := user.ToAPI()
-	otherProfileIDs := []string{}
-	for _, p := range apiUser.Profiles {
-		if p.Id != apiUser.Profiles[0].Id {
-			otherProfileIDs = append(otherProfileIDs, p.Id)
-		}
-	}
-	// Access Token
-	token, err := tokens.GenerateNewToken(
-		apiUser.Id,
-		apiUser.Account.AccountConfirmedAt > 0,
-		apiUser.Profiles[0].Id,
-		currentRoles,
-		tokenInfos.InstanceID,
-		s.JWT.TokenExpiryInterval,
-		"",
-		&tokenInfos,
-		otherProfileIDs,
-	)
-	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-
-	if err := s.userDBservice.UpdateLoginTime(tokenInfos.InstanceID, user.ID.Hex()); err != nil {
-		return nil, status.Error(codes.InvalidArgument, err.Error())
-	}
-
-	apiUser.ContactInfos = []*api.ContactInfo{}
-	apiUser.Timestamps = nil
-	apiUser.ContactPreferences = nil
-	apiUser.Roles = []string{}
-
-	response := &api.LoginResponse{
-		Token: &api.TokenResponse{
-			AccessToken:       token,
-			ExpiresIn:         int32(s.JWT.TokenExpiryInterval / time.Minute),
-			Profiles:          apiUser.Profiles,
-			SelectedProfileId: apiUser.Profiles[0].Id,
-			PreferredLanguage: apiUser.Account.PreferredLanguage,
-		},
-		User: apiUser,
-	}
-	return response, nil
-}
-
 func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.SignupWithEmailMsg) (*api.TokenResponse, error) {
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
@@ -200,11 +178,12 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
+	email := strings.ToLower(req.Email)
 	// Create user DB object from request:
 	newUser := models.User{
 		Account: models.Account{
 			Type:               "email",
-			AccountID:          req.Email,
+			AccountID:          email,
 			AccountConfirmedAt: 0, // not confirmed yet
 			Password:           password,
 			PreferredLanguage:  req.PreferredLanguage,

@@ -6,12 +6,19 @@ import (
 
 // Account holds information about user authentication methods
 type Account struct {
-	Type               string   `bson:"type"`
-	AccountID          string   `bson:"accountID"`
-	AccountConfirmedAt int64    `bson:"accountConfirmedAt"`
-	Password           string   `bson:"password"`
-	RefreshTokens      []string `bson:"refreshTokens"`
-	PreferredLanguage  string   `bson:"preferredLanguage"`
+	Type               string           `bson:"type"`
+	AccountID          string           `bson:"accountID"`
+	AccountConfirmedAt int64            `bson:"accountConfirmedAt"`
+	Password           string           `bson:"password"`
+	AuthMode           string           `bson:"authMode"`
+	VerificationCode   VerificationCode `bson:"verificationCode"`
+	RefreshTokens      []string         `bson:"refreshTokens"`
+	PreferredLanguage  string           `bson:"preferredLanguage"`
+}
+
+type VerificationCode struct {
+	Code      string `bson:"code"`
+	ExpiresAt int64  `bson:"expiresAt"`
 }
 
 func AccountFromAPI(a *api.User_Account) Account {
