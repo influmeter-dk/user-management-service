@@ -96,3 +96,21 @@ func (dbService *GlobalDBService) DeleteAllTempTokenForUser(instanceID string, u
 	}
 	return nil
 }
+
+func (dbService *GlobalDBService) DeleteTempTokensExpireBefore(instanceID string, purpose string, expiresBefore int64) error {
+	ctx, cancel := dbService.getContext()
+	defer cancel()
+
+	filter := bson.M{"expiration": bson.M{"$lt": expiresBefore}}
+	if len(purpose) > 0 {
+		filter["purpose"] = purpose
+	}
+	if len(instanceID) > 0 {
+		filter["instanceID"] = instanceID
+	}
+	_, err := dbService.collectionRefTempToken().DeleteMany(ctx, filter)
+	if err != nil {
+		return err
+	}
+	return nil
+}

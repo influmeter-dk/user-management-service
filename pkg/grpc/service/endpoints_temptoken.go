@@ -15,6 +15,7 @@ func (s *userManagementServer) GetOrCreateTemptoken(ctx context.Context, t *api.
 	if t == nil || t.Purpose == "" || t.UserId == "" || t.InstanceId == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
+	go s.CleanExpiredTemptokens(3600)
 
 	tList, err := s.globalDBService.GetTempTokenForUser(t.InstanceId, t.UserId, t.Purpose)
 	if err != nil {
@@ -51,6 +52,7 @@ func (s *userManagementServer) GenerateTempToken(ctx context.Context, t *api.Tem
 	if t == nil || t.Purpose == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
+	go s.CleanExpiredTemptokens(3600)
 
 	tempToken := models.TempToken{
 		UserID:     t.UserId,

@@ -1,12 +1,14 @@
 package globaldb
 
 import (
+	"context"
 	"log"
 	"testing"
 	"time"
 
 	"github.com/influenzanet/user-management-service/pkg/models"
 	"github.com/influenzanet/user-management-service/pkg/tokens"
+	"go.mongodb.org/mongo-driver/bson"
 )
 
 // Testing Database Interface methods
@@ -196,6 +198,95 @@ func TestDbInterfaceMethodsForTempToken(t *testing.T) {
 			t.Error(tokens)
 			t.Error("too many tokens found")
 			return
+		}
+	})
+}
+
+func TestDBDeleteExpiredTempTokens(t *testing.T) {
+	testTempTokens := []models.TempToken{
+		{Expiration: time.Now().Unix() - 10, Purpose: "purpose1", UserID: "testUID", InstanceID: "testInstance1"},
+		{Expiration: time.Now().Unix() - 20, Purpose: "purpose1", UserID: "testUID", InstanceID: "testInstance1"},
+		{Expiration: time.Now().Unix() - 10, Purpose: "purpose2", UserID: "testUID", InstanceID: "testInstance1"},
+		{Expiration: time.Now().Unix() - 20, Purpose: "purpose2", UserID: "testUID", InstanceID: "testInstance1"},
+		{Expiration: time.Now().Unix() - 10, Purpose: "purpose1", UserID: "testUID", InstanceID: "testInstance2"},
+		{Expiration: time.Now().Unix() - 20, Purpose: "purpose1", UserID: "testUID", InstanceID: "testInstance2"},
+		{Expiration: time.Now().Unix() - 20, Purpose: "purpose3", UserID: "testUID", InstanceID: "testInstance3"},
+		{Expiration: time.Now().Unix() - 20, Purpose: "purpose4", UserID: "testUID", InstanceID: "testInstance3"},
+	}
+
+	for _, token := range testTempTokens {
+		_, err := testDBService.AddTempToken(token)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err.Error())
+			return
+		}
+	}
+
+	t.Run("Delete expired for single purpose", func(t *testing.T) {
+		err := testDBService.DeleteTempTokensExpireBefore("", "purpose1", time.Now().Unix()-15)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err.Error())
+			return
+		}
+
+		count, err := testDBService.collectionRefTempToken().CountDocuments(context.TODO(), bson.M{})
+		if err != nil {
+			t.Errorf("unexpected error: %v", err.Error())
+			return
+		}
+		if count != 6 {
+			t.Errorf("unexpected number of tokens found: %d instead of %d", count, 7)
+		}
+	})
+
+	t.Run("Delete expired for single instance", func(t *testing.T) {
+		err := testDBService.DeleteTempTokensExpireBefore("testInstance1", "", time.Now().Unix()-5)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err.Error())
+			return
+		}
+
+		count, err := testDBService.collectionRefTempToken().CountDocuments(context.TODO(), bson.M{})
+		if err != nil {
+			t.Errorf("unexpected error: %v", err.Error())
+			return
+		}
+		if count != 3 {
+			t.Errorf("unexpected number of tokens found: %d instead of %d", count, 3)
+		}
+	})
+
+	t.Run("Delete expired for purpose and instance", func(t *testing.T) {
+		err := testDBService.DeleteTempTokensExpireBefore("testInstance3", "purpose3", time.Now().Unix()-5)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err.Error())
+			return
+		}
+
+		count, err := testDBService.collectionRefTempToken().CountDocuments(context.TODO(), bson.M{})
+		if err != nil {
+			t.Errorf("unexpected error: %v", err.Error())
+			return
+		}
+		if count != 2 {
+			t.Errorf("unexpected number of tokens found: %d instead of %d", count, 3)
+		}
+	})
+
+	t.Run("Delete expired everywhere", func(t *testing.T) {
+		err := testDBService.DeleteTempTokensExpireBefore("", "", time.Now().Unix()-5)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err.Error())
+			return
+		}
+
+		count, err := testDBService.collectionRefTempToken().CountDocuments(context.TODO(), bson.M{})
+		if err != nil {
+			t.Errorf("unexpected error: %v", err.Error())
+			return
+		}
+		if count != 0 {
+			t.Errorf("unexpected number of tokens found: %d instead of %d", count, 3)
 		}
 	})
 }
