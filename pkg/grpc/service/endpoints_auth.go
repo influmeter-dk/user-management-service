@@ -253,6 +253,10 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 	}
 	newUser.AddNewEmail(req.Email, false)
 
+	if req.Use_2Fa {
+		newUser.Account.AuthType = "2FA"
+	}
+
 	if req.WantsNewsletter {
 		newUser.ContactPreferences.SubscribedToNewsletter = true
 		newUser.ContactPreferences.SendNewsletterTo = []string{newUser.ContactInfos[0].ID.Hex()}

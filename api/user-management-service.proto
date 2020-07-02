@@ -92,6 +92,7 @@ message SignupWithEmailMsg {
   string instance_id = 3;
   string preferred_language = 4;
   bool wants_newsletter = 5;
+  bool use_2fa = 6;
 }
 
 message LoginWithEmailMsg {
