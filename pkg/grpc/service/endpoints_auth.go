@@ -19,6 +19,8 @@ import (
 	"github.com/influenzanet/user-management-service/pkg/utils"
 )
 
+const verificationCodeLifetime = 5 * 60
+
 func (s *userManagementServer) Status(ctx context.Context, _ *empty.Empty) (*api.ServiceStatus, error) {
 	return &api.ServiceStatus{
 		Status:  api.ServiceStatus_NORMAL,
@@ -58,7 +60,7 @@ func (s *userManagementServer) SendVerificationCode(ctx context.Context, req *ap
 
 	user.Account.VerificationCode = models.VerificationCode{
 		Code:      vc,
-		ExpiresAt: time.Now().Unix() + 60*5,
+		ExpiresAt: time.Now().Unix() + verificationCodeLifetime,
 	}
 	user, err = s.userDBservice.UpdateUser(req.InstanceId, user)
 	if err != nil {
@@ -94,7 +96,53 @@ func (s *userManagementServer) AutoValidateTempToken(ctx context.Context, req *a
 		return nil, status.Error(codes.InvalidArgument, "invalid token")
 	}
 
-	return nil, status.Error(codes.Unimplemented, "unimplemented")
+	tempToken, err := s.globalDBService.GetTempToken(req.TempToken)
+	if err != nil {
+		log.Printf("SECURITY WARNING: temptoken cannot be found %s", req.TempToken)
+		return nil, status.Error(codes.InvalidArgument, "invalid token")
+	}
+	if tempToken.Purpose != "survey-login" {
+		log.Printf("SECURITY WARNING: temptoken with wrong prupose found: %s - by user %s in instance %s", tempToken.Purpose, tempToken.UserID, tempToken.InstanceID)
+		return nil, status.Error(codes.InvalidArgument, "invalid token")
+	}
+	if tempToken.Expiration < time.Now().Unix() {
+		log.Printf("SECURITY WARNING: temptoken is expired - by user %s in instance %s", tempToken.UserID, tempToken.InstanceID)
+		return nil, status.Error(codes.InvalidArgument, "token expired")
+	}
+
+	user, err := s.userDBservice.GetUserByID(tempToken.InstanceID, tempToken.UserID)
+	if err != nil {
+		return nil, status.Error(codes.InvalidArgument, "user not found")
+	}
+
+	vc, err := tokens.GenerateVerificationCode(6)
+	if err != nil {
+		log.Printf("unexpected error while generating verification code: %v", err)
+		return nil, status.Error(codes.Internal, "error while generating verification code")
+	}
+
+	user.Account.VerificationCode = models.VerificationCode{
+		Code:      vc,
+		ExpiresAt: time.Now().Unix() + verificationCodeLifetime,
+	}
+	user, err = s.userDBservice.UpdateUser(tempToken.InstanceID, user)
+	if err != nil {
+		log.Printf("AutoValidateTempToken: unexpected error when saving user -> %v", err)
+		return nil, status.Error(codes.Internal, "user couldn't be updated")
+	}
+
+	sameUser := false
+	if len(req.AccessToken) > 0 {
+		validatedToken, _, err := tokens.ValidateToken(req.AccessToken)
+		if err != nil {
+			log.Printf("AutoValidateTempToken: unexpected error when parsing token -> %v", err)
+		}
+		if validatedToken.ID == tempToken.UserID && validatedToken.InstanceID == tempToken.InstanceID {
+			sameUser = true
+		}
+	}
+
+	return &api.AutoValidateResponse{AccountId: user.Account.AccountID, IsSameUser: sameUser, VerificationCode: vc}, nil
 }
 
 func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.LoginWithEmailMsg) (*api.LoginResponse, error) {

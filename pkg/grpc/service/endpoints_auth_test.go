@@ -107,25 +107,201 @@ func TestSendVerificationCode(t *testing.T) {
 }
 
 func TestAutoValidateTempToken(t *testing.T) {
-	/*s := userManagementServer{
+	s := userManagementServer{
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
 		JWT: models.JWTConfig{
 			TokenExpiryInterval: time.Second * 2,
 		},
-	}*/
+	}
+
+	// Create Test User
+	currentPw := "SuperSecurePassword123!§$"
+	hashedPw, err := pwhash.HashPassword(currentPw)
+	if err != nil {
+		t.Errorf("error creating user for testing login")
+		return
+	}
+
+	testUser := models.User{
+		Account: models.Account{
+			Type:               "email",
+			AccountID:          "test-autovalidate@test.com",
+			AccountConfirmedAt: time.Now().Unix(),
+			Password:           hashedPw,
+			PreferredLanguage:  "de",
+		},
+		Roles: []string{"PARTICIPANT"},
+		Profiles: []models.Profile{
+			{ID: primitive.NewObjectID()},
+		},
+	}
+
+	id, err := testUserDBService.AddUser(testInstanceID, testUser)
+	if err != nil {
+		t.Errorf("error creating user for testing login")
+		return
+	}
+	testUser.ID, err = primitive.ObjectIDFromHex(id)
+	if err != nil {
+		t.Errorf("error converting id")
+		return
+	}
 
 	// add temp token with correct purpose not expired
+	token1, err := s.globalDBService.AddTempToken(models.TempToken{
+		InstanceID: testInstanceID,
+		UserID:     testUser.ID.Hex(),
+		Expiration: time.Now().Unix() + 20,
+		Purpose:    "survey-login",
+	})
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+		return
+	}
+
 	// add temp token with correct purpose expired
+	token2, err := s.globalDBService.AddTempToken(models.TempToken{
+		InstanceID: testInstanceID,
+		UserID:     testUser.ID.Hex(),
+		Expiration: time.Now().Unix() - 20,
+		Purpose:    "survey-login",
+	})
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+		return
+	}
+
 	// add temp token with wrong purpose not expired
+	token3, err := s.globalDBService.AddTempToken(models.TempToken{
+		InstanceID: testInstanceID,
+		UserID:     testUser.ID.Hex(),
+		Expiration: time.Now().Unix() + 20,
+		Purpose:    "wrong",
+	})
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
+		return
+	}
 
-	// check with nil
-	// check with empty
-	// check without access token
-	// check with same user access token
-	// check with other user access token
+	t.Run("without payload", func(t *testing.T) {
+		_, err := s.AutoValidateTempToken(context.Background(), nil)
+		ok, msg := shouldHaveGrpcErrorStatus(err, "invalid token")
+		if !ok {
+			t.Error(msg)
+		}
+	})
 
-	t.Error("test unimplemented")
+	t.Run("with empty payload", func(t *testing.T) {
+		_, err := s.AutoValidateTempToken(context.Background(), &api.AutoValidateReq{})
+		ok, msg := shouldHaveGrpcErrorStatus(err, "invalid token")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	t.Run("with expired token", func(t *testing.T) {
+		_, err := s.AutoValidateTempToken(context.Background(), &api.AutoValidateReq{
+			TempToken: token2,
+		})
+		ok, msg := shouldHaveGrpcErrorStatus(err, "token expired")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	t.Run("with wrong token", func(t *testing.T) {
+		_, err := s.AutoValidateTempToken(context.Background(), &api.AutoValidateReq{
+			TempToken: "wrong token here",
+		})
+		ok, msg := shouldHaveGrpcErrorStatus(err, "invalid token")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	t.Run("with wrong purpose token", func(t *testing.T) {
+		_, err := s.AutoValidateTempToken(context.Background(), &api.AutoValidateReq{
+			TempToken: token3,
+		})
+		ok, msg := shouldHaveGrpcErrorStatus(err, "invalid token")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	t.Run("correct temptoken without access token", func(t *testing.T) {
+		resp, err := s.AutoValidateTempToken(context.Background(), &api.AutoValidateReq{
+			TempToken: token1,
+		})
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+			return
+		}
+		if len(resp.VerificationCode) != 6 {
+			t.Errorf("unexpected verification code: %s", resp.VerificationCode)
+		}
+		if resp.IsSameUser {
+			t.Error("should be false")
+		}
+		if resp.AccountId != testUser.Account.AccountID {
+			t.Errorf("unexpected account id: %s", resp.AccountId)
+		}
+	})
+
+	t.Run("correct temptoken with access token same user", func(t *testing.T) {
+		accessToken, err := tokens.GenerateNewToken(
+			testUser.ID.Hex(), true, "profid", []string{}, testInstanceID, s.JWT.TokenExpiryInterval, "", nil, []string{},
+		)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+			return
+		}
+		resp, err := s.AutoValidateTempToken(context.Background(), &api.AutoValidateReq{
+			TempToken:   token1,
+			AccessToken: accessToken,
+		})
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+			return
+		}
+		if len(resp.VerificationCode) != 6 {
+			t.Errorf("unexpected verification code: %s", resp.VerificationCode)
+		}
+		if !resp.IsSameUser {
+			t.Error("should be true")
+		}
+		if resp.AccountId != testUser.Account.AccountID {
+			t.Errorf("unexpected account id: %s", resp.AccountId)
+		}
+	})
+
+	t.Run("correct temptoken with access token different user", func(t *testing.T) {
+		accessToken, err := tokens.GenerateNewToken(
+			"different", true, "profid", []string{}, testInstanceID, s.JWT.TokenExpiryInterval, "", nil, []string{},
+		)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+			return
+		}
+		resp, err := s.AutoValidateTempToken(context.Background(), &api.AutoValidateReq{
+			TempToken:   token1,
+			AccessToken: accessToken,
+		})
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+			return
+		}
+		if len(resp.VerificationCode) != 6 {
+			t.Errorf("unexpected verification code: %s", resp.VerificationCode)
+		}
+		if resp.IsSameUser {
+			t.Error("should be false")
+		}
+		if resp.AccountId != testUser.Account.AccountID {
+			t.Errorf("unexpected account id: %s", resp.AccountId)
+		}
+	})
 }
 
 func TestLogin(t *testing.T) {
