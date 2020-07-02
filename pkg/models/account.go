@@ -10,7 +10,7 @@ type Account struct {
 	AccountID          string           `bson:"accountID"`
 	AccountConfirmedAt int64            `bson:"accountConfirmedAt"`
 	Password           string           `bson:"password"`
-	AuthMode           string           `bson:"authMode"`
+	AuthType           string           `bson:"authType"`
 	VerificationCode   VerificationCode `bson:"verificationCode"`
 	RefreshTokens      []string         `bson:"refreshTokens"`
 	PreferredLanguage  string           `bson:"preferredLanguage"`

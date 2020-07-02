@@ -16,14 +16,105 @@ import (
 )
 
 func TestSendVerificationCode(t *testing.T) {
-	// check with nil
-	// check with empty
-	// check with wrong password
-	// check with valid data
-	t.Error("test unimplemented")
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockMessagingClient := messageMock.NewMockMessagingServiceApiClient(mockCtrl)
+
+	s := userManagementServer{
+		userDBservice:   testUserDBService,
+		globalDBService: testGlobalDBService,
+		clients: &models.APIClients{
+			MessagingService: mockMessagingClient,
+		},
+		JWT: models.JWTConfig{
+			TokenExpiryInterval: time.Second * 2,
+		},
+	}
+
+	// Create Test User
+	currentPw := "SuperSecurePassword123!§$"
+	hashedPw, err := pwhash.HashPassword(currentPw)
+	if err != nil {
+		t.Errorf("error creating user for testing login")
+		return
+	}
+
+	testUser := models.User{
+		Account: models.Account{
+			Type:               "email",
+			AccountID:          "test-send-verification-code@test.com",
+			AccountConfirmedAt: time.Now().Unix(),
+			AuthType:           "2FA",
+			Password:           hashedPw,
+			PreferredLanguage:  "de",
+		},
+		Roles: []string{"PARTICIPANT"},
+		Profiles: []models.Profile{
+			{ID: primitive.NewObjectID()},
+		},
+	}
+
+	_, err = testUserDBService.AddUser(testInstanceID, testUser)
+	if err != nil {
+		t.Errorf("unexpected error while creating user: %v", err)
+		return
+	}
+
+	t.Run("without payload", func(t *testing.T) {
+		_, err := s.SendVerificationCode(context.Background(), nil)
+		ok, msg := shouldHaveGrpcErrorStatus(err, "invalid username and/or password")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	t.Run("with empty payload", func(t *testing.T) {
+		_, err := s.SendVerificationCode(context.Background(), &api.SendVerificationCodeReq{})
+		ok, msg := shouldHaveGrpcErrorStatus(err, "invalid username and/or password")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	t.Run("with wrong password payload", func(t *testing.T) {
+		_, err := s.SendVerificationCode(context.Background(), &api.SendVerificationCodeReq{
+			InstanceId: testInstanceID,
+			Email:      "test-send-verification-code@test.com",
+			Password:   "something-that-is-obivously-wrong",
+		})
+		ok, msg := shouldHaveGrpcErrorStatus(err, "invalid username and/or password")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	t.Run("with valid payload", func(t *testing.T) {
+		mockMessagingClient.EXPECT().SendInstantEmail(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
+
+		_, err := s.SendVerificationCode(context.Background(), &api.SendVerificationCodeReq{
+			InstanceId: testInstanceID,
+			Email:      "test-send-verification-code@test.com",
+			Password:   "SuperSecurePassword123!§$",
+		})
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+			return
+		}
+	})
 }
 
 func TestAutoValidateTempToken(t *testing.T) {
+	/*s := userManagementServer{
+		userDBservice:   testUserDBService,
+		globalDBService: testGlobalDBService,
+		JWT: models.JWTConfig{
+			TokenExpiryInterval: time.Second * 2,
+		},
+	}*/
+
 	// add temp token with correct purpose not expired
 	// add temp token with correct purpose expired
 	// add temp token with wrong purpose not expired

@@ -28,15 +28,65 @@ func (s *userManagementServer) Status(ctx context.Context, _ *empty.Empty) (*api
 }
 
 func (s *userManagementServer) SendVerificationCode(ctx context.Context, req *api.SendVerificationCodeReq) (*api.ServiceStatus, error) {
-	if req == nil || req.Email == "" || req.Password == "" || req.InstanceId == "" {
+	if req == nil || req.Email == "" || req.Password == "" {
 		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
 	}
 
-	// vc, err := tokens.GenerateVerificationCode(6)
+	instanceID := req.InstanceId
+	if instanceID == "" {
+		instanceID = "default"
+	}
 
-	// if password wrong:
-	// log.Printf("SECURITY WARNING: login step 1 attempt with wrong password for %s", user.ID.Hex())
-	return nil, status.Error(codes.Unimplemented, "unimplemented")
+	email := strings.ToLower(req.Email)
+	user, err := s.userDBservice.GetUserByAccountID(instanceID, email)
+	if err != nil {
+		log.Printf("SECURITY WARNING: login step 1 attempt with wrong email address for %s", email)
+		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
+	}
+
+	match, err := pwhash.ComparePasswordWithHash(user.Account.Password, req.Password)
+	if err != nil || !match {
+		log.Printf("SECURITY WARNING: login step 1 attempt with wrong password for %s", user.ID.Hex())
+		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
+	}
+
+	vc, err := tokens.GenerateVerificationCode(6)
+	if err != nil {
+		log.Printf("unexpected error while generating verification code: %v", err)
+		return nil, status.Error(codes.Internal, "error while generating verification code")
+	}
+
+	user.Account.VerificationCode = models.VerificationCode{
+		Code:      vc,
+		ExpiresAt: time.Now().Unix() + 60*5,
+	}
+	user, err = s.userDBservice.UpdateUser(req.InstanceId, user)
+	if err != nil {
+		log.Printf("SendVerificationCode: unexpected error when saving user -> %v", err)
+		return nil, status.Error(codes.Internal, "user couldn't be updated")
+	}
+
+	// ---> Trigger message sending
+	func(instanceID string, accountID string, code string, preferredLang string) {
+		_, err = s.clients.MessagingService.SendInstantEmail(context.TODO(), &messageAPI.SendEmailReq{
+			InstanceId:  instanceID,
+			To:          []string{accountID},
+			MessageType: "verificationCode",
+			ContentInfos: map[string]string{
+				"verificationCode": code,
+			},
+			PreferredLanguage: preferredLang,
+		})
+		if err != nil {
+			log.Printf("SendVerificationCode: %s", err.Error())
+		}
+	}(instanceID, user.Account.AccountID, vc, user.Account.PreferredLanguage)
+
+	return &api.ServiceStatus{
+		Version: apiVersion,
+		Status:  api.ServiceStatus_NORMAL,
+		Msg:     "code generated and message sending triggered",
+	}, nil
 }
 
 func (s *userManagementServer) AutoValidateTempToken(ctx context.Context, req *api.AutoValidateReq) (*api.AutoValidateResponse, error) {
@@ -70,7 +120,7 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
 	}
 
-	if user.Account.AuthMode == "2FA" {
+	if user.Account.AuthType == "2FA" {
 		if user.Account.VerificationCode.Code == "" {
 			log.Printf("SECURITY WARNING: login attempt with missing first step for %s", user.ID.Hex())
 			return nil, status.Error(codes.InvalidArgument, "missing verficiation code")
