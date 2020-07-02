@@ -145,7 +145,7 @@ func TestLogin(t *testing.T) {
 		return
 	}
 
-	testUser := models.User{
+	testUser1 := models.User{
 		Account: models.Account{
 			Type:               "email",
 			AccountID:          "test-login@test.com",
@@ -159,12 +159,42 @@ func TestLogin(t *testing.T) {
 		},
 	}
 
-	id, err := testUserDBService.AddUser(testInstanceID, testUser)
+	id, err := testUserDBService.AddUser(testInstanceID, testUser1)
 	if err != nil {
 		t.Errorf("error creating user for testing login")
 		return
 	}
-	testUser.ID, err = primitive.ObjectIDFromHex(id)
+	testUser1.ID, err = primitive.ObjectIDFromHex(id)
+	if err != nil {
+		t.Errorf("error converting id")
+		return
+	}
+
+	testUser2 := models.User{
+		Account: models.Account{
+			Type:               "email",
+			AccountID:          "test-login-2fa@test.com",
+			AccountConfirmedAt: time.Now().Unix(),
+			AuthType:           "2FA",
+			VerificationCode: models.VerificationCode{
+				Code:      "456345",
+				ExpiresAt: time.Now().Unix() + 15,
+			},
+			Password:          hashedPw,
+			PreferredLanguage: "de",
+		},
+		Roles: []string{"PARTICIPANT"},
+		Profiles: []models.Profile{
+			{ID: primitive.NewObjectID()},
+		},
+	}
+
+	id, err = testUserDBService.AddUser(testInstanceID, testUser2)
+	if err != nil {
+		t.Errorf("error creating user 2 for testing login")
+		return
+	}
+	testUser2.ID, err = primitive.ObjectIDFromHex(id)
 	if err != nil {
 		t.Errorf("error converting id")
 		return
@@ -211,7 +241,7 @@ func TestLogin(t *testing.T) {
 
 	t.Run("with wrong password", func(t *testing.T) {
 		req := &api.LoginWithEmailMsg{
-			Email:      testUser.Account.AccountID,
+			Email:      testUser1.Account.AccountID,
 			Password:   currentPw + "w",
 			InstanceId: testInstanceID,
 		}
@@ -229,7 +259,7 @@ func TestLogin(t *testing.T) {
 
 	t.Run("with valid fields", func(t *testing.T) {
 		req := &api.LoginWithEmailMsg{
-			Email:         testUser.Account.AccountID,
+			Email:         testUser1.Account.AccountID,
 			Password:      currentPw,
 			InstanceId:    testInstanceID,
 			AsParticipant: true,
@@ -246,7 +276,54 @@ func TestLogin(t *testing.T) {
 			return
 		}
 
-		if resp.Token.PreferredLanguage != "de" || resp.Token.SelectedProfileId != testUser.Profiles[0].ID.Hex() {
+		if resp.Token.PreferredLanguage != "de" || resp.Token.SelectedProfileId != testUser1.Profiles[0].ID.Hex() {
+			t.Errorf("unexpected PreferredLanguage or AccountConfirmed: %s", resp)
+			return
+		}
+	})
+
+	// 2FA tests
+	t.Run("without verifcation code", func(t *testing.T) {
+		req := &api.LoginWithEmailMsg{
+			Email:         testUser2.Account.AccountID,
+			Password:      currentPw,
+			InstanceId:    testInstanceID,
+			AsParticipant: true,
+		}
+		_, err := s.LoginWithEmail(context.Background(), req)
+		ok, msg := shouldHaveGrpcErrorStatus(err, "wrong verficiation code")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
+	_, err = testUserDBService.UpdateUser(testInstanceID, testUser2)
+	if err != nil {
+		t.Errorf("error updating user 2 for testing login")
+		return
+	}
+
+	t.Run("with valid fields for 2FA", func(t *testing.T) {
+		req := &api.LoginWithEmailMsg{
+			Email:            testUser2.Account.AccountID,
+			Password:         currentPw,
+			InstanceId:       testInstanceID,
+			VerificationCode: testUser2.Account.VerificationCode.Code,
+			AsParticipant:    true,
+		}
+
+		resp, err := s.LoginWithEmail(context.Background(), req)
+
+		if err != nil {
+			t.Errorf("unexpected error: %s", err.Error())
+			return
+		}
+		if resp == nil || len(resp.Token.AccessToken) < 1 || len(resp.Token.RefreshToken) < 1 {
+			t.Errorf("unexpected response: %s", resp)
+			return
+		}
+
+		if resp.Token.PreferredLanguage != "de" || resp.Token.SelectedProfileId != testUser2.Profiles[0].ID.Hex() {
 			t.Errorf("unexpected PreferredLanguage or AccountConfirmed: %s", resp)
 			return
 		}
