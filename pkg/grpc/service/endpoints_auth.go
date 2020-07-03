@@ -142,7 +142,7 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 	}
 
 	if user.Account.AuthType == "2FA" {
-		if user.Account.VerificationCode.Code == "" {
+		if user.Account.VerificationCode.Code == "" || req.VerificationCode == "" {
 			err = s.generateAndSendVerificationCode(instanceID, user)
 			if err != nil {
 				return nil, err

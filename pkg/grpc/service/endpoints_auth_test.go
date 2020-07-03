@@ -459,12 +459,13 @@ func TestLogin(t *testing.T) {
 	})
 
 	// 2FA tests
-	t.Run("without verifcation code", func(t *testing.T) {
+	t.Run("with wrong verifcation code", func(t *testing.T) {
 		req := &api.LoginWithEmailMsg{
-			Email:         testUser2.Account.AccountID,
-			Password:      currentPw,
-			InstanceId:    testInstanceID,
-			AsParticipant: true,
+			Email:            testUser2.Account.AccountID,
+			Password:         currentPw,
+			InstanceId:       testInstanceID,
+			AsParticipant:    true,
+			VerificationCode: "234855",
 		}
 		_, err := s.LoginWithEmail(context.Background(), req)
 		ok, msg := shouldHaveGrpcErrorStatus(err, "wrong verficiation code")
