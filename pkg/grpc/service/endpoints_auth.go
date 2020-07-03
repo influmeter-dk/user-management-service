@@ -157,12 +157,8 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 				SecondFactorNeeded: true,
 			}, nil
 		}
-		if user.Account.VerificationCode.ExpiresAt < time.Now().Unix() {
-			log.Printf("SECURITY WARNING: login attempt with expired verification code for %s", user.ID.Hex())
-			return nil, status.Error(codes.InvalidArgument, "expired verficiation code")
-		}
-		if user.Account.VerificationCode.Code != req.VerificationCode {
-			log.Printf("SECURITY WARNING: login attempt with wrong verification code for %s", user.ID.Hex())
+		if user.Account.VerificationCode.ExpiresAt < time.Now().Unix() || user.Account.VerificationCode.Code != req.VerificationCode {
+			log.Printf("SECURITY WARNING: login attempt with wrong or expired verification code for %s", user.ID.Hex())
 			user.Account.VerificationCode = models.VerificationCode{}
 			user, err = s.userDBservice.UpdateUser(req.InstanceId, user)
 			if err != nil {
@@ -214,6 +210,7 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 	}
 	user.AddRefreshToken(rt)
 	user.Timestamps.LastLogin = time.Now().Unix()
+	user.Account.VerificationCode = models.VerificationCode{}
 
 	user, err = s.userDBservice.UpdateUser(req.InstanceId, user)
 	if err != nil {
