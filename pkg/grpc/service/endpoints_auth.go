@@ -52,37 +52,10 @@ func (s *userManagementServer) SendVerificationCode(ctx context.Context, req *ap
 		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
 	}
 
-	vc, err := tokens.GenerateVerificationCode(6)
+	err = s.generateAndSendVerificationCode(instanceID, user)
 	if err != nil {
-		log.Printf("unexpected error while generating verification code: %v", err)
-		return nil, status.Error(codes.Internal, "error while generating verification code")
+		return nil, err
 	}
-
-	user.Account.VerificationCode = models.VerificationCode{
-		Code:      vc,
-		ExpiresAt: time.Now().Unix() + verificationCodeLifetime,
-	}
-	user, err = s.userDBservice.UpdateUser(req.InstanceId, user)
-	if err != nil {
-		log.Printf("SendVerificationCode: unexpected error when saving user -> %v", err)
-		return nil, status.Error(codes.Internal, "user couldn't be updated")
-	}
-
-	// ---> Trigger message sending
-	func(instanceID string, accountID string, code string, preferredLang string) {
-		_, err = s.clients.MessagingService.SendInstantEmail(context.TODO(), &messageAPI.SendEmailReq{
-			InstanceId:  instanceID,
-			To:          []string{accountID},
-			MessageType: "verificationCode",
-			ContentInfos: map[string]string{
-				"verificationCode": code,
-			},
-			PreferredLanguage: preferredLang,
-		})
-		if err != nil {
-			log.Printf("SendVerificationCode: %s", err.Error())
-		}
-	}(instanceID, user.Account.AccountID, vc, user.Account.PreferredLanguage)
 
 	return &api.ServiceStatus{
 		Version: apiVersion,
@@ -170,8 +143,19 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 
 	if user.Account.AuthType == "2FA" {
 		if user.Account.VerificationCode.Code == "" {
-			log.Printf("SECURITY WARNING: login attempt with missing first step for %s", user.ID.Hex())
-			return nil, status.Error(codes.InvalidArgument, "missing verficiation code")
+			err = s.generateAndSendVerificationCode(instanceID, user)
+			if err != nil {
+				return nil, err
+			}
+			return &api.LoginResponse{
+				User: &api.User{
+					Account: &api.User_Account{
+						AccountConfirmedAt: user.Account.AccountConfirmedAt,
+						AccountId:          user.Account.AccountID,
+					},
+				},
+				SecondFactorNeeded: true,
+			}, nil
 		}
 		if user.Account.VerificationCode.ExpiresAt < time.Now().Unix() {
 			log.Printf("SECURITY WARNING: login attempt with expired verification code for %s", user.ID.Hex())

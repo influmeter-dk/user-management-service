@@ -123,6 +123,7 @@ message SendVerificationCodeReq {
 message LoginResponse {
   inf.tokens.TokenResponse token = 1;
   inf.user.User user = 2;
+  bool second_factor_needed = 3;
 }
 
 message UserReference {
