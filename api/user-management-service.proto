@@ -112,6 +112,7 @@ message AutoValidateResponse {
   string account_id = 1;
   string verification_code = 2;
   bool is_same_user = 3;
+  string instance_id = 4;
 }
 
 message SendVerificationCodeReq {

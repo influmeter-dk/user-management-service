@@ -115,7 +115,7 @@ func (s *userManagementServer) AutoValidateTempToken(ctx context.Context, req *a
 		}
 	}
 
-	return &api.AutoValidateResponse{AccountId: user.Account.AccountID, IsSameUser: sameUser, VerificationCode: vc}, nil
+	return &api.AutoValidateResponse{AccountId: user.Account.AccountID, IsSameUser: sameUser, VerificationCode: vc, InstanceId: tempToken.InstanceID}, nil
 }
 
 func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.LoginWithEmailMsg) (*api.LoginResponse, error) {
