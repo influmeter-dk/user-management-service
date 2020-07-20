@@ -1,9 +1,9 @@
 .PHONY: build test install-dev mock docker api
 
-PROTO_BUILD_DIR = ./pkg
+PROTO_BUILD_DIR = ../../..
 DOCKER_OPTS ?= --rm
 
-#TEST_ARGS = -v
+# TEST_ARGS = -v | grep -c RUN
 
 VERSION := $(shell git describe --tags --abbrev=0)
 
@@ -20,7 +20,7 @@ help:
 
 api:
 	if [ ! -d "$(PROTO_BUILD_DIR)/api" ]; then mkdir -p "$(PROTO_BUILD_DIR)"; else  find "$(PROTO_BUILD_DIR)/api" -type f -delete &&  mkdir -p "$(PROTO_BUILD_DIR)"; fi
-	find ./api/*.proto -maxdepth 1 -type f -exec protoc {} --go_opt=paths=source_relative --go_out=plugins=grpc:$(PROTO_BUILD_DIR) \;
+	find ./api/user_management/*.proto -maxdepth 1 -type f -exec protoc {} --proto_path=./api --go_out=plugins=grpc:$(PROTO_BUILD_DIR) \;
 
 build:
 	go build .

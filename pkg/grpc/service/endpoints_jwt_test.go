@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	api_types "github.com/influenzanet/go-utils/pkg/api_types"
 	"github.com/influenzanet/user-management-service/pkg/api"
 	"github.com/influenzanet/user-management-service/pkg/models"
 	"github.com/influenzanet/user-management-service/pkg/tokens"
@@ -291,7 +292,7 @@ func TestRevokeAllRefreshTokens(t *testing.T) {
 
 	t.Run("revoke", func(t *testing.T) {
 		req := &api.RevokeRefreshTokensReq{
-			Token: &api.TokenInfos{
+			Token: &api_types.TokenInfos{
 				InstanceId: testInstanceID,
 				Id:         testUsers[0].ID.Hex(),
 			},

@@ -10,10 +10,11 @@ import (
 	"github.com/influenzanet/user-management-service/pkg/utils"
 	"google.golang.org/grpc/codes"
 
+	api_types "github.com/influenzanet/go-utils/pkg/api_types"
 	"google.golang.org/grpc/status"
 )
 
-func (s *userManagementServer) ValidateJWT(ctx context.Context, req *api.JWTRequest) (*api.TokenInfos, error) {
+func (s *userManagementServer) ValidateJWT(ctx context.Context, req *api.JWTRequest) (*api_types.TokenInfos, error) {
 	if req == nil || req.Token == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing arguments")
 	}
@@ -23,7 +24,7 @@ func (s *userManagementServer) ValidateJWT(ctx context.Context, req *api.JWTRequ
 		return nil, status.Error(codes.InvalidArgument, "invalid token")
 	}
 
-	return &api.TokenInfos{
+	return &api_types.TokenInfos{
 		Id:               parsedToken.ID,
 		InstanceId:       parsedToken.InstanceID,
 		IssuedAt:         parsedToken.IssuedAt,

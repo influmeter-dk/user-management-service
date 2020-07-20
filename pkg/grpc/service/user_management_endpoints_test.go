@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/golang/mock/gomock"
+	api_types "github.com/influenzanet/go-utils/pkg/api_types"
 	"github.com/influenzanet/user-management-service/pkg/api"
 	"github.com/influenzanet/user-management-service/pkg/models"
 	messageMock "github.com/influenzanet/user-management-service/test/mocks/messaging_service"
@@ -47,7 +48,7 @@ func TestCreateUserEndpoint(t *testing.T) {
 
 	t.Run("with non admin user", func(t *testing.T) {
 		req := &api.CreateUserReq{
-			Token: &api.TokenInfos{
+			Token: &api_types.TokenInfos{
 				Id:         "testuserid",
 				InstanceId: testInstanceID,
 				Payload: map[string]string{
@@ -71,7 +72,7 @@ func TestCreateUserEndpoint(t *testing.T) {
 		).Return(nil, nil)
 
 		req := &api.CreateUserReq{
-			Token: &api.TokenInfos{
+			Token: &api_types.TokenInfos{
 				Id:         "testuserid",
 				InstanceId: testInstanceID,
 				Payload: map[string]string{
@@ -96,7 +97,7 @@ func TestCreateUserEndpoint(t *testing.T) {
 
 	t.Run("with already existing user", func(t *testing.T) {
 		req := &api.CreateUserReq{
-			Token: &api.TokenInfos{
+			Token: &api_types.TokenInfos{
 				Id:         "testuserid",
 				InstanceId: testInstanceID,
 				Payload: map[string]string{
@@ -157,7 +158,7 @@ func TestAddRoleForUserEndpoint(t *testing.T) {
 
 	t.Run("with non admin user", func(t *testing.T) {
 		req := &api.RoleMsg{
-			Token: &api.TokenInfos{
+			Token: &api_types.TokenInfos{
 				Id:         "testuserid",
 				InstanceId: testInstanceID,
 				Payload: map[string]string{
@@ -176,7 +177,7 @@ func TestAddRoleForUserEndpoint(t *testing.T) {
 
 	t.Run("with valid arguments", func(t *testing.T) {
 		req := &api.RoleMsg{
-			Token: &api.TokenInfos{
+			Token: &api_types.TokenInfos{
 				Id:         "testuserid",
 				InstanceId: testInstanceID,
 				Payload: map[string]string{
@@ -199,7 +200,7 @@ func TestAddRoleForUserEndpoint(t *testing.T) {
 
 	t.Run("with already added role", func(t *testing.T) {
 		req := &api.RoleMsg{
-			Token: &api.TokenInfos{
+			Token: &api_types.TokenInfos{
 				Id:         "testuserid",
 				InstanceId: testInstanceID,
 				Payload: map[string]string{
@@ -260,7 +261,7 @@ func TestRemoveRoleForUserEndpoint(t *testing.T) {
 
 	t.Run("with non admin user", func(t *testing.T) {
 		req := &api.RoleMsg{
-			Token: &api.TokenInfos{
+			Token: &api_types.TokenInfos{
 				Id:         "testuserid",
 				InstanceId: testInstanceID,
 				Payload: map[string]string{
@@ -279,7 +280,7 @@ func TestRemoveRoleForUserEndpoint(t *testing.T) {
 
 	t.Run("with valid arguments", func(t *testing.T) {
 		req := &api.RoleMsg{
-			Token: &api.TokenInfos{
+			Token: &api_types.TokenInfos{
 				Id:         "testuserid",
 				InstanceId: testInstanceID,
 				Payload: map[string]string{
@@ -302,7 +303,7 @@ func TestRemoveRoleForUserEndpoint(t *testing.T) {
 
 	t.Run("with already non existing role", func(t *testing.T) {
 		req := &api.RoleMsg{
-			Token: &api.TokenInfos{
+			Token: &api_types.TokenInfos{
 				Id:         "testuserid",
 				InstanceId: testInstanceID,
 				Payload: map[string]string{
@@ -376,7 +377,7 @@ func TestFindNonParticipantUsersEndpoint(t *testing.T) {
 
 	t.Run("with non admin user", func(t *testing.T) {
 		req := &api.FindNonParticipantUsersMsg{
-			Token: &api.TokenInfos{
+			Token: &api_types.TokenInfos{
 				Id:         "testuserid",
 				InstanceId: testInstanceID,
 				Payload: map[string]string{
@@ -393,7 +394,7 @@ func TestFindNonParticipantUsersEndpoint(t *testing.T) {
 
 	t.Run("with valid arguments", func(t *testing.T) {
 		req := &api.FindNonParticipantUsersMsg{
-			Token: &api.TokenInfos{
+			Token: &api_types.TokenInfos{
 				Id:         "testuserid",
 				InstanceId: testInstanceID,
 				Payload: map[string]string{

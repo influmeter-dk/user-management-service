@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/golang/mock/gomock"
+	api_types "github.com/influenzanet/go-utils/pkg/api_types"
 	"github.com/influenzanet/user-management-service/pkg/api"
 	"github.com/influenzanet/user-management-service/pkg/models"
 	"github.com/influenzanet/user-management-service/pkg/pwhash"
@@ -682,7 +683,7 @@ func TestSwitchProfileEndpoint(t *testing.T) {
 		}
 	})
 
-	token := api.TokenInfos{
+	token := api_types.TokenInfos{
 		Id:         testUsers[0].ID.Hex(),
 		InstanceId: testInstanceID,
 	}
@@ -948,7 +949,7 @@ func TestResendContactVerificationEndpoint(t *testing.T) {
 
 	t.Run("with wrong payload", func(t *testing.T) {
 		req := &api.ResendContactVerificationReq{
-			Token: &api.TokenInfos{
+			Token: &api_types.TokenInfos{
 				Id:         testUsers[0].ID.Hex(),
 				InstanceId: testInstanceID,
 			},
@@ -969,7 +970,7 @@ func TestResendContactVerificationEndpoint(t *testing.T) {
 		).Return(nil, nil)
 
 		req := &api.ResendContactVerificationReq{
-			Token: &api.TokenInfos{
+			Token: &api_types.TokenInfos{
 				Id:         testUsers[0].ID.Hex(),
 				InstanceId: testInstanceID,
 			},

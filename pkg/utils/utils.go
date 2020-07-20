@@ -4,7 +4,7 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/influenzanet/user-management-service/pkg/api"
+	"github.com/influenzanet/go-utils/pkg/api_types"
 )
 
 // CheckEmailFormat to check if input string is a correct email address
@@ -46,7 +46,7 @@ func CheckLanguageCode(code string) bool {
 }
 
 // IsTokenEmpty check a token from api if it's empty
-func IsTokenEmpty(t *api.TokenInfos) bool {
+func IsTokenEmpty(t *api_types.TokenInfos) bool {
 	if t == nil || t.Id == "" || t.InstanceId == "" {
 		return true
 	}
@@ -54,7 +54,7 @@ func IsTokenEmpty(t *api.TokenInfos) bool {
 }
 
 // CheckRoleInToken Check if role is present in the token
-func CheckRoleInToken(t *api.TokenInfos, role string) bool {
+func CheckRoleInToken(t *api_types.TokenInfos, role string) bool {
 	if t == nil {
 		return false
 	}

@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/influenzanet/user-management-service/pkg/api"
+	api_types "github.com/influenzanet/go-utils/pkg/api_types"
 )
 
 func TestCheckPasswordFormat(t *testing.T) {
@@ -120,19 +120,19 @@ func TestIsTokenEmpty(t *testing.T) {
 	})
 
 	t.Run("check with empty id", func(t *testing.T) {
-		if !IsTokenEmpty(&api.TokenInfos{Id: "", InstanceId: "testid"}) {
+		if !IsTokenEmpty(&api_types.TokenInfos{Id: "", InstanceId: "testid"}) {
 			t.Error("should be true")
 		}
 	})
 
 	t.Run("check with empty InstanceId", func(t *testing.T) {
-		if !IsTokenEmpty(&api.TokenInfos{InstanceId: "", Id: "testid"}) {
+		if !IsTokenEmpty(&api_types.TokenInfos{InstanceId: "", Id: "testid"}) {
 			t.Error("should be true")
 		}
 	})
 
 	t.Run("check with not empty id", func(t *testing.T) {
-		if IsTokenEmpty(&api.TokenInfos{Id: "testid", InstanceId: "testid"}) {
+		if IsTokenEmpty(&api_types.TokenInfos{Id: "testid", InstanceId: "testid"}) {
 			t.Error("should be false")
 		}
 	})
@@ -146,7 +146,7 @@ func TestCheckRoleInToken(t *testing.T) {
 	})
 
 	t.Run("check with no payload ", func(t *testing.T) {
-		tokenInf := &api.TokenInfos{
+		tokenInf := &api_types.TokenInfos{
 			Id: "testid",
 		}
 		if CheckRoleInToken(tokenInf, "testrole") {
@@ -158,7 +158,7 @@ func TestCheckRoleInToken(t *testing.T) {
 		payload := map[string]string{}
 		payload["roles"] = strings.Join([]string{"notthesame"}, ",")
 
-		tokenInf := &api.TokenInfos{
+		tokenInf := &api_types.TokenInfos{
 			Id:      "testid",
 			Payload: payload,
 		}
@@ -170,7 +170,7 @@ func TestCheckRoleInToken(t *testing.T) {
 	t.Run("check with single role - right", func(t *testing.T) {
 		payload := map[string]string{}
 		payload["roles"] = strings.Join([]string{"testrole"}, ",")
-		tokenInf := &api.TokenInfos{
+		tokenInf := &api_types.TokenInfos{
 			Id:      "testid",
 			Payload: payload,
 		}
@@ -182,7 +182,7 @@ func TestCheckRoleInToken(t *testing.T) {
 	t.Run("check with multiple roles - wrong", func(t *testing.T) {
 		payload := map[string]string{}
 		payload["roles"] = strings.Join([]string{"r1", "r2", "r4"}, ",")
-		tokenInf := &api.TokenInfos{
+		tokenInf := &api_types.TokenInfos{
 			Id:      "testid",
 			Payload: payload,
 		}
@@ -194,7 +194,7 @@ func TestCheckRoleInToken(t *testing.T) {
 	t.Run("check with multiple roles - right", func(t *testing.T) {
 		payload := map[string]string{}
 		payload["roles"] = strings.Join([]string{"r1", "r2", "r4", "testrole"}, ",")
-		tokenInf := &api.TokenInfos{
+		tokenInf := &api_types.TokenInfos{
 			Id:      "testid",
 			Payload: payload,
 		}

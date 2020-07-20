@@ -5,6 +5,7 @@ import (
 	"testing"
 	"time"
 
+	api_types "github.com/influenzanet/go-utils/pkg/api_types"
 	"github.com/influenzanet/user-management-service/pkg/api"
 	"github.com/influenzanet/user-management-service/pkg/models"
 	"github.com/influenzanet/user-management-service/pkg/tokens"
@@ -45,7 +46,7 @@ func TestGetOrCreateTemptokenEndpoint(t *testing.T) {
 	})
 
 	t.Run("with empty payload", func(t *testing.T) {
-		_, err := s.GetOrCreateTemptoken(context.Background(), &api.TempTokenInfo{})
+		_, err := s.GetOrCreateTemptoken(context.Background(), &api_types.TempTokenInfo{})
 		ok, msg := shouldHaveGrpcErrorStatus(err, "missing argument")
 		if !ok {
 			t.Error(msg)
@@ -53,7 +54,7 @@ func TestGetOrCreateTemptokenEndpoint(t *testing.T) {
 	})
 
 	t.Run("with not existing token", func(t *testing.T) {
-		resp, err := s.GetOrCreateTemptoken(context.Background(), &api.TempTokenInfo{
+		resp, err := s.GetOrCreateTemptoken(context.Background(), &api_types.TempTokenInfo{
 			Purpose:    testTempToken.Purpose,
 			UserId:     "otheruserhere",
 			InstanceId: testInstanceID,
@@ -69,7 +70,7 @@ func TestGetOrCreateTemptokenEndpoint(t *testing.T) {
 	})
 
 	t.Run("with existing token", func(t *testing.T) {
-		resp, err := s.GetOrCreateTemptoken(context.Background(), &api.TempTokenInfo{
+		resp, err := s.GetOrCreateTemptoken(context.Background(), &api_types.TempTokenInfo{
 			Purpose:    testTempToken.Purpose,
 			UserId:     testTempToken.UserID,
 			InstanceId: testInstanceID,
@@ -94,7 +95,7 @@ func TestGenerateTempTokenEndpoint(t *testing.T) {
 		},
 	}
 
-	testTempToken := &api.TempTokenInfo{
+	testTempToken := &api_types.TempTokenInfo{
 		UserId:     "test_user_id",
 		InstanceId: testInstanceID,
 		Purpose:    "test_purpose",
@@ -115,7 +116,7 @@ func TestGenerateTempTokenEndpoint(t *testing.T) {
 	})
 
 	t.Run("with empty payload", func(t *testing.T) {
-		resp, err := s.GenerateTempToken(context.Background(), &api.TempTokenInfo{})
+		resp, err := s.GenerateTempToken(context.Background(), &api_types.TempTokenInfo{})
 		if err == nil {
 			t.Errorf("or response: %s", resp)
 			return
@@ -174,7 +175,7 @@ func TestGetTempTokensEndpoint(t *testing.T) {
 	})
 
 	t.Run("with empty payload", func(t *testing.T) {
-		resp, err := s.GetTempTokens(context.Background(), &api.TempTokenInfo{})
+		resp, err := s.GetTempTokens(context.Background(), &api_types.TempTokenInfo{})
 		if err == nil || resp != nil {
 			t.Errorf("wrong response: %s", resp)
 			return
@@ -185,7 +186,7 @@ func TestGetTempTokensEndpoint(t *testing.T) {
 	})
 
 	t.Run("get by user_id + instace_id", func(t *testing.T) {
-		resp, err := s.GetTempTokens(context.Background(), &api.TempTokenInfo{
+		resp, err := s.GetTempTokens(context.Background(), &api_types.TempTokenInfo{
 			UserId:     testTempToken.UserID,
 			InstanceId: testTempToken.InstanceID,
 		})
@@ -200,7 +201,7 @@ func TestGetTempTokensEndpoint(t *testing.T) {
 	})
 
 	t.Run("get by user_id + instace_id + type", func(t *testing.T) {
-		resp, err := s.GetTempTokens(context.Background(), &api.TempTokenInfo{
+		resp, err := s.GetTempTokens(context.Background(), &api_types.TempTokenInfo{
 			UserId:     testTempToken.UserID,
 			InstanceId: testTempToken.InstanceID,
 			Purpose:    testTempToken.Purpose,
@@ -332,7 +333,7 @@ func TestPurgeUserTempTokensEndpoint(t *testing.T) {
 	})
 
 	t.Run("with empty payload", func(t *testing.T) {
-		resp, err := s.PurgeUserTempTokens(context.Background(), &api.TempTokenInfo{})
+		resp, err := s.PurgeUserTempTokens(context.Background(), &api_types.TempTokenInfo{})
 		if err == nil || resp != nil {
 			t.Errorf("wrong response: %s", resp)
 			return
@@ -343,7 +344,7 @@ func TestPurgeUserTempTokensEndpoint(t *testing.T) {
 	})
 
 	t.Run("with not exisiting wrong instance_id", func(t *testing.T) {
-		_, err := s.PurgeUserTempTokens(context.Background(), &api.TempTokenInfo{
+		_, err := s.PurgeUserTempTokens(context.Background(), &api_types.TempTokenInfo{
 			InstanceId: testTempToken.InstanceID + "1",
 			UserId:     testTempToken.UserID,
 		})
@@ -363,7 +364,7 @@ func TestPurgeUserTempTokensEndpoint(t *testing.T) {
 	})
 
 	t.Run("with not exisiting wrong user_id", func(t *testing.T) {
-		_, err := s.PurgeUserTempTokens(context.Background(), &api.TempTokenInfo{
+		_, err := s.PurgeUserTempTokens(context.Background(), &api_types.TempTokenInfo{
 			InstanceId: testTempToken.InstanceID,
 			UserId:     testTempToken.UserID + "1",
 		})
@@ -383,7 +384,7 @@ func TestPurgeUserTempTokensEndpoint(t *testing.T) {
 	})
 
 	t.Run("with exisiting user_id/instance_id combination", func(t *testing.T) {
-		resp, err := s.PurgeUserTempTokens(context.Background(), &api.TempTokenInfo{
+		resp, err := s.PurgeUserTempTokens(context.Background(), &api_types.TempTokenInfo{
 			InstanceId: testTempToken.InstanceID,
 			UserId:     testTempToken.UserID,
 		})

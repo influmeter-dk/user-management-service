@@ -13,6 +13,41 @@ import (
 	reflect "reflect"
 )
 
+// MockisExpressionArg_Data is a mock of isExpressionArg_Data interface
+type MockisExpressionArg_Data struct {
+	ctrl     *gomock.Controller
+	recorder *MockisExpressionArg_DataMockRecorder
+}
+
+// MockisExpressionArg_DataMockRecorder is the mock recorder for MockisExpressionArg_Data
+type MockisExpressionArg_DataMockRecorder struct {
+	mock *MockisExpressionArg_Data
+}
+
+// NewMockisExpressionArg_Data creates a new mock instance
+func NewMockisExpressionArg_Data(ctrl *gomock.Controller) *MockisExpressionArg_Data {
+	mock := &MockisExpressionArg_Data{ctrl: ctrl}
+	mock.recorder = &MockisExpressionArg_DataMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use
+func (m *MockisExpressionArg_Data) EXPECT() *MockisExpressionArg_DataMockRecorder {
+	return m.recorder
+}
+
+// isExpressionArg_Data mocks base method
+func (m *MockisExpressionArg_Data) isExpressionArg_Data() {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "isExpressionArg_Data")
+}
+
+// isExpressionArg_Data indicates an expected call of isExpressionArg_Data
+func (mr *MockisExpressionArg_DataMockRecorder) isExpressionArg_Data() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "isExpressionArg_Data", reflect.TypeOf((*MockisExpressionArg_Data)(nil).isExpressionArg_Data))
+}
+
 // MockMessagingServiceApiClient is a mock of MessagingServiceApiClient interface
 type MockMessagingServiceApiClient struct {
 	ctrl     *gomock.Controller
@@ -74,6 +109,106 @@ func (mr *MockMessagingServiceApiClientMockRecorder) SendInstantEmail(ctx, in in
 	mr.mock.ctrl.T.Helper()
 	varargs := append([]interface{}{ctx, in}, opts...)
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendInstantEmail", reflect.TypeOf((*MockMessagingServiceApiClient)(nil).SendInstantEmail), varargs...)
+}
+
+// SendMessageToAllUsers mocks base method
+func (m *MockMessagingServiceApiClient) SendMessageToAllUsers(ctx context.Context, in *messaging_service.SendMessageToAllUsersReq, opts ...grpc.CallOption) (*messaging_service.ServiceStatus, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SendMessageToAllUsers", varargs...)
+	ret0, _ := ret[0].(*messaging_service.ServiceStatus)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SendMessageToAllUsers indicates an expected call of SendMessageToAllUsers
+func (mr *MockMessagingServiceApiClientMockRecorder) SendMessageToAllUsers(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendMessageToAllUsers", reflect.TypeOf((*MockMessagingServiceApiClient)(nil).SendMessageToAllUsers), varargs...)
+}
+
+// SendMessageToStudyParticipants mocks base method
+func (m *MockMessagingServiceApiClient) SendMessageToStudyParticipants(ctx context.Context, in *messaging_service.SendMessageToStudyParticipantsReq, opts ...grpc.CallOption) (*messaging_service.ServiceStatus, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SendMessageToStudyParticipants", varargs...)
+	ret0, _ := ret[0].(*messaging_service.ServiceStatus)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SendMessageToStudyParticipants indicates an expected call of SendMessageToStudyParticipants
+func (mr *MockMessagingServiceApiClientMockRecorder) SendMessageToStudyParticipants(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendMessageToStudyParticipants", reflect.TypeOf((*MockMessagingServiceApiClient)(nil).SendMessageToStudyParticipants), varargs...)
+}
+
+// GetAutoMessages mocks base method
+func (m *MockMessagingServiceApiClient) GetAutoMessages(ctx context.Context, in *messaging_service.GetAutoMessagesReq, opts ...grpc.CallOption) (*messaging_service.AutoMessages, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "GetAutoMessages", varargs...)
+	ret0, _ := ret[0].(*messaging_service.AutoMessages)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAutoMessages indicates an expected call of GetAutoMessages
+func (mr *MockMessagingServiceApiClientMockRecorder) GetAutoMessages(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAutoMessages", reflect.TypeOf((*MockMessagingServiceApiClient)(nil).GetAutoMessages), varargs...)
+}
+
+// SaveAutoMessage mocks base method
+func (m *MockMessagingServiceApiClient) SaveAutoMessage(ctx context.Context, in *messaging_service.SaveAutoMessageReq, opts ...grpc.CallOption) (*messaging_service.AutoMessage, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "SaveAutoMessage", varargs...)
+	ret0, _ := ret[0].(*messaging_service.AutoMessage)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SaveAutoMessage indicates an expected call of SaveAutoMessage
+func (mr *MockMessagingServiceApiClientMockRecorder) SaveAutoMessage(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveAutoMessage", reflect.TypeOf((*MockMessagingServiceApiClient)(nil).SaveAutoMessage), varargs...)
+}
+
+// DeleteAutoMessage mocks base method
+func (m *MockMessagingServiceApiClient) DeleteAutoMessage(ctx context.Context, in *messaging_service.DeleteAutoMessageReq, opts ...grpc.CallOption) (*messaging_service.ServiceStatus, error) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{ctx, in}
+	for _, a := range opts {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "DeleteAutoMessage", varargs...)
+	ret0, _ := ret[0].(*messaging_service.ServiceStatus)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteAutoMessage indicates an expected call of DeleteAutoMessage
+func (mr *MockMessagingServiceApiClientMockRecorder) DeleteAutoMessage(ctx, in interface{}, opts ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{ctx, in}, opts...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteAutoMessage", reflect.TypeOf((*MockMessagingServiceApiClient)(nil).DeleteAutoMessage), varargs...)
 }
 
 // GetEmailTemplates mocks base method
@@ -187,6 +322,81 @@ func (m *MockMessagingServiceApiServer) SendInstantEmail(arg0 context.Context, a
 func (mr *MockMessagingServiceApiServerMockRecorder) SendInstantEmail(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendInstantEmail", reflect.TypeOf((*MockMessagingServiceApiServer)(nil).SendInstantEmail), arg0, arg1)
+}
+
+// SendMessageToAllUsers mocks base method
+func (m *MockMessagingServiceApiServer) SendMessageToAllUsers(arg0 context.Context, arg1 *messaging_service.SendMessageToAllUsersReq) (*messaging_service.ServiceStatus, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SendMessageToAllUsers", arg0, arg1)
+	ret0, _ := ret[0].(*messaging_service.ServiceStatus)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SendMessageToAllUsers indicates an expected call of SendMessageToAllUsers
+func (mr *MockMessagingServiceApiServerMockRecorder) SendMessageToAllUsers(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendMessageToAllUsers", reflect.TypeOf((*MockMessagingServiceApiServer)(nil).SendMessageToAllUsers), arg0, arg1)
+}
+
+// SendMessageToStudyParticipants mocks base method
+func (m *MockMessagingServiceApiServer) SendMessageToStudyParticipants(arg0 context.Context, arg1 *messaging_service.SendMessageToStudyParticipantsReq) (*messaging_service.ServiceStatus, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SendMessageToStudyParticipants", arg0, arg1)
+	ret0, _ := ret[0].(*messaging_service.ServiceStatus)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SendMessageToStudyParticipants indicates an expected call of SendMessageToStudyParticipants
+func (mr *MockMessagingServiceApiServerMockRecorder) SendMessageToStudyParticipants(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SendMessageToStudyParticipants", reflect.TypeOf((*MockMessagingServiceApiServer)(nil).SendMessageToStudyParticipants), arg0, arg1)
+}
+
+// GetAutoMessages mocks base method
+func (m *MockMessagingServiceApiServer) GetAutoMessages(arg0 context.Context, arg1 *messaging_service.GetAutoMessagesReq) (*messaging_service.AutoMessages, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetAutoMessages", arg0, arg1)
+	ret0, _ := ret[0].(*messaging_service.AutoMessages)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetAutoMessages indicates an expected call of GetAutoMessages
+func (mr *MockMessagingServiceApiServerMockRecorder) GetAutoMessages(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetAutoMessages", reflect.TypeOf((*MockMessagingServiceApiServer)(nil).GetAutoMessages), arg0, arg1)
+}
+
+// SaveAutoMessage mocks base method
+func (m *MockMessagingServiceApiServer) SaveAutoMessage(arg0 context.Context, arg1 *messaging_service.SaveAutoMessageReq) (*messaging_service.AutoMessage, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "SaveAutoMessage", arg0, arg1)
+	ret0, _ := ret[0].(*messaging_service.AutoMessage)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// SaveAutoMessage indicates an expected call of SaveAutoMessage
+func (mr *MockMessagingServiceApiServerMockRecorder) SaveAutoMessage(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SaveAutoMessage", reflect.TypeOf((*MockMessagingServiceApiServer)(nil).SaveAutoMessage), arg0, arg1)
+}
+
+// DeleteAutoMessage mocks base method
+func (m *MockMessagingServiceApiServer) DeleteAutoMessage(arg0 context.Context, arg1 *messaging_service.DeleteAutoMessageReq) (*messaging_service.ServiceStatus, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "DeleteAutoMessage", arg0, arg1)
+	ret0, _ := ret[0].(*messaging_service.ServiceStatus)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// DeleteAutoMessage indicates an expected call of DeleteAutoMessage
+func (mr *MockMessagingServiceApiServerMockRecorder) DeleteAutoMessage(arg0, arg1 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "DeleteAutoMessage", reflect.TypeOf((*MockMessagingServiceApiServer)(nil).DeleteAutoMessage), arg0, arg1)
 }
 
 // GetEmailTemplates mocks base method

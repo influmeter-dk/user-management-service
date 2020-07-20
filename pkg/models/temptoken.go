@@ -1,7 +1,7 @@
 package models
 
 import (
-	"github.com/influenzanet/user-management-service/pkg/api"
+	"github.com/influenzanet/go-utils/pkg/api_types"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -17,11 +17,11 @@ type TempToken struct {
 }
 
 // ToAPI converts the object from DB to API format
-func (t *TempToken) ToAPI() *api.TempTokenInfo {
+func (t *TempToken) ToAPI() *api_types.TempTokenInfo {
 	if t == nil {
 		return nil
 	}
-	return &api.TempTokenInfo{
+	return &api_types.TempTokenInfo{
 		Token:      t.Token,
 		Expiration: t.Expiration,
 		Purpose:    t.Purpose,
@@ -31,7 +31,7 @@ func (t *TempToken) ToAPI() *api.TempTokenInfo {
 	}
 }
 
-func TempTokenFromAPI(t *api.TempTokenInfo) *TempToken {
+func TempTokenFromAPI(t *api_types.TempTokenInfo) *TempToken {
 	if t == nil {
 		return nil
 	}
@@ -49,13 +49,13 @@ func TempTokenFromAPI(t *api.TempTokenInfo) *TempToken {
 type TempTokens []TempToken
 
 // ToAPI converts from DB formate into API format
-func (items TempTokens) ToAPI() *api.TempTokenInfos {
-	res := make([]*api.TempTokenInfo, len(items))
+func (items TempTokens) ToAPI() *api_types.TempTokenInfos {
+	res := make([]*api_types.TempTokenInfo, len(items))
 	for i, v := range items {
 		res[i] = v.ToAPI()
 	}
 
-	return &api.TempTokenInfos{
+	return &api_types.TempTokenInfos{
 		TempTokens: res,
 	}
 }

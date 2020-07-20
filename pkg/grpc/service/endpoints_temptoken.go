@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	api_types "github.com/influenzanet/go-utils/pkg/api_types"
 	"github.com/influenzanet/user-management-service/pkg/api"
 	"github.com/influenzanet/user-management-service/pkg/models"
 	"github.com/influenzanet/user-management-service/pkg/tokens"
@@ -11,7 +12,7 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-func (s *userManagementServer) GetOrCreateTemptoken(ctx context.Context, t *api.TempTokenInfo) (*api.TempToken, error) {
+func (s *userManagementServer) GetOrCreateTemptoken(ctx context.Context, t *api_types.TempTokenInfo) (*api.TempToken, error) {
 	if t == nil || t.Purpose == "" || t.UserId == "" || t.InstanceId == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
@@ -48,7 +49,7 @@ func (s *userManagementServer) GetOrCreateTemptoken(ctx context.Context, t *api.
 	return resp, nil
 }
 
-func (s *userManagementServer) GenerateTempToken(ctx context.Context, t *api.TempTokenInfo) (*api.TempToken, error) {
+func (s *userManagementServer) GenerateTempToken(ctx context.Context, t *api_types.TempTokenInfo) (*api.TempToken, error) {
 	if t == nil || t.Purpose == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
@@ -76,7 +77,7 @@ func (s *userManagementServer) GenerateTempToken(ctx context.Context, t *api.Tem
 	}, nil
 }
 
-func (s *userManagementServer) GetTempTokens(ctx context.Context, t *api.TempTokenInfo) (*api.TempTokenInfos, error) {
+func (s *userManagementServer) GetTempTokens(ctx context.Context, t *api_types.TempTokenInfo) (*api_types.TempTokenInfos, error) {
 	if t == nil || t.UserId == "" || t.InstanceId == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
@@ -104,7 +105,7 @@ func (s *userManagementServer) DeleteTempToken(ctx context.Context, t *api.TempT
 	}, nil
 }
 
-func (s *userManagementServer) PurgeUserTempTokens(ctx context.Context, t *api.TempTokenInfo) (*api.ServiceStatus, error) {
+func (s *userManagementServer) PurgeUserTempTokens(ctx context.Context, t *api_types.TempTokenInfo) (*api.ServiceStatus, error) {
 	if t == nil || t.UserId == "" || t.InstanceId == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}

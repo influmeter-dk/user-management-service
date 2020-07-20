@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/golang/mock/gomock"
+	api_types "github.com/influenzanet/go-utils/pkg/api_types"
 	"github.com/influenzanet/user-management-service/pkg/api"
 	"github.com/influenzanet/user-management-service/pkg/models"
 	"github.com/influenzanet/user-management-service/pkg/pwhash"
@@ -67,7 +68,7 @@ func TestGetUserEndpoint(t *testing.T) {
 
 	t.Run("with wrong user id", func(t *testing.T) {
 		req := &api.UserReference{
-			Token: &api.TokenInfos{
+			Token: &api_types.TokenInfos{
 				Id:         testUsers[0].ID.Hex() + "w",
 				InstanceId: testInstanceID,
 			},
@@ -86,7 +87,7 @@ func TestGetUserEndpoint(t *testing.T) {
 
 	t.Run("with other user id", func(t *testing.T) {
 		req := &api.UserReference{
-			Token: &api.TokenInfos{
+			Token: &api_types.TokenInfos{
 				Id:         testUsers[0].ID.Hex(),
 				InstanceId: testInstanceID,
 			},
@@ -105,7 +106,7 @@ func TestGetUserEndpoint(t *testing.T) {
 
 	t.Run("with own user id", func(t *testing.T) {
 		req := &api.UserReference{
-			Token: &api.TokenInfos{
+			Token: &api_types.TokenInfos{
 				Id:         testUsers[1].ID.Hex(),
 				InstanceId: testInstanceID,
 			},
@@ -189,7 +190,7 @@ func TestChangePasswordEndpoint(t *testing.T) {
 
 	t.Run("with wrong user id", func(t *testing.T) {
 		req := &api.PasswordChangeMsg{
-			Token: &api.TokenInfos{
+			Token: &api_types.TokenInfos{
 				Id:         "wrong-id",
 				InstanceId: testInstanceID,
 			},
@@ -207,7 +208,7 @@ func TestChangePasswordEndpoint(t *testing.T) {
 
 	t.Run("with wrong old password", func(t *testing.T) {
 		req := &api.PasswordChangeMsg{
-			Token: &api.TokenInfos{
+			Token: &api_types.TokenInfos{
 				Id:         id,
 				InstanceId: testInstanceID,
 			},
@@ -225,7 +226,7 @@ func TestChangePasswordEndpoint(t *testing.T) {
 
 	t.Run("with too weak new password", func(t *testing.T) {
 		req := &api.PasswordChangeMsg{
-			Token: &api.TokenInfos{
+			Token: &api_types.TokenInfos{
 				Id:         id,
 				InstanceId: testInstanceID,
 			},
@@ -248,7 +249,7 @@ func TestChangePasswordEndpoint(t *testing.T) {
 		).Return(nil, nil)
 
 		req := &api.PasswordChangeMsg{
-			Token: &api.TokenInfos{
+			Token: &api_types.TokenInfos{
 				Id:         id,
 				InstanceId: testInstanceID,
 			},
@@ -388,7 +389,7 @@ func TestChangeAccountIDEmailEndpoint(t *testing.T) {
 
 	t.Run("try to update to an already existing email", func(t *testing.T) {
 		req := &api.EmailChangeMsg{
-			Token: &api.TokenInfos{
+			Token: &api_types.TokenInfos{
 				Id:         testUsers[1].ID.Hex(),
 				InstanceId: testInstanceID,
 			},
@@ -408,7 +409,7 @@ func TestChangeAccountIDEmailEndpoint(t *testing.T) {
 		).Return(nil, nil)
 
 		req := &api.EmailChangeMsg{
-			Token: &api.TokenInfos{
+			Token: &api_types.TokenInfos{
 				Id:         testUsers[1].ID.Hex(),
 				InstanceId: testInstanceID,
 			},
@@ -441,7 +442,7 @@ func TestChangeAccountIDEmailEndpoint(t *testing.T) {
 		).Return(nil, nil)
 
 		req := &api.EmailChangeMsg{
-			Token: &api.TokenInfos{
+			Token: &api_types.TokenInfos{
 				Id:         testUsers[2].ID.Hex(),
 				InstanceId: testInstanceID,
 			},
@@ -469,7 +470,7 @@ func TestChangeAccountIDEmailEndpoint(t *testing.T) {
 		).Return(nil, nil).Times(2)
 
 		req := &api.EmailChangeMsg{
-			Token: &api.TokenInfos{
+			Token: &api_types.TokenInfos{
 				Id:         testUsers[3].ID.Hex(),
 				InstanceId: testInstanceID,
 			},
@@ -550,7 +551,7 @@ func TestDeleteAccountEndpoint(t *testing.T) {
 
 	t.Run("with other user", func(t *testing.T) {
 		req := &api.UserReference{
-			Token: &api.TokenInfos{
+			Token: &api_types.TokenInfos{
 				Id:         testUsers[0].ID.Hex(),
 				InstanceId: testInstanceID,
 			},
@@ -575,7 +576,7 @@ func TestDeleteAccountEndpoint(t *testing.T) {
 		).Return(nil, nil)
 
 		req := &api.UserReference{
-			Token: &api.TokenInfos{
+			Token: &api_types.TokenInfos{
 				Id:         testUsers[0].ID.Hex(),
 				InstanceId: testInstanceID,
 			},
@@ -632,7 +633,7 @@ func TestChangePreferredLanguageEndpoint(t *testing.T) {
 		}
 	})
 
-	token := api.TokenInfos{
+	token := api_types.TokenInfos{
 		Id:         testUsers[0].ID.Hex(),
 		InstanceId: testInstanceID,
 	}
@@ -688,7 +689,7 @@ func TestSaveProfileEndpoint(t *testing.T) {
 		}
 	})
 
-	token := api.TokenInfos{
+	token := api_types.TokenInfos{
 		Id:         testUsers[0].ID.Hex(),
 		InstanceId: testInstanceID,
 	}
@@ -777,7 +778,7 @@ func TestRemoveProfileEndpoint(t *testing.T) {
 		}
 	})
 
-	token := api.TokenInfos{
+	token := api_types.TokenInfos{
 		Id:         testUsers[0].ID.Hex(),
 		InstanceId: testInstanceID,
 	}
@@ -869,7 +870,7 @@ func TestUpdateContactPreferencesEndpoint(t *testing.T) {
 		}
 	})
 
-	token := api.TokenInfos{
+	token := api_types.TokenInfos{
 		Id:         testUsers[0].ID.Hex(),
 		InstanceId: testInstanceID,
 	}
@@ -1039,7 +1040,7 @@ func TestAddEmailEndpoint(t *testing.T) {
 		}
 	})
 
-	token := api.TokenInfos{
+	token := api_types.TokenInfos{
 		Id:         testUsers[0].ID.Hex(),
 		InstanceId: testInstanceID,
 	}
@@ -1141,7 +1142,7 @@ func TestRemoveEmailEndpoint(t *testing.T) {
 		}
 	})
 
-	token := api.TokenInfos{
+	token := api_types.TokenInfos{
 		Id:         testUsers[0].ID.Hex(),
 		InstanceId: testInstanceID,
 	}
