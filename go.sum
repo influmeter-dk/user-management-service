@@ -63,13 +63,19 @@ github.com/google/go-cmp v0.4.0/go.mod h1:v8dTdLbMG2kIc/vJvl+f65V22dbkXbowE6jgT/
 github.com/inconshreveable/mousetrap v1.0.0/go.mod h1:PxqpIevigyE2G7u3NXJIT2ANytuPF1OarO4DADm73n8=
 github.com/influenzanet/go-utils v0.0.0-20200719205359-4796ff908160 h1:lDiA+vgxJFkVJ/634f3P6XBZ4S7S2DIFRaLCeAiqd9s=
 github.com/influenzanet/go-utils v0.0.0-20200719205359-4796ff908160/go.mod h1:OY5GbpOVq5aUj5r9wxUxRKXIAMQ7CxeHGL9YpmOvObY=
+github.com/influenzanet/go-utils v0.0.0-20200720123801-a189fee40438 h1:mSV55g7u/k0Nr0F/AsXccHRfBxFR8AR0ZL56rsg/IoQ=
+github.com/influenzanet/go-utils v0.0.0-20200720123801-a189fee40438/go.mod h1:OY5GbpOVq5aUj5r9wxUxRKXIAMQ7CxeHGL9YpmOvObY=
 github.com/influenzanet/messaging-service v0.2.0 h1:dNvWILhHnx0bbZV3UDQoJy/MR2isEJB4sCvt1gJcFOk=
 github.com/influenzanet/messaging-service v0.2.0/go.mod h1:11yQIQT4x91kVVGQw4/H4YgHxaKdhDBGz84f8kZvC1g=
 github.com/influenzanet/messaging-service v0.5.3 h1:7hWMHaA+81kq5goWDMH/siZeZm4B2tuqunB9SA4FaQY=
 github.com/influenzanet/messaging-service v0.5.3/go.mod h1:Ev3V4sjuqYEBdj1N5fQfAMY17codvLGUXs59qR7y3tc=
+github.com/influenzanet/messaging-service v0.6.0 h1:WI4Hulx7T9xdtvNaomGymsQ8PaxRdMkKtNaNJtMw8Ds=
+github.com/influenzanet/messaging-service v0.6.0/go.mod h1:g161zqRK7aCg/o56Ij6HMUG2Rp7ibnDpLm2ExlrSXfE=
 github.com/influenzanet/study-service v0.6.2/go.mod h1:S/inqN3mSNT0cQ3xgi8upUEXWzBIxn6CirfXzhuLZsw=
+github.com/influenzanet/study-service v0.8.0/go.mod h1:S/inqN3mSNT0cQ3xgi8upUEXWzBIxn6CirfXzhuLZsw=
 github.com/influenzanet/user-management-service v0.4.0-alpha/go.mod h1:hzpAlj0vcpZByruRB5IQmjiuiYuAAy2E7tkr9sc1B64=
 github.com/influenzanet/user-management-service v0.7.0/go.mod h1:0z88Izqm7YWEUFUTC7dHrN9XVG2CevyWXyNeoTkRWvk=
+github.com/influenzanet/user-management-service v0.10.0/go.mod h1:Qn1E8bFezQ1peyaC+P5dAo0PqH3G8/UNV5pnShfuwGI=
 github.com/joho/godotenv v1.3.0/go.mod h1:7hK45KPybAkOC6peb+G5yklZfMxEjkZhHbwpqxOKXbg=
 github.com/jordan-wright/email v0.0.0-20200521030443-c069f37d901d/go.mod h1:Fy2gCFfZhay8jplf/Csj6cyH/oshQTkLQYZbKkcV+SY=
 github.com/jordan-wright/email v0.0.0-20200602115436-fd8a7622303e/go.mod h1:Fy2gCFfZhay8jplf/Csj6cyH/oshQTkLQYZbKkcV+SY=
@@ -131,8 +137,6 @@ golang.org/x/crypto v0.0.0-20200429183012-4b2356b1ed79 h1:IaQbIIB2X/Mp/DKctl6ROx
 golang.org/x/crypto v0.0.0-20200429183012-4b2356b1ed79/go.mod h1:LzIPMQfyMNhhGPhUkYOs5KpL4U8rLKemX1yGLhDgUto=
 golang.org/x/crypto v0.0.0-20200510223506-06a226fb4e37/go.mod h1:LzIPMQfyMNhhGPhUkYOs5KpL4U8rLKemX1yGLhDgUto=
 golang.org/x/crypto v0.0.0-20200602180216-279210d13fed/go.mod h1:LzIPMQfyMNhhGPhUkYOs5KpL4U8rLKemX1yGLhDgUto=
-golang.org/x/crypto v0.0.0-20200604202706-70a84ac30bf9 h1:vEg9joUBmeBcK9iSJftGNf3coIG4HqZElCPehJsfAYM=
-golang.org/x/crypto v0.0.0-20200604202706-70a84ac30bf9/go.mod h1:LzIPMQfyMNhhGPhUkYOs5KpL4U8rLKemX1yGLhDgUto=
 golang.org/x/crypto v0.0.0-20200709230013-948cd5f35899 h1:DZhuSZLsGlFL4CmhA8BcRA0mnthyA/nZ00AqCUo7vHg=
 golang.org/x/crypto v0.0.0-20200709230013-948cd5f35899/go.mod h1:LzIPMQfyMNhhGPhUkYOs5KpL4U8rLKemX1yGLhDgUto=
 golang.org/x/exp v0.0.0-20190121172915-509febef88a4/go.mod h1:CJ0aWSM057203Lf6IL+f9T1iT9GByDxfZKAQTCR3kQA=
@@ -168,8 +172,6 @@ golang.org/x/sys v0.0.0-20200323222414-85ca7c5b95cd/go.mod h1:h1NjWce9XRLGQEsW7w
 golang.org/x/sys v0.0.0-20200519105757-fe76b779f299 h1:DYfZAGf2WMFjMxbgTjaC+2HC7NkNAQs+6Q8b9WEB/F4=
 golang.org/x/sys v0.0.0-20200519105757-fe76b779f299/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20200602225109-6fdc65e7d980/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
-golang.org/x/sys v0.0.0-20200610111108-226ff32320da h1:bGb80FudwxpeucJUjPYJXuJ8Hk91vNtfvrymzwiei38=
-golang.org/x/sys v0.0.0-20200610111108-226ff32320da/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20200625212154-ddb9806d33ae h1:Ih9Yo4hSPImZOpfGuA4bR/ORKTAbhZo2AbWNRCnevdo=
 golang.org/x/sys v0.0.0-20200625212154-ddb9806d33ae/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/text v0.0.0-20170915032832-14c0d48ead0c/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
