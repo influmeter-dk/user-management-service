@@ -298,7 +298,8 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 
 	id, err := s.userDBservice.AddUser(instanceID, newUser)
 	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
+		log.Printf("ERROR: when creating new user: %s", err.Error())
+		return nil, status.Error(codes.Internal, "user creation failed")
 	}
 	newUser.ID, _ = primitive.ObjectIDFromHex(id)
 
@@ -315,7 +316,8 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 	}
 	tempToken, err := s.globalDBService.AddTempToken(tempTokenInfos)
 	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
+		log.Printf("ERROR: signup method failed to create verification token: %s", err.Error())
+		return nil, status.Error(codes.Internal, "failed to create verification token")
 	}
 
 	// ---> Trigger message sending
@@ -354,20 +356,23 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 		[]string{},
 	)
 	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
+		log.Printf("ERROR: signup method failed to generate jwt: %s", err.Error())
+		return nil, status.Error(codes.Internal, "token creation failed")
 	}
 
 	// Refresh Token
 	rt, err := tokens.GenerateUniqueTokenString()
 	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
+		log.Printf("ERROR: signup method failed to generate refresh token: %s", err.Error())
+		return nil, status.Error(codes.Internal, "token creation failed")
 	}
 	newUser.AddRefreshToken(rt)
 	newUser.Timestamps.LastLogin = time.Now().Unix()
 
 	newUser, err = s.userDBservice.UpdateUser(req.InstanceId, newUser)
 	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
+		log.Printf("ERROR: signup method failed to save refresh token: %s", err.Error())
+		return nil, status.Error(codes.Internal, "user created, but token could not be saved")
 	}
 
 	response := &api.TokenResponse{
@@ -414,7 +419,8 @@ func (s *userManagementServer) SwitchProfile(ctx context.Context, req *api.Switc
 
 		user, err = s.userDBservice.UpdateUser(req.Token.InstanceId, user)
 		if err != nil {
-			return nil, status.Error(codes.Internal, err.Error())
+			log.Printf("ERROR: SwitchProfile method failed to save user: %s", err.Error())
+			return nil, status.Error(codes.Internal, "user couldn't be updated")
 		}
 	}
 
@@ -471,7 +477,7 @@ func (s *userManagementServer) VerifyContact(ctx context.Context, req *api.TempT
 	user, err := s.userDBservice.GetUserByID(tokenInfos.InstanceID, tokenInfos.UserID)
 	if err != nil {
 		log.Printf("VerifyContact: %s", err.Error())
-		return nil, status.Error(codes.InvalidArgument, err.Error())
+		return nil, status.Error(codes.InvalidArgument, "no user found")
 	}
 
 	cType, ok1 := tokenInfos.Info["type"]
