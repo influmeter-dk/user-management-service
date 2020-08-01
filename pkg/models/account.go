@@ -14,6 +14,9 @@ type Account struct {
 	VerificationCode   VerificationCode `bson:"verificationCode"`
 	RefreshTokens      []string         `bson:"refreshTokens"`
 	PreferredLanguage  string           `bson:"preferredLanguage"`
+
+	// Rate limiting
+	FailedLoginAttempts []int64 `bson:"failedLoginAttempts"`
 }
 
 type VerificationCode struct {

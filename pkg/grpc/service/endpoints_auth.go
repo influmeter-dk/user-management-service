@@ -135,9 +135,19 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
 	}
 
+	log.Printf("%v", user)
+	if utils.HasMoreAttemptsRecently(user.Account.FailedLoginAttempts, 10, 5*60) {
+		log.Printf("SECURITY WARNING: login attempt blocked for email address for %s - too many wrong tries recently", email)
+		time.Sleep(5 * time.Second)
+		return nil, status.Error(codes.InvalidArgument, "account blocked for 5 minutes")
+	}
+
 	match, err := pwhash.ComparePasswordWithHash(user.Account.Password, req.Password)
 	if err != nil || !match {
 		log.Printf("SECURITY WARNING: login attempt with wrong password for %s", user.ID.Hex())
+		if err2 := s.userDBservice.SaveFailedLoginAttempt(req.InstanceId, user.ID.Hex()); err != nil {
+			log.Printf("DB ERROR: unexpected error when updating user: %s ", err2.Error())
+		}
 		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
 	}
 
@@ -163,6 +173,10 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 			user, err = s.userDBservice.UpdateUser(req.InstanceId, user)
 			if err != nil {
 				log.Printf("LoginWithEmail: unexpected error when saving user -> %v", err)
+			}
+
+			if err2 := s.userDBservice.SaveFailedLoginAttempt(req.InstanceId, user.ID.Hex()); err != nil {
+				log.Printf("DB ERROR: unexpected error when updating user: %s ", err2.Error())
 			}
 			return nil, status.Error(codes.InvalidArgument, "wrong verficiation code")
 		}
@@ -211,6 +225,7 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 	user.AddRefreshToken(rt)
 	user.Timestamps.LastLogin = time.Now().Unix()
 	user.Account.VerificationCode = models.VerificationCode{}
+	user.Account.FailedLoginAttempts = utils.RemoveAttemptsOlderThan(user.Account.FailedLoginAttempts, 3600)
 
 	user, err = s.userDBservice.UpdateUser(req.InstanceId, user)
 	if err != nil {

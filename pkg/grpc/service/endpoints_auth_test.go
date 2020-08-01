@@ -506,6 +506,29 @@ func TestLogin(t *testing.T) {
 			return
 		}
 	})
+
+	t.Run("with brute force attack", func(t *testing.T) {
+		req := &api.LoginWithEmailMsg{
+			Email:         testUser2.Account.AccountID,
+			Password:      currentPw + "w",
+			InstanceId:    testInstanceID,
+			AsParticipant: true,
+		}
+		for i := 0; i < 11; i++ {
+			_, err := s.LoginWithEmail(context.Background(), req)
+			ok, msg := shouldHaveGrpcErrorStatus(err, "invalid username and/or password")
+			if !ok {
+				t.Error(msg)
+			}
+		}
+
+		_, err := s.LoginWithEmail(context.Background(), req)
+		ok, msg := shouldHaveGrpcErrorStatus(err, "account blocked for 5 minutes")
+		if !ok {
+			t.Error(msg)
+			return
+		}
+	})
 }
 
 func TestSignupWithEmail(t *testing.T) {
