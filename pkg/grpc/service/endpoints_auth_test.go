@@ -11,6 +11,7 @@ import (
 	"github.com/influenzanet/user-management-service/pkg/models"
 	"github.com/influenzanet/user-management-service/pkg/pwhash"
 	"github.com/influenzanet/user-management-service/pkg/tokens"
+	loggingMock "github.com/influenzanet/user-management-service/test/mocks/logging_service"
 	messageMock "github.com/influenzanet/user-management-service/test/mocks/messaging_service"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc/status"
@@ -535,6 +536,7 @@ func TestSignupWithEmail(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	mockMessagingClient := messageMock.NewMockMessagingServiceApiClient(mockCtrl)
+	mockLoggingClient := loggingMock.NewMockLoggingServiceApiClient(mockCtrl)
 
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
@@ -544,6 +546,7 @@ func TestSignupWithEmail(t *testing.T) {
 		},
 		clients: &models.APIClients{
 			MessagingService: mockMessagingClient,
+			LoggingService:   mockLoggingClient,
 		},
 	}
 
@@ -606,6 +609,11 @@ func TestSignupWithEmail(t *testing.T) {
 			gomock.Any(),
 		).Return(nil, nil)
 
+		mockLoggingClient.EXPECT().SaveLogEvent(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
+
 		resp, err := s.SignupWithEmail(context.Background(), validNewUserReq)
 		if err != nil {
 			t.Errorf("unexpected error: %s", err.Error())
@@ -627,6 +635,10 @@ func TestSignupWithEmail(t *testing.T) {
 
 	t.Run("with duplicate user (same email)", func(t *testing.T) {
 		mockMessagingClient.EXPECT().SendInstantEmail(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
+		mockLoggingClient.EXPECT().SaveLogEvent(
 			gomock.Any(),
 			gomock.Any(),
 		).Return(nil, nil)

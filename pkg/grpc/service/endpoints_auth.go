@@ -11,6 +11,7 @@ import (
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 
+	loggingAPI "github.com/influenzanet/logging-service/pkg/api"
 	messageAPI "github.com/influenzanet/messaging-service/pkg/api/messaging_service"
 	"github.com/influenzanet/user-management-service/pkg/api"
 	"github.com/influenzanet/user-management-service/pkg/models"
@@ -388,6 +389,18 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 	if err != nil {
 		log.Printf("ERROR: signup method failed to save refresh token: %s", err.Error())
 		return nil, status.Error(codes.Internal, "user created, but token could not be saved")
+	}
+
+	_, err = s.clients.LoggingService.SaveLogEvent(context.TODO(), &loggingAPI.NewLogEvent{
+		Origin:     "user-management",
+		InstanceId: req.InstanceId,
+		UserId:     newUser.ID.Hex(),
+		EventType:  loggingAPI.LogEventType_LOG,
+		EventName:  "account creation",
+		// Msg: fmt.Sprintf(""),
+	})
+	if err != nil {
+		log.Printf("ERROR: signup method failed to save log: %s", err.Error())
 	}
 
 	response := &api.TokenResponse{
