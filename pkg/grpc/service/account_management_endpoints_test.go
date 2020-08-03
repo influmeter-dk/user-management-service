@@ -10,6 +10,7 @@ import (
 	"github.com/influenzanet/user-management-service/pkg/api"
 	"github.com/influenzanet/user-management-service/pkg/models"
 	"github.com/influenzanet/user-management-service/pkg/pwhash"
+	loggingMock "github.com/influenzanet/user-management-service/test/mocks/logging_service"
 	messageMock "github.com/influenzanet/user-management-service/test/mocks/messaging_service"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"google.golang.org/grpc/status"
@@ -128,6 +129,7 @@ func TestChangePasswordEndpoint(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	mockMessagingClient := messageMock.NewMockMessagingServiceApiClient(mockCtrl)
+	mockLoggingClient := loggingMock.NewMockLoggingServiceApiClient(mockCtrl)
 
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
@@ -137,6 +139,7 @@ func TestChangePasswordEndpoint(t *testing.T) {
 		},
 		clients: &models.APIClients{
 			MessagingService: mockMessagingClient,
+			LoggingService:   mockLoggingClient,
 		},
 	}
 
@@ -243,6 +246,11 @@ func TestChangePasswordEndpoint(t *testing.T) {
 	})
 
 	t.Run("with valid data and new password", func(t *testing.T) {
+		mockLoggingClient.EXPECT().SaveLogEvent(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
+
 		mockMessagingClient.EXPECT().SendInstantEmail(
 			gomock.Any(),
 			gomock.Any(),
@@ -288,6 +296,7 @@ func TestChangeAccountIDEmailEndpoint(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	mockMessagingClient := messageMock.NewMockMessagingServiceApiClient(mockCtrl)
+	mockLoggingClient := loggingMock.NewMockLoggingServiceApiClient(mockCtrl)
 
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
@@ -297,6 +306,7 @@ func TestChangeAccountIDEmailEndpoint(t *testing.T) {
 		},
 		clients: &models.APIClients{
 			MessagingService: mockMessagingClient,
+			LoggingService:   mockLoggingClient,
 		},
 	}
 
@@ -407,6 +417,10 @@ func TestChangeAccountIDEmailEndpoint(t *testing.T) {
 			gomock.Any(),
 			gomock.Any(),
 		).Return(nil, nil)
+		mockLoggingClient.EXPECT().SaveLogEvent(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
 
 		req := &api.EmailChangeMsg{
 			Token: &api_types.TokenInfos{
@@ -440,6 +454,10 @@ func TestChangeAccountIDEmailEndpoint(t *testing.T) {
 			gomock.Any(),
 			gomock.Any(),
 		).Return(nil, nil)
+		mockLoggingClient.EXPECT().SaveLogEvent(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
 
 		req := &api.EmailChangeMsg{
 			Token: &api_types.TokenInfos{
@@ -468,6 +486,10 @@ func TestChangeAccountIDEmailEndpoint(t *testing.T) {
 			gomock.Any(),
 			gomock.Any(),
 		).Return(nil, nil).Times(2)
+		mockLoggingClient.EXPECT().SaveLogEvent(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
 
 		req := &api.EmailChangeMsg{
 			Token: &api_types.TokenInfos{
@@ -496,6 +518,7 @@ func TestDeleteAccountEndpoint(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	mockMessagingClient := messageMock.NewMockMessagingServiceApiClient(mockCtrl)
+	mockLoggingClient := loggingMock.NewMockLoggingServiceApiClient(mockCtrl)
 
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
@@ -505,6 +528,7 @@ func TestDeleteAccountEndpoint(t *testing.T) {
 		},
 		clients: &models.APIClients{
 			MessagingService: mockMessagingClient,
+			LoggingService:   mockLoggingClient,
 		},
 	}
 
@@ -570,6 +594,11 @@ func TestDeleteAccountEndpoint(t *testing.T) {
 	})
 
 	t.Run("with same user", func(t *testing.T) {
+		mockLoggingClient.EXPECT().SaveLogEvent(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
+
 		mockMessagingClient.EXPECT().SendInstantEmail(
 			gomock.Any(),
 			gomock.Any(),
@@ -655,11 +684,18 @@ func TestChangePreferredLanguageEndpoint(t *testing.T) {
 }
 
 func TestSaveProfileEndpoint(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockLoggingClient := loggingMock.NewMockLoggingServiceApiClient(mockCtrl)
+
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
 		JWT: models.JWTConfig{
 			TokenExpiryInterval: time.Second * 2,
+		},
+		clients: &models.APIClients{
+			LoggingService: mockLoggingClient,
 		},
 	}
 	testUsers, err := addTestUsers([]models.User{
@@ -695,6 +731,11 @@ func TestSaveProfileEndpoint(t *testing.T) {
 	}
 
 	t.Run("with add profile", func(t *testing.T) {
+		mockLoggingClient.EXPECT().SaveLogEvent(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
+
 		req := &api.ProfileRequest{
 			Token: &token,
 			Profile: &api.Profile{
@@ -712,6 +753,11 @@ func TestSaveProfileEndpoint(t *testing.T) {
 	})
 
 	t.Run("with update profile", func(t *testing.T) {
+		mockLoggingClient.EXPECT().SaveLogEvent(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
+
 		req := &api.ProfileRequest{
 			Token: &token,
 			Profile: &api.Profile{
@@ -731,11 +777,18 @@ func TestSaveProfileEndpoint(t *testing.T) {
 }
 
 func TestRemoveProfileEndpoint(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockLoggingClient := loggingMock.NewMockLoggingServiceApiClient(mockCtrl)
+
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
 		JWT: models.JWTConfig{
 			TokenExpiryInterval: time.Second * 2,
+		},
+		clients: &models.APIClients{
+			LoggingService: mockLoggingClient,
 		},
 	}
 	testUsers, err := addTestUsers([]models.User{
@@ -797,6 +850,11 @@ func TestRemoveProfileEndpoint(t *testing.T) {
 	})
 
 	t.Run("with correct id", func(t *testing.T) {
+		mockLoggingClient.EXPECT().SaveLogEvent(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
+
 		req := &api.ProfileRequest{
 			Token: &token,
 			Profile: &api.Profile{

@@ -396,8 +396,8 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 		InstanceId: req.InstanceId,
 		UserId:     newUser.ID.Hex(),
 		EventType:  loggingAPI.LogEventType_LOG,
-		EventName:  "account creation",
-		// Msg: fmt.Sprintf(""),
+		EventName:  "account created",
+		Msg:        newUser.Account.AccountID,
 	})
 	if err != nil {
 		log.Printf("ERROR: signup method failed to save log: %s", err.Error())
