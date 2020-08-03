@@ -3,6 +3,7 @@ package clients
 import (
 	"log"
 
+	loggingAPI "github.com/influenzanet/logging-service/pkg/api"
 	messageAPI "github.com/influenzanet/messaging-service/pkg/api/messaging_service"
 	"google.golang.org/grpc"
 )
@@ -19,4 +20,10 @@ func ConnectToMessagingService(addr string) (client messageAPI.MessagingServiceA
 	// Connect to user management service
 	serverConn := connectToGRPCServer(addr)
 	return messageAPI.NewMessagingServiceApiClient(serverConn), serverConn.Close
+}
+
+func ConnectToLoggingService(addr string) (client loggingAPI.LoggingServiceApiClient, close func() error) {
+	// Connect to user management service
+	serverConn := connectToGRPCServer(addr)
+	return loggingAPI.NewLoggingServiceApiClient(serverConn), serverConn.Close
 }

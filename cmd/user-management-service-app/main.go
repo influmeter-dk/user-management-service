@@ -21,6 +21,10 @@ func main() {
 	defer close()
 	clients.MessagingService = messagingClient
 
+	loggingClient, close := gc.ConnectToLoggingService(conf.ServiceURLs.LoggingService)
+	defer close()
+	clients.LoggingService = loggingClient
+
 	userDBService := userdb.NewUserDBService(conf.UserDBConfig)
 	globalDBService := globaldb.NewGlobalDBService(conf.GlobalDBConfig)
 
