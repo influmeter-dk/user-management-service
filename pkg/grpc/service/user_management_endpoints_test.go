@@ -80,7 +80,7 @@ func TestCreateUserEndpoint(t *testing.T) {
 				},
 			},
 			AccountId:         "test_created_user@email.test",
-			InitialPassword:   "initpw543",
+			InitialPassword:   "initPW543",
 			PreferredLanguage: "en",
 			Roles:             []string{"PARTICIPANT", "ADMIN"},
 		}

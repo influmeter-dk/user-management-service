@@ -31,13 +31,19 @@ func CheckPasswordFormat(password string) bool {
 	number := regexp.MustCompile(`\d`) //"^(?:(?=.*[a-z])(?:(?=.*[A-Z])(?=.*[\\d\\W])|(?=.*\\W)(?=.*\d))|(?=.*\W)(?=.*[A-Z])(?=.*\d)).{8,}$")
 	symbol := regexp.MustCompile(`\W`)
 
-	if lowercase.MatchString(password) || uppercase.MatchString(password) {
+	if lowercase.MatchString(password) {
 		res++
 	}
-	if number.MatchString(password) || symbol.MatchString(password) {
+	if uppercase.MatchString(password) {
 		res++
 	}
-	return res == 2
+	if number.MatchString(password) {
+		res++
+	}
+	if symbol.MatchString(password) {
+		res++
+	}
+	return res > 2
 }
 
 func CheckLanguageCode(code string) bool {
