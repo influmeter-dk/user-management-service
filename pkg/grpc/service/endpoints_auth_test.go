@@ -548,6 +548,7 @@ func TestSignupWithEmail(t *testing.T) {
 			MessagingService: mockMessagingClient,
 			LoggingService:   mockLoggingClient,
 		},
+		newUserCountLimit: 100,
 	}
 
 	wrongEmailFormatNewUserReq := &api.SignupWithEmailMsg{

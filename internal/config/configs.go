@@ -17,9 +17,10 @@ type Config struct {
 		MessagingService string
 		LoggingService   string
 	}
-	UserDBConfig   models.DBConfig
-	GlobalDBConfig models.DBConfig
-	JWT            models.JWTConfig
+	UserDBConfig      models.DBConfig
+	GlobalDBConfig    models.DBConfig
+	JWT               models.JWTConfig
+	NewUserCountLimit int64
 }
 
 func InitConfig() Config {
@@ -27,9 +28,16 @@ func InitConfig() Config {
 	conf.Port = os.Getenv("USER_MANAGEMENT_LISTEN_PORT")
 	conf.ServiceURLs.MessagingService = os.Getenv("ADDR_MESSAGING_SERVICE")
 	conf.ServiceURLs.LoggingService = os.Getenv("ADDR_LOGGING_SERVICE")
+
 	conf.UserDBConfig = getUserDBConfig()
 	conf.GlobalDBConfig = getGlobalDBConfig()
 	conf.JWT = getJWTConfig()
+
+	rl, err := strconv.Atoi(os.Getenv("NEW_USER_RATE_LIMIT"))
+	if err != nil {
+		log.Fatal("NEW_USER_RATE_LIMIT: " + err.Error())
+	}
+	conf.NewUserCountLimit = int64(rl)
 	return conf
 }
 

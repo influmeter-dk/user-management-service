@@ -24,6 +24,8 @@ const (
 	verificationCodeLifetime           = 5 * 60 // for 2FA 6 digit code
 	contactVerificationMessageCooldown = 1 * 60
 	loginVerificationCodeCooldown      = 20
+
+	signupRateLimitWindow = 5 * 60
 )
 
 func (s *userManagementServer) Status(ctx context.Context, _ *empty.Empty) (*api.ServiceStatus, error) {
@@ -266,6 +268,7 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 	if req == nil {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
+
 	if !utils.CheckEmailFormat(req.Email) {
 		return nil, status.Error(codes.InvalidArgument, "email not valid")
 	}
@@ -274,6 +277,21 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 	}
 	if !utils.CheckPasswordFormat(req.Password) {
 		return nil, status.Error(codes.InvalidArgument, "password too weak")
+	}
+
+	instanceID := req.InstanceId
+	if instanceID == "" {
+		instanceID = "default"
+	}
+
+	newUserCount, err := s.userDBservice.CountRecentlyCreatedUsers(instanceID, signupRateLimitWindow)
+	if err != nil {
+		log.Printf("ERROR: signup - unexpected error when counting: %v", err)
+	} else {
+		if newUserCount > s.newUserCountLimit {
+			log.Println("ERROR: user creation blocked due to too many registations")
+			return nil, status.Error(codes.Internal, "user creation failed, please try in some minutes again")
+		}
 	}
 
 	password, err := pwhash.HashPassword(req.Password)
@@ -313,11 +331,6 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 	if req.WantsNewsletter {
 		newUser.ContactPreferences.SubscribedToNewsletter = true
 		newUser.ContactPreferences.SendNewsletterTo = []string{newUser.ContactInfos[0].ID.Hex()}
-	}
-
-	instanceID := req.InstanceId
-	if instanceID == "" {
-		instanceID = "default"
 	}
 
 	id, err := s.userDBservice.AddUser(instanceID, newUser)

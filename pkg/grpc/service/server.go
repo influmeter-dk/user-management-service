@@ -21,10 +21,11 @@ const (
 )
 
 type userManagementServer struct {
-	clients         *models.APIClients
-	userDBservice   *userdb.UserDBService
-	globalDBService *globaldb.GlobalDBService
-	JWT             models.JWTConfig
+	clients           *models.APIClients
+	userDBservice     *userdb.UserDBService
+	globalDBService   *globaldb.GlobalDBService
+	JWT               models.JWTConfig
+	newUserCountLimit int64
 }
 
 // NewUserManagementServer creates a new service instance
@@ -35,12 +36,14 @@ func NewUserManagementServer(
 	JWT struct {
 		TokenExpiryInterval time.Duration // interpreted in minutes later
 	},
+	newUserCountLimit int64,
 ) api.UserManagementApiServer {
 	return &userManagementServer{
-		clients:         clients,
-		userDBservice:   userDBservice,
-		globalDBService: globalDBservice,
-		JWT:             JWT,
+		clients:           clients,
+		userDBservice:     userDBservice,
+		globalDBService:   globalDBservice,
+		JWT:               JWT,
+		newUserCountLimit: newUserCountLimit,
 	}
 }
 
@@ -52,6 +55,7 @@ func RunServer(ctx context.Context, port string,
 	JWT struct {
 		TokenExpiryInterval time.Duration // interpreted in minutes later
 	},
+	newUserCountLimit int64,
 ) error {
 	lis, err := net.Listen("tcp", ":"+port)
 	if err != nil {
@@ -65,6 +69,7 @@ func RunServer(ctx context.Context, port string,
 		userDBservice,
 		globalDBservice,
 		JWT,
+		newUserCountLimit,
 	))
 
 	// graceful shutdown
