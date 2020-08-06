@@ -87,6 +87,9 @@ func TestDbInterfaceMethods(t *testing.T) {
 			Password:  "testhashedpassword-youcantreadme",
 		},
 		Roles: []string{"TEST"},
+		Timestamps: models.Timestamps{
+			CreatedAt: time.Now().Unix(),
+		},
 	}
 
 	t.Run("Testing create user", func(t *testing.T) {
@@ -184,6 +187,19 @@ func TestDbInterfaceMethods(t *testing.T) {
 		if err == nil {
 			t.Errorf("cannot update not existing user")
 			return
+		}
+	})
+
+	t.Run("Testing counting recently added users", func(t *testing.T) {
+		count, err := testDBService.CountRecentlyCreatedUsers(testInstanceID, 20)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+			return
+
+		}
+		log.Println(count)
+		if count < 1 {
+			t.Error("at least one user should be found")
 		}
 	})
 

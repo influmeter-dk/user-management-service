@@ -159,6 +159,15 @@ func (dbService *UserDBService) UpdateLoginTime(instanceID string, id string) er
 	return nil
 }
 
+func (dbService *UserDBService) CountRecentlyCreatedUsers(instanceID string, interval int64) (count int64, err error) {
+	ctx, cancel := dbService.getContext()
+	defer cancel()
+
+	filter := bson.M{"timestamps.createdAt": bson.M{"$gt": time.Now().Unix() - interval}}
+	count, err = dbService.collectionRefUsers(instanceID).CountDocuments(ctx, filter)
+	return
+}
+
 func (dbService *UserDBService) DeleteUser(instanceID string, id string) error {
 	_id, _ := primitive.ObjectIDFromHex(id)
 	filter := bson.M{"_id": _id}
