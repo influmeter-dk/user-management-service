@@ -9,11 +9,12 @@ import (
 
 // ContactInfo is about saving infos about communication channels
 type ContactInfo struct {
-	ID          primitive.ObjectID `bson:"_id,omitempty"`
-	Type        string             `bson:"type,omitempty"`
-	ConfirmedAt int64              `bson:"confirmedAt"`
-	Email       string             `bson:"email,omitempty"`
-	Phone       string             `bson:"phone,omitempty"`
+	ID                     primitive.ObjectID `bson:"_id,omitempty"`
+	Type                   string             `bson:"type,omitempty"`
+	ConfirmedAt            int64              `bson:"confirmedAt"`
+	ConfirmationLinkSentAt int64              `bson:"confirmationLinkSentAt"`
+	Email                  string             `bson:"email,omitempty"`
+	Phone                  string             `bson:"phone,omitempty"`
 }
 
 func ContactInfoFromAPI(obj *api.ContactInfo) ContactInfo {

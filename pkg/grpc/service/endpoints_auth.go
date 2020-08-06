@@ -20,7 +20,10 @@ import (
 	"github.com/influenzanet/user-management-service/pkg/utils"
 )
 
-const verificationCodeLifetime = 5 * 60
+const (
+	verificationCodeLifetime           = 5 * 60 // for 2FA 6 digit code
+	contactVerificationMessageCooldown = 1 * 60
+)
 
 func (s *userManagementServer) Status(ctx context.Context, _ *empty.Empty) (*api.ServiceStatus, error) {
 	return &api.ServiceStatus{
@@ -546,6 +549,10 @@ func (s *userManagementServer) ResendContactVerification(ctx context.Context, re
 		return nil, status.Error(codes.InvalidArgument, "address not found")
 	}
 
+	if ci.ConfirmationLinkSentAt > time.Now().Unix()-contactVerificationMessageCooldown {
+		return nil, status.Error(codes.InvalidArgument, "cannot send verification so often")
+	}
+
 	// TempToken for contact verification:
 	tempTokenInfos := models.TempToken{
 		UserID:     req.Token.Id,
@@ -576,6 +583,13 @@ func (s *userManagementServer) ResendContactVerification(ctx context.Context, re
 		log.Printf("ResendContactVerification: %s", err.Error())
 	}
 	// <---
+
+	// update last verification email sent time:
+	user.SetContactInfoVerificationSent("email", req.Address)
+	_, err = s.userDBservice.UpdateUser(req.Token.InstanceId, user)
+	if err != nil {
+		log.Printf("ResendContactVerification: %s", err.Error())
+	}
 
 	return &api.ServiceStatus{
 		Status:  api.ServiceStatus_NORMAL,

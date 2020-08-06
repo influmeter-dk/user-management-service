@@ -99,6 +99,18 @@ func (u *User) ConfirmContactInfo(t string, addr string) error {
 	return errors.New("contact not found")
 }
 
+func (u *User) SetContactInfoVerificationSent(t string, addr string) {
+	for i, ci := range u.ContactInfos {
+		if t == "email" && ci.Email == addr {
+			u.ContactInfos[i].ConfirmationLinkSentAt = time.Now().Unix()
+			return
+		} else if t == "phone" && ci.Phone == addr {
+			u.ContactInfos[i].ConfirmationLinkSentAt = time.Now().Unix()
+			return
+		}
+	}
+}
+
 func (u User) FindContactInfoByTypeAndAddr(t string, addr string) (ContactInfo, bool) {
 	for _, ci := range u.ContactInfos {
 		if t == "email" && ci.Email == addr {
