@@ -23,6 +23,7 @@ import (
 const (
 	verificationCodeLifetime           = 5 * 60 // for 2FA 6 digit code
 	contactVerificationMessageCooldown = 1 * 60
+	loginVerificationCodeCooldown      = 20
 )
 
 func (s *userManagementServer) Status(ctx context.Context, _ *empty.Empty) (*api.ServiceStatus, error) {
@@ -48,6 +49,10 @@ func (s *userManagementServer) SendVerificationCode(ctx context.Context, req *ap
 	if err != nil {
 		log.Printf("SECURITY WARNING: login step 1 attempt with wrong email address for %s", email)
 		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
+	}
+
+	if user.Account.VerificationCode.CreatedAt > time.Now().Unix()-loginVerificationCodeCooldown {
+		return nil, status.Error(codes.InvalidArgument, "cannot generate verification code so often")
 	}
 
 	match, err := pwhash.ComparePasswordWithHash(user.Account.Password, req.Password)
