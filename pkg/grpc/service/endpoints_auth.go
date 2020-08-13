@@ -146,7 +146,6 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
 	}
 
-	log.Printf("%v", user)
 	if utils.HasMoreAttemptsRecently(user.Account.FailedLoginAttempts, 10, 5*60) {
 		log.Printf("SECURITY WARNING: login attempt blocked for email address for %s - too many wrong tries recently", email)
 		time.Sleep(5 * time.Second)
@@ -303,11 +302,12 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 	// Create user DB object from request:
 	newUser := models.User{
 		Account: models.Account{
-			Type:               "email",
-			AccountID:          email,
-			AccountConfirmedAt: 0, // not confirmed yet
-			Password:           password,
-			PreferredLanguage:  req.PreferredLanguage,
+			Type:                "email",
+			AccountID:           email,
+			AccountConfirmedAt:  0, // not confirmed yet
+			Password:            password,
+			PreferredLanguage:   req.PreferredLanguage,
+			FailedLoginAttempts: []int64{},
 		},
 		Roles: []string{"PARTICIPANT"},
 		Profiles: []models.Profile{
