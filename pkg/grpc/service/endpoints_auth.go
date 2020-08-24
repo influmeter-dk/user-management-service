@@ -18,6 +18,8 @@ import (
 	"github.com/influenzanet/user-management-service/pkg/pwhash"
 	"github.com/influenzanet/user-management-service/pkg/tokens"
 	"github.com/influenzanet/user-management-service/pkg/utils"
+
+	constants "github.com/influenzanet/go-utils/pkg/constants"
 )
 
 const (
@@ -362,7 +364,7 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 		_, err = s.clients.MessagingService.SendInstantEmail(context.TODO(), &messageAPI.SendEmailReq{
 			InstanceId:  instanceID,
 			To:          []string{accountID},
-			MessageType: "registration",
+			MessageType: constants.EMAIL_TYPE_REGISTRATION,
 			ContentInfos: map[string]string{
 				"token": tempToken,
 			},
@@ -591,7 +593,7 @@ func (s *userManagementServer) ResendContactVerification(ctx context.Context, re
 	_, err = s.clients.MessagingService.SendInstantEmail(ctx, &messageAPI.SendEmailReq{
 		InstanceId:  req.Token.InstanceId,
 		To:          []string{req.Address},
-		MessageType: "verify-email",
+		MessageType: constants.EMAIL_TYPE_VERIFY_EMAIL,
 		ContentInfos: map[string]string{
 			"token": tempToken,
 		},

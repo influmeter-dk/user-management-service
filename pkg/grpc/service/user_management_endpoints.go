@@ -6,6 +6,8 @@ import (
 	"log"
 	"time"
 
+	"github.com/influenzanet/go-utils/pkg/constants"
+	loggingAPI "github.com/influenzanet/logging-service/pkg/api"
 	messageAPI "github.com/influenzanet/messaging-service/pkg/api/messaging_service"
 	"github.com/influenzanet/user-management-service/pkg/api"
 	"github.com/influenzanet/user-management-service/pkg/models"
@@ -21,7 +23,7 @@ func (s *userManagementServer) CreateUser(ctx context.Context, req *api.CreateUs
 	if req == nil || utils.IsTokenEmpty(req.Token) || req.AccountId == "" || req.InitialPassword == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing arguments")
 	}
-	if !utils.CheckRoleInToken(req.Token, "ADMIN") {
+	if !utils.CheckRoleInToken(req.Token, constants.USER_ROLE_ADMIN) {
 		return nil, status.Error(codes.PermissionDenied, "permission denied")
 	}
 
@@ -84,7 +86,7 @@ func (s *userManagementServer) CreateUser(ctx context.Context, req *api.CreateUs
 	_, err = s.clients.MessagingService.SendInstantEmail(ctx, &messageAPI.SendEmailReq{
 		InstanceId:  instanceID,
 		To:          []string{newUser.Account.AccountID},
-		MessageType: "registration",
+		MessageType: constants.EMAIL_TYPE_REGISTRATION,
 		ContentInfos: map[string]string{
 			"token": tempToken,
 		},
@@ -95,6 +97,18 @@ func (s *userManagementServer) CreateUser(ctx context.Context, req *api.CreateUs
 	}
 	// <---
 
+	_, err = s.clients.LoggingService.SaveLogEvent(context.TODO(), &loggingAPI.NewLogEvent{
+		Origin:     "user-management",
+		InstanceId: req.Token.InstanceId,
+		UserId:     req.Token.Id,
+		EventType:  loggingAPI.LogEventType_LOG,
+		EventName:  "ACCOUNT CREATED",
+		Msg:        newUser.Account.AccountID,
+	})
+	if err != nil {
+		log.Printf("ERROR: failed to save log: %s", err.Error())
+	}
+
 	return newUser.ToAPI(), nil
 }
 
@@ -102,7 +116,7 @@ func (s *userManagementServer) AddRoleForUser(ctx context.Context, req *api.Role
 	if req == nil || utils.IsTokenEmpty(req.Token) || req.AccountId == "" || req.Role == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing arguments")
 	}
-	if !utils.CheckRoleInToken(req.Token, "ADMIN") {
+	if !utils.CheckRoleInToken(req.Token, constants.USER_ROLE_ADMIN) {
 		return nil, status.Error(codes.PermissionDenied, "permission denied")
 	}
 
@@ -117,6 +131,19 @@ func (s *userManagementServer) AddRoleForUser(ctx context.Context, req *api.Role
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+
+	_, err = s.clients.LoggingService.SaveLogEvent(context.TODO(), &loggingAPI.NewLogEvent{
+		Origin:     "user-management",
+		InstanceId: req.Token.InstanceId,
+		UserId:     user.ID.Hex(),
+		EventType:  loggingAPI.LogEventType_LOG,
+		EventName:  "ADD ROLE",
+		Msg:        user.Account.AccountID + " + " + req.Role,
+	})
+	if err != nil {
+		log.Printf("ERROR: failed to save log: %s", err.Error())
+	}
+
 	return user.ToAPI(), nil
 }
 
@@ -124,7 +151,7 @@ func (s *userManagementServer) RemoveRoleForUser(ctx context.Context, req *api.R
 	if req == nil || utils.IsTokenEmpty(req.Token) || req.AccountId == "" || req.Role == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing arguments")
 	}
-	if !utils.CheckRoleInToken(req.Token, "ADMIN") {
+	if !utils.CheckRoleInToken(req.Token, constants.USER_ROLE_ADMIN) {
 		return nil, status.Error(codes.PermissionDenied, "permission denied")
 	}
 	user, err := s.userDBservice.GetUserByAccountID(req.Token.InstanceId, req.AccountId)
@@ -138,6 +165,18 @@ func (s *userManagementServer) RemoveRoleForUser(ctx context.Context, req *api.R
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+	_, err = s.clients.LoggingService.SaveLogEvent(context.TODO(), &loggingAPI.NewLogEvent{
+		Origin:     "user-management",
+		InstanceId: req.Token.InstanceId,
+		UserId:     user.ID.Hex(),
+		EventType:  loggingAPI.LogEventType_LOG,
+		EventName:  "REMOVE ROLE",
+		Msg:        user.Account.AccountID + " - " + req.Role,
+	})
+	if err != nil {
+		log.Printf("ERROR: failed to save log: %s", err.Error())
+	}
+
 	return user.ToAPI(), nil
 }
 
@@ -145,7 +184,7 @@ func (s *userManagementServer) FindNonParticipantUsers(ctx context.Context, req 
 	if req == nil || utils.IsTokenEmpty(req.Token) {
 		return nil, status.Error(codes.InvalidArgument, "missing arguments")
 	}
-	if !utils.CheckRoleInToken(req.Token, "ADMIN") {
+	if !utils.CheckRoleInToken(req.Token, constants.USER_ROLE_ADMIN) {
 		return nil, status.Error(codes.PermissionDenied, "permission denied")
 	}
 

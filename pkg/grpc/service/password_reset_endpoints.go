@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/influenzanet/go-utils/pkg/constants"
 	messageAPI "github.com/influenzanet/messaging-service/pkg/api/messaging_service"
 	"github.com/influenzanet/user-management-service/pkg/api"
 	"github.com/influenzanet/user-management-service/pkg/models"
@@ -34,7 +35,7 @@ func (s *userManagementServer) InitiatePasswordReset(ctx context.Context, req *a
 	tempTokenInfos := models.TempToken{
 		UserID:     user.ID.Hex(),
 		InstanceID: instanceID,
-		Purpose:    "password-reset",
+		Purpose:    constants.EMAIL_TYPE_PASSWORD_RESET,
 		Info: map[string]string{
 			"email": user.Account.AccountID,
 		},
@@ -49,7 +50,7 @@ func (s *userManagementServer) InitiatePasswordReset(ctx context.Context, req *a
 	_, err = s.clients.MessagingService.SendInstantEmail(ctx, &messageAPI.SendEmailReq{
 		InstanceId:  instanceID,
 		To:          []string{user.Account.AccountID},
-		MessageType: "password-reset",
+		MessageType: constants.EMAIL_TYPE_PASSWORD_RESET,
 		ContentInfos: map[string]string{
 			"token":      tempToken,
 			"validUntil": "24", // hours
@@ -123,7 +124,7 @@ func (s *userManagementServer) ResetPassword(ctx context.Context, req *api.Reset
 	_, err = s.clients.MessagingService.SendInstantEmail(ctx, &messageAPI.SendEmailReq{
 		InstanceId:        tokenInfos.InstanceID,
 		To:                []string{user.Account.AccountID},
-		MessageType:       "password-changed",
+		MessageType:       constants.EMAIL_TYPE_PASSWORD_CHANGED,
 		PreferredLanguage: user.Account.PreferredLanguage,
 	})
 	if err != nil {

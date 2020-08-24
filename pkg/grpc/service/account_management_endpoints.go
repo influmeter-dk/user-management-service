@@ -6,6 +6,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/influenzanet/go-utils/pkg/constants"
 	loggingAPI "github.com/influenzanet/logging-service/pkg/api"
 	messageAPI "github.com/influenzanet/messaging-service/pkg/api/messaging_service"
 	"github.com/influenzanet/user-management-service/pkg/api"
@@ -72,7 +73,7 @@ func (s *userManagementServer) ChangePassword(ctx context.Context, req *api.Pass
 	_, err = s.clients.MessagingService.SendInstantEmail(ctx, &messageAPI.SendEmailReq{
 		InstanceId:        req.Token.InstanceId,
 		To:                []string{user.Account.AccountID},
-		MessageType:       "password-changed",
+		MessageType:       constants.EMAIL_TYPE_PASSWORD_CHANGED,
 		PreferredLanguage: user.Account.PreferredLanguage,
 	})
 	if err != nil {
@@ -150,7 +151,7 @@ func (s *userManagementServer) ChangeAccountIDEmail(ctx context.Context, req *ap
 		_, err = s.clients.MessagingService.SendInstantEmail(ctx, &messageAPI.SendEmailReq{
 			InstanceId:        req.Token.InstanceId,
 			To:                []string{user.Account.AccountID},
-			MessageType:       "account-id-changed",
+			MessageType:       constants.EMAIL_TYPE_ACCOUNT_ID_CHANGED,
 			PreferredLanguage: user.Account.PreferredLanguage,
 			ContentInfos: map[string]string{
 				"restoreToken": tempToken,
@@ -206,7 +207,7 @@ func (s *userManagementServer) ChangeAccountIDEmail(ctx context.Context, req *ap
 		_, err = s.clients.MessagingService.SendInstantEmail(ctx, &messageAPI.SendEmailReq{
 			InstanceId:        req.Token.InstanceId,
 			To:                []string{user.Account.AccountID},
-			MessageType:       "verify-email",
+			MessageType:       constants.EMAIL_TYPE_VERIFY_EMAIL,
 			PreferredLanguage: user.Account.PreferredLanguage,
 			ContentInfos: map[string]string{
 				"token": tempToken,
@@ -266,7 +267,7 @@ func (s *userManagementServer) DeleteAccount(ctx context.Context, req *api.UserR
 	_, err = s.clients.MessagingService.SendInstantEmail(ctx, &messageAPI.SendEmailReq{
 		InstanceId:        req.Token.InstanceId,
 		To:                []string{user.Account.AccountID},
-		MessageType:       "account-deleted",
+		MessageType:       constants.EMAIL_TYPE_ACCOUNT_DELETED,
 		PreferredLanguage: user.Account.PreferredLanguage,
 	})
 	if err != nil {
@@ -465,7 +466,7 @@ func (s *userManagementServer) AddEmail(ctx context.Context, req *api.ContactInf
 	_, err = s.clients.MessagingService.SendInstantEmail(ctx, &messageAPI.SendEmailReq{
 		InstanceId:  req.Token.InstanceId,
 		To:          []string{user.Account.AccountID},
-		MessageType: "verify-email",
+		MessageType: constants.EMAIL_TYPE_VERIFY_EMAIL,
 		ContentInfos: map[string]string{
 			"token": tempToken,
 		},

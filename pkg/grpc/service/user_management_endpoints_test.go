@@ -9,6 +9,7 @@ import (
 	api_types "github.com/influenzanet/go-utils/pkg/api_types"
 	"github.com/influenzanet/user-management-service/pkg/api"
 	"github.com/influenzanet/user-management-service/pkg/models"
+	loggingMock "github.com/influenzanet/user-management-service/test/mocks/logging_service"
 	messageMock "github.com/influenzanet/user-management-service/test/mocks/messaging_service"
 	"google.golang.org/grpc"
 )
@@ -17,6 +18,7 @@ func TestCreateUserEndpoint(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	mockMessagingClient := messageMock.NewMockMessagingServiceApiClient(mockCtrl)
+	mockLoggingClient := loggingMock.NewMockLoggingServiceApiClient(mockCtrl)
 
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
@@ -26,6 +28,7 @@ func TestCreateUserEndpoint(t *testing.T) {
 		},
 		clients: &models.APIClients{
 			MessagingService: mockMessagingClient,
+			LoggingService:   mockLoggingClient,
 		},
 	}
 
@@ -67,6 +70,10 @@ func TestCreateUserEndpoint(t *testing.T) {
 
 	t.Run("with valid arguments", func(t *testing.T) {
 		mockMessagingClient.EXPECT().SendInstantEmail(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
+		mockLoggingClient.EXPECT().SaveLogEvent(
 			gomock.Any(),
 			gomock.Any(),
 		).Return(nil, nil)
@@ -117,11 +124,18 @@ func TestCreateUserEndpoint(t *testing.T) {
 }
 
 func TestAddRoleForUserEndpoint(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockLoggingClient := loggingMock.NewMockLoggingServiceApiClient(mockCtrl)
+
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
 		JWT: models.JWTConfig{
 			TokenExpiryInterval: time.Second * 2,
+		},
+		clients: &models.APIClients{
+			LoggingService: mockLoggingClient,
 		},
 	}
 
@@ -176,6 +190,11 @@ func TestAddRoleForUserEndpoint(t *testing.T) {
 	})
 
 	t.Run("with valid arguments", func(t *testing.T) {
+		mockLoggingClient.EXPECT().SaveLogEvent(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
+
 		req := &api.RoleMsg{
 			Token: &api_types.TokenInfos{
 				Id:         "testuserid",
@@ -220,11 +239,18 @@ func TestAddRoleForUserEndpoint(t *testing.T) {
 }
 
 func TestRemoveRoleForUserEndpoint(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockLoggingClient := loggingMock.NewMockLoggingServiceApiClient(mockCtrl)
+
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
 		JWT: models.JWTConfig{
 			TokenExpiryInterval: time.Second * 2,
+		},
+		clients: &models.APIClients{
+			LoggingService: mockLoggingClient,
 		},
 	}
 
@@ -279,6 +305,11 @@ func TestRemoveRoleForUserEndpoint(t *testing.T) {
 	})
 
 	t.Run("with valid arguments", func(t *testing.T) {
+		mockLoggingClient.EXPECT().SaveLogEvent(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
+
 		req := &api.RoleMsg{
 			Token: &api_types.TokenInfos{
 				Id:         "testuserid",
