@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	constants "github.com/influenzanet/go-utils/pkg/constants"
 	messageAPI "github.com/influenzanet/messaging-service/pkg/api/messaging_service"
 	"github.com/influenzanet/user-management-service/pkg/models"
 	"github.com/influenzanet/user-management-service/pkg/tokens"
@@ -35,7 +36,7 @@ func (s *userManagementServer) generateAndSendVerificationCode(instanceID string
 		_, err = s.clients.MessagingService.SendInstantEmail(context.TODO(), &messageAPI.SendEmailReq{
 			InstanceId:  instanceID,
 			To:          []string{accountID},
-			MessageType: "verification-code",
+			MessageType: constants.EMAIL_TYPE_AUTH_VERIFICATION_CODE,
 			ContentInfos: map[string]string{
 				"verificationCode": code,
 			},
