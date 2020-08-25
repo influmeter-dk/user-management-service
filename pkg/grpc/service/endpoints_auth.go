@@ -27,7 +27,8 @@ const (
 	contactVerificationMessageCooldown = 1 * 60
 	loginVerificationCodeCooldown      = 20
 
-	signupRateLimitWindow = 5 * 60
+	signupRateLimitWindow    = 5 * 60
+	loginFailedAttemptWindow = 5 * 50 // seconds
 )
 
 func (s *userManagementServer) Status(ctx context.Context, _ *empty.Empty) (*api.ServiceStatus, error) {
@@ -148,7 +149,7 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
 	}
 
-	if utils.HasMoreAttemptsRecently(user.Account.FailedLoginAttempts, 10, 5*60) {
+	if utils.HasMoreAttemptsRecently(user.Account.FailedLoginAttempts, 10, loginFailedAttemptWindow) {
 		log.Printf("SECURITY WARNING: login attempt blocked for email address for %s - too many wrong tries recently", email)
 		time.Sleep(5 * time.Second)
 		return nil, status.Error(codes.InvalidArgument, "account blocked for 5 minutes")
@@ -238,6 +239,7 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 	user.Timestamps.LastLogin = time.Now().Unix()
 	user.Account.VerificationCode = models.VerificationCode{}
 	user.Account.FailedLoginAttempts = utils.RemoveAttemptsOlderThan(user.Account.FailedLoginAttempts, 3600)
+	user.Account.PasswordResetTriggers = utils.RemoveAttemptsOlderThan(user.Account.PasswordResetTriggers, 7200)
 
 	user, err = s.userDBservice.UpdateUser(req.InstanceId, user)
 	if err != nil {
@@ -304,12 +306,13 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 	// Create user DB object from request:
 	newUser := models.User{
 		Account: models.Account{
-			Type:                "email",
-			AccountID:           email,
-			AccountConfirmedAt:  0, // not confirmed yet
-			Password:            password,
-			PreferredLanguage:   req.PreferredLanguage,
-			FailedLoginAttempts: []int64{},
+			Type:                  "email",
+			AccountID:             email,
+			AccountConfirmedAt:    0, // not confirmed yet
+			Password:              password,
+			PreferredLanguage:     req.PreferredLanguage,
+			FailedLoginAttempts:   []int64{},
+			PasswordResetTriggers: []int64{},
 		},
 		Roles: []string{"PARTICIPANT"},
 		Profiles: []models.Profile{

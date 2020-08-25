@@ -17,6 +17,8 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+const passwordResetAttemptWindow = 60 * 60 // 1 hour
+
 func (s *userManagementServer) InitiatePasswordReset(ctx context.Context, req *api.InitiateResetPasswordMsg) (*api.ServiceStatus, error) {
 	if req == nil || req.AccountId == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
@@ -30,6 +32,12 @@ func (s *userManagementServer) InitiatePasswordReset(ctx context.Context, req *a
 	if err != nil {
 		log.Printf("InitiatePasswordReset: %s", err.Error())
 		return nil, status.Error(codes.InvalidArgument, "invalid account id")
+	}
+
+	if utils.HasMoreAttemptsRecently(user.Account.PasswordResetTriggers, 5, passwordResetAttemptWindow) {
+		log.Printf("SECURITY WARNING: password reset attempt blocked for email address for %s - too many tries recently", req.AccountId)
+		time.Sleep(5 * time.Second)
+		return nil, status.Error(codes.InvalidArgument, "account blocked for a while")
 	}
 
 	// TempToken for contact verification:
@@ -62,6 +70,10 @@ func (s *userManagementServer) InitiatePasswordReset(ctx context.Context, req *a
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	// <---
+
+	if err2 := s.userDBservice.SavePasswordResetTrigger(req.InstanceId, user.ID.Hex()); err != nil {
+		log.Printf("DB ERROR: unexpected error when updating user: %s ", err2.Error())
+	}
 
 	// ---> Log Event
 	_, err = s.clients.LoggingService.SaveLogEvent(context.TODO(), &loggingAPI.NewLogEvent{
