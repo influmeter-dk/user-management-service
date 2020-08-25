@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/influenzanet/go-utils/pkg/constants"
+	loggingAPI "github.com/influenzanet/logging-service/pkg/api"
 	messageAPI "github.com/influenzanet/messaging-service/pkg/api/messaging_service"
 	"github.com/influenzanet/user-management-service/pkg/api"
 	"github.com/influenzanet/user-management-service/pkg/models"
@@ -61,6 +62,21 @@ func (s *userManagementServer) InitiatePasswordReset(ctx context.Context, req *a
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	// <---
+
+	// ---> Log Event
+	_, err = s.clients.LoggingService.SaveLogEvent(context.TODO(), &loggingAPI.NewLogEvent{
+		Origin:     "user-management",
+		InstanceId: req.InstanceId,
+		UserId:     user.ID.Hex(),
+		EventType:  loggingAPI.LogEventType_LOG,
+		EventName:  "password reset initiated",
+		Msg:        "email sent",
+	})
+	if err != nil {
+		log.Printf("ERROR: password reset initiation method failed to save log: %s", err.Error())
+	}
+	// <---
+
 	return &api.ServiceStatus{
 		Msg:     "email sending triggered",
 		Version: apiVersion,
@@ -136,6 +152,20 @@ func (s *userManagementServer) ResetPassword(ctx context.Context, req *api.Reset
 	if err := s.globalDBService.DeleteAllTempTokenForUser(tokenInfos.InstanceID, tokenInfos.UserID, "password-reset"); err != nil {
 		log.Printf("ChangePassword: %s", err.Error())
 	}
+
+	// ---> Log Event
+	_, err = s.clients.LoggingService.SaveLogEvent(context.TODO(), &loggingAPI.NewLogEvent{
+		Origin:     "user-management",
+		InstanceId: tokenInfos.InstanceID,
+		UserId:     user.ID.Hex(),
+		EventType:  loggingAPI.LogEventType_LOG,
+		EventName:  "password reset",
+		Msg:        "new password set after password reset",
+	})
+	if err != nil {
+		log.Printf("ERROR: password reset method failed to save log: %s", err.Error())
+	}
+	// <---
 
 	return &api.ServiceStatus{
 		Version: apiVersion,

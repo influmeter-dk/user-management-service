@@ -9,6 +9,7 @@ import (
 	"github.com/influenzanet/user-management-service/pkg/api"
 	"github.com/influenzanet/user-management-service/pkg/models"
 	"github.com/influenzanet/user-management-service/pkg/tokens"
+	loggingMock "github.com/influenzanet/user-management-service/test/mocks/logging_service"
 	messageMock "github.com/influenzanet/user-management-service/test/mocks/messaging_service"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
@@ -17,6 +18,7 @@ func TestInitiatePasswordResetEndpoint(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	mockMessagingClient := messageMock.NewMockMessagingServiceApiClient(mockCtrl)
+	mockLoggingClient := loggingMock.NewMockLoggingServiceApiClient(mockCtrl)
 
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
@@ -26,6 +28,7 @@ func TestInitiatePasswordResetEndpoint(t *testing.T) {
 		},
 		clients: &models.APIClients{
 			MessagingService: mockMessagingClient,
+			LoggingService:   mockLoggingClient,
 		},
 	}
 
@@ -78,6 +81,11 @@ func TestInitiatePasswordResetEndpoint(t *testing.T) {
 
 	t.Run("with valid account id", func(t *testing.T) {
 		mockMessagingClient.EXPECT().SendInstantEmail(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
+
+		mockLoggingClient.EXPECT().SaveLogEvent(
 			gomock.Any(),
 			gomock.Any(),
 		).Return(nil, nil)
@@ -203,6 +211,7 @@ func TestResetPasswordEndpoint(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	mockMessagingClient := messageMock.NewMockMessagingServiceApiClient(mockCtrl)
+	mockLoggingClient := loggingMock.NewMockLoggingServiceApiClient(mockCtrl)
 
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
@@ -212,6 +221,7 @@ func TestResetPasswordEndpoint(t *testing.T) {
 		},
 		clients: &models.APIClients{
 			MessagingService: mockMessagingClient,
+			LoggingService:   mockLoggingClient,
 		},
 	}
 
@@ -313,6 +323,11 @@ func TestResetPasswordEndpoint(t *testing.T) {
 
 	t.Run("with valid arguments", func(t *testing.T) {
 		mockMessagingClient.EXPECT().SendInstantEmail(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
+
+		mockLoggingClient.EXPECT().SaveLogEvent(
 			gomock.Any(),
 			gomock.Any(),
 		).Return(nil, nil)
