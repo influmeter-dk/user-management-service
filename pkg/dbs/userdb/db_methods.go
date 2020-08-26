@@ -87,7 +87,7 @@ func (dbService *UserDBService) UpdateUserPassword(instanceID string, userID str
 
 	_id, _ := primitive.ObjectIDFromHex(userID)
 	filter := bson.M{"_id": _id}
-	update := bson.M{"$set": bson.M{"account.password": newPassword, "timestamps.updatedAt": time.Now().Unix()}}
+	update := bson.M{"$set": bson.M{"account.password": newPassword, "timestamps.lastPasswordChange": time.Now().Unix()}}
 	_, err := dbService.collectionRefUsers(instanceID).UpdateOne(ctx, filter, update)
 	if err != nil {
 		return err

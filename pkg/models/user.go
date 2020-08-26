@@ -238,18 +238,20 @@ func (u *User) RemoveRefreshToken(token string) error {
 
 // Timestamps describes metadata for the User
 type Timestamps struct {
-	LastTokenRefresh int64 `bson:"lastTokenRefresh"`
-	LastLogin        int64 `bson:"lastLogin"`
-	CreatedAt        int64 `bson:"createdAt"`
-	UpdatedAt        int64 `bson:"updatedAt"`
+	LastTokenRefresh   int64 `bson:"lastTokenRefresh"`
+	LastLogin          int64 `bson:"lastLogin"`
+	CreatedAt          int64 `bson:"createdAt"`
+	UpdatedAt          int64 `bson:"updatedAt"`
+	LastPasswordChange int64 `bson:"lastPasswordChange"`
 }
 
 // ToAPI converts the object from DB to API format
 func (o Timestamps) ToAPI() *api.User_Timestamps {
 	return &api.User_Timestamps{
-		LastTokenRefresh: o.LastTokenRefresh,
-		LastLogin:        o.LastLogin,
-		CreatedAt:        o.CreatedAt,
-		UpdatedAt:        o.UpdatedAt,
+		LastTokenRefresh:   o.LastTokenRefresh,
+		LastLogin:          o.LastLogin,
+		CreatedAt:          o.CreatedAt,
+		UpdatedAt:          o.UpdatedAt,
+		LastPasswordChange: o.LastPasswordChange,
 	}
 }
