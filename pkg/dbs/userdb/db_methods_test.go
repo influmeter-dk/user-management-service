@@ -262,3 +262,70 @@ func TestDbPerformActionForUsers(t *testing.T) {
 		t.Errorf("unexpected error: %v", err)
 	}
 }
+
+func AssertNumberOfNonParticipantUsers(instanceID string, count int) error {
+	users, err := testDBService.FindNonParticipantUsers(instanceID)
+	if err != nil {
+		return err
+	}
+	if len(users) != count {
+		return fmt.Errorf("wrong number of users found: %d instead of %d", len(users), count)
+	}
+	return nil
+}
+
+func TestDeleteUnverfiedUsers(t *testing.T) {
+	testUsers := []models.User{
+		{Account: models.Account{AccountID: "delete_1"}, Roles: []string{"RESEARCHER"}, Timestamps: models.Timestamps{CreatedAt: time.Now().Unix() - 100}},
+		{Account: models.Account{AccountID: "delete_2"}, Roles: []string{"RESEARCHER"}, Timestamps: models.Timestamps{CreatedAt: time.Now().Unix() - 50}},
+		{Account: models.Account{AccountID: "delete_3"}, Roles: []string{"RESEARCHER"}, Timestamps: models.Timestamps{CreatedAt: time.Now().Unix()}},
+	}
+	for _, u := range testUsers {
+		_, err := testDBService.AddUser(testInstanceID, u)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
+	t.Run("remove any other user not in the test set", func(t *testing.T) {
+		count, err := testDBService.DeleteUnverfiedUsers(testInstanceID, time.Now().Unix()-105)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+			return
+		}
+		log.Printf("deleted %d users", count)
+		err = AssertNumberOfNonParticipantUsers(testInstanceID, 3)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+			return
+		}
+	})
+
+	t.Run("remove 1 user", func(t *testing.T) {
+		count, err := testDBService.DeleteUnverfiedUsers(testInstanceID, time.Now().Unix()-55)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+			return
+		}
+		log.Printf("deleted %d users", count)
+		err = AssertNumberOfNonParticipantUsers(testInstanceID, 2)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+			return
+		}
+	})
+
+	t.Run("remove an other user", func(t *testing.T) {
+		count, err := testDBService.DeleteUnverfiedUsers(testInstanceID, time.Now().Unix()-15)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+			return
+		}
+		log.Printf("deleted %d users", count)
+		err = AssertNumberOfNonParticipantUsers(testInstanceID, 1)
+		if err != nil {
+			t.Errorf("unexpected error: %v", err)
+			return
+		}
+	})
+}

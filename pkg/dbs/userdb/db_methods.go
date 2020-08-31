@@ -198,6 +198,23 @@ func (dbService *UserDBService) DeleteUser(instanceID string, id string) error {
 	return nil
 }
 
+func (dbService *UserDBService) DeleteUnverfiedUsers(instanceID string, createdBefore int64) (int64, error) {
+	filter := bson.M{}
+	filter["$and"] = bson.A{
+		bson.M{"account.accountConfirmedAt": 0},
+		bson.M{"timestamps.createdAt": bson.M{"$lt": createdBefore}},
+	}
+
+	ctx, cancel := dbService.getContext()
+	defer cancel()
+	res, err := dbService.collectionRefUsers(instanceID).DeleteMany(ctx, filter, nil)
+	if err != nil {
+		return 0, err
+	}
+
+	return res.DeletedCount, nil
+}
+
 func (dbService *UserDBService) FindNonParticipantUsers(instanceID string) (users []models.User, err error) {
 	ctx, cancel := dbService.getContext()
 	defer cancel()
