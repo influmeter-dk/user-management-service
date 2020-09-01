@@ -10,6 +10,7 @@ import (
 	gc "github.com/influenzanet/user-management-service/pkg/grpc/clients"
 	"github.com/influenzanet/user-management-service/pkg/grpc/service"
 	"github.com/influenzanet/user-management-service/pkg/models"
+	"github.com/influenzanet/user-management-service/pkg/timer_event"
 )
 
 func main() {
@@ -28,6 +29,16 @@ func main() {
 	userDBService := userdb.NewUserDBService(conf.UserDBConfig)
 	globalDBService := globaldb.NewGlobalDBService(conf.GlobalDBConfig)
 
+	// Start timer thread
+	userTimerService := timer_event.NewUserManagmentTimerService(
+		60,
+		globalDBService,
+		userDBService,
+		clients,
+	)
+	userTimerService.Run()
+
+	// Start server thread
 	ctx := context.Background()
 
 	if err := service.RunServer(

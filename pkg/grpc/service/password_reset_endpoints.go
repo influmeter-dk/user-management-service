@@ -17,8 +17,6 @@ import (
 	"google.golang.org/grpc/status"
 )
 
-const passwordResetAttemptWindow = 60 * 60 // 1 hour
-
 func (s *userManagementServer) InitiatePasswordReset(ctx context.Context, req *api.InitiateResetPasswordMsg) (*api.ServiceStatus, error) {
 	if req == nil || req.AccountId == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")

@@ -22,15 +22,6 @@ import (
 	constants "github.com/influenzanet/go-utils/pkg/constants"
 )
 
-const (
-	verificationCodeLifetime           = 5 * 60 // for 2FA 6 digit code
-	contactVerificationMessageCooldown = 1 * 60
-	loginVerificationCodeCooldown      = 20
-
-	signupRateLimitWindow    = 5 * 60
-	loginFailedAttemptWindow = 5 * 50 // seconds
-)
-
 func (s *userManagementServer) Status(ctx context.Context, _ *empty.Empty) (*api.ServiceStatus, error) {
 	return &api.ServiceStatus{
 		Status:  api.ServiceStatus_NORMAL,
