@@ -13,6 +13,8 @@ import (
 	"github.com/influenzanet/user-management-service/pkg/timer_event"
 )
 
+const userManagementTimerEventFrequency = 90 * 60 // seconds
+
 func main() {
 	conf := config.InitConfig()
 
@@ -31,7 +33,7 @@ func main() {
 
 	// Start timer thread
 	userTimerService := timer_event.NewUserManagmentTimerService(
-		60,
+		userManagementTimerEventFrequency,
 		globalDBService,
 		userDBService,
 		clients,
