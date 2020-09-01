@@ -38,3 +38,7 @@ An example to run your created docker image - with the set environment variables
 
 ## Misc
 Maximum ten devices can get a refresh token at the same time - see pkg/models/user.go
+
+Create a database index on user collection for:
+- account.accountID
+- account.accountConfirmedAt + timestamps.createdAt
