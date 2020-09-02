@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"log"
+	"math/rand"
 	"strings"
 	"time"
 
@@ -328,6 +329,8 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 		newUser.ContactPreferences.SubscribedToNewsletter = true
 		newUser.ContactPreferences.SendNewsletterTo = []string{newUser.ContactInfos[0].ID.Hex()}
 	}
+	// on which weekday the user will receive the reminder emails
+	newUser.ContactPreferences.ReceiveWeeklyMessageDayOfWeek = int32(rand.Intn(7))
 
 	id, err := s.userDBservice.AddUser(instanceID, newUser)
 	if err != nil {

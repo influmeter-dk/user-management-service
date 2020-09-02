@@ -4,8 +4,9 @@ import "github.com/influenzanet/user-management-service/pkg/api"
 
 // ContactPreferences defines how to reach out to the user for what purpose
 type ContactPreferences struct {
-	SubscribedToNewsletter bool     `bson:"subscribedToNewsletter"`
-	SendNewsletterTo       []string `bson:"sendNewsletterTo"`
+	SubscribedToNewsletter        bool     `bson:"subscribedToNewsletter"`
+	SendNewsletterTo              []string `bson:"sendNewsletterTo"`
+	ReceiveWeeklyMessageDayOfWeek int32    `bson:"receiveWeeklyMessageDayOfWeek"`
 }
 
 func ContactPreferencesFromAPI(obj *api.ContactPreferences) ContactPreferences {
@@ -14,8 +15,9 @@ func ContactPreferencesFromAPI(obj *api.ContactPreferences) ContactPreferences {
 	}
 
 	res := ContactPreferences{
-		SubscribedToNewsletter: obj.SubscribedToNewsletter,
-		SendNewsletterTo:       obj.SendNewsletterTo,
+		SubscribedToNewsletter:        obj.SubscribedToNewsletter,
+		SendNewsletterTo:              obj.SendNewsletterTo,
+		ReceiveWeeklyMessageDayOfWeek: obj.ReceiveWeeklyMessageDayOfWeek,
 	}
 	return res
 }
@@ -23,7 +25,8 @@ func ContactPreferencesFromAPI(obj *api.ContactPreferences) ContactPreferences {
 // ToAPI converts a person from DB format into the API format
 func (obj ContactPreferences) ToAPI() *api.ContactPreferences {
 	return &api.ContactPreferences{
-		SubscribedToNewsletter: obj.SubscribedToNewsletter,
-		SendNewsletterTo:       obj.SendNewsletterTo,
+		SubscribedToNewsletter:        obj.SubscribedToNewsletter,
+		SendNewsletterTo:              obj.SendNewsletterTo,
+		ReceiveWeeklyMessageDayOfWeek: obj.ReceiveWeeklyMessageDayOfWeek,
 	}
 }
