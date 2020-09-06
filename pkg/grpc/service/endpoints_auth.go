@@ -517,7 +517,10 @@ func (s *userManagementServer) VerifyContact(ctx context.Context, req *api.TempT
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
 
-	tokenInfos, err := s.ValidateTempToken(req.Token, []string{constants.TOKEN_PURPOSE_CONTACT_VERIFICATION})
+	tokenInfos, err := s.ValidateTempToken(req.Token, []string{
+		constants.TOKEN_PURPOSE_CONTACT_VERIFICATION,
+		constants.TOKEN_PURPOSE_INVITATION,
+	})
 	if err != nil {
 		log.Printf("VerifyContact: %s", err.Error())
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -545,8 +548,11 @@ func (s *userManagementServer) VerifyContact(ctx context.Context, req *api.TempT
 	}
 	user, err = s.userDBservice.UpdateUser(tokenInfos.InstanceID, user)
 
-	if err := s.globalDBService.DeleteTempToken(req.Token); err != nil {
-		log.Printf("VerifyContact delete token: %s", err.Error())
+	if tokenInfos.Purpose != constants.TOKEN_PURPOSE_INVITATION {
+		// invitation token will be required for password reset, so we don't remove it
+		if err := s.globalDBService.DeleteTempToken(req.Token); err != nil {
+			log.Printf("VerifyContact delete token: %s", err.Error())
+		}
 	}
 	return user.ToAPI(), err
 }
