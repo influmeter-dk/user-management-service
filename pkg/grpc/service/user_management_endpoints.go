@@ -61,6 +61,9 @@ func (s *userManagementServer) CreateUser(ctx context.Context, req *api.CreateUs
 		},
 	}
 	newUser.AddNewEmail(req.AccountId, false)
+	if req.Use_2Fa {
+		newUser.Account.AuthType = "2FA"
+	}
 
 	instanceID := req.Token.InstanceId
 	id, err := s.userDBservice.AddUser(instanceID, newUser)
