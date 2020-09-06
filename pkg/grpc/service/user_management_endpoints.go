@@ -56,6 +56,9 @@ func (s *userManagementServer) CreateUser(ctx context.Context, req *api.CreateUs
 				AvatarID: "default",
 			},
 		},
+		Timestamps: models.Timestamps{
+			CreatedAt: time.Now().Unix() + userCreationTimestampOffset,
+		},
 	}
 	newUser.AddNewEmail(req.AccountId, false)
 
@@ -70,12 +73,12 @@ func (s *userManagementServer) CreateUser(ctx context.Context, req *api.CreateUs
 	tempTokenInfos := models.TempToken{
 		UserID:     id,
 		InstanceID: instanceID,
-		Purpose:    "contact-verification",
+		Purpose:    constants.TOKEN_PURPOSE_INVITATION,
 		Info: map[string]string{
 			"type":  "email",
 			"email": newUser.Account.AccountID,
 		},
-		Expiration: tokens.GetExpirationTime(time.Hour * 24 * 30),
+		Expiration: tokens.GetExpirationTime(time.Hour * 24 * 7),
 	}
 	tempToken, err := s.globalDBService.AddTempToken(tempTokenInfos)
 	if err != nil {
@@ -86,7 +89,7 @@ func (s *userManagementServer) CreateUser(ctx context.Context, req *api.CreateUs
 	_, err = s.clients.MessagingService.SendInstantEmail(ctx, &messageAPI.SendEmailReq{
 		InstanceId:  instanceID,
 		To:          []string{newUser.Account.AccountID},
-		MessageType: constants.EMAIL_TYPE_REGISTRATION,
+		MessageType: constants.EMAIL_TYPE_INVITATION,
 		ContentInfos: map[string]string{
 			"token": tempToken,
 		},
