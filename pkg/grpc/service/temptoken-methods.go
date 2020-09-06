@@ -15,7 +15,7 @@ func (s *userManagementServer) CleanExpiredTemptokens(offset int64) {
 	}
 }
 
-func (s *userManagementServer) ValidateTempToken(token string, withPurpose string) (tt *models.TempToken, err error) {
+func (s *userManagementServer) ValidateTempToken(token string, purposes []string) (tt *models.TempToken, err error) {
 	tokenInfos, err := s.globalDBService.GetTempToken(token)
 	if err != nil {
 		return nil, errors.New("wrong token")
@@ -26,10 +26,18 @@ func (s *userManagementServer) ValidateTempToken(token string, withPurpose strin
 		return nil, errors.New("token expired")
 	}
 
-	if withPurpose != "" && withPurpose != tokenInfos.Purpose {
-		return nil, errors.New("wrong token purpose")
+	if len(purposes) > 0 {
+		found := false
+		for _, p := range purposes {
+			if p == tokenInfos.Purpose {
+				found = true
+				break
+			}
+		}
+		if !found {
+			return nil, errors.New("wrong token purpose")
+		}
 	}
-
 	tt = &tokenInfos
 	return
 }

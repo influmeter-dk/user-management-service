@@ -405,7 +405,7 @@ func (s *userManagementServer) UseUnsubscribeToken(ctx context.Context, req *api
 	if req == nil || req.Token == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
-	tokenInfos, err := s.ValidateTempToken(req.Token, "unsubscribe-newsletter")
+	tokenInfos, err := s.ValidateTempToken(req.Token, []string{constants.TOKEN_PURPOSE_UNSUBSCRIBE_NEWSLETTER})
 	if err != nil {
 		log.Printf("UseUnsubscribeToken: %s", err.Error())
 		return nil, status.Error(codes.InvalidArgument, err.Error())

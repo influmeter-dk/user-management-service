@@ -517,7 +517,7 @@ func (s *userManagementServer) VerifyContact(ctx context.Context, req *api.TempT
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
 
-	tokenInfos, err := s.ValidateTempToken(req.Token, constants.TOKEN_PURPOSE_CONTACT_VERIFICATION)
+	tokenInfos, err := s.ValidateTempToken(req.Token, []string{constants.TOKEN_PURPOSE_CONTACT_VERIFICATION})
 	if err != nil {
 		log.Printf("VerifyContact: %s", err.Error())
 		return nil, status.Error(codes.InvalidArgument, err.Error())
