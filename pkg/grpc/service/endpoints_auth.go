@@ -80,7 +80,7 @@ func (s *userManagementServer) AutoValidateTempToken(ctx context.Context, req *a
 		log.Printf("SECURITY WARNING: temptoken cannot be found %s", req.TempToken)
 		return nil, status.Error(codes.InvalidArgument, "invalid token")
 	}
-	if tempToken.Purpose != "survey-login" {
+	if tempToken.Purpose != constants.TOKEN_PURPOSE_SURVEY_LOGIN {
 		log.Printf("SECURITY WARNING: temptoken with wrong prupose found: %s - by user %s in instance %s", tempToken.Purpose, tempToken.UserID, tempToken.InstanceID)
 		return nil, status.Error(codes.InvalidArgument, "invalid token")
 	}
@@ -240,7 +240,7 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 	}
 
 	// remove all temptokens for password reset:
-	if err := s.globalDBService.DeleteAllTempTokenForUser(instanceID, user.ID.Hex(), "password-reset"); err != nil {
+	if err := s.globalDBService.DeleteAllTempTokenForUser(instanceID, user.ID.Hex(), constants.TOKEN_PURPOSE_PASSWORD_RESET); err != nil {
 		log.Printf("LoginWithEmail: %s", err.Error())
 	}
 
@@ -344,7 +344,7 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 	tempTokenInfos := models.TempToken{
 		UserID:     id,
 		InstanceID: instanceID,
-		Purpose:    "contact-verification",
+		Purpose:    constants.TOKEN_PURPOSE_CONTACT_VERIFICATION,
 		Info: map[string]string{
 			"type":  "email",
 			"email": newUser.Account.AccountID,
@@ -517,7 +517,7 @@ func (s *userManagementServer) VerifyContact(ctx context.Context, req *api.TempT
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
 
-	tokenInfos, err := s.ValidateTempToken(req.Token, "contact-verification")
+	tokenInfos, err := s.ValidateTempToken(req.Token, constants.TOKEN_PURPOSE_CONTACT_VERIFICATION)
 	if err != nil {
 		log.Printf("VerifyContact: %s", err.Error())
 		return nil, status.Error(codes.InvalidArgument, err.Error())
@@ -575,7 +575,7 @@ func (s *userManagementServer) ResendContactVerification(ctx context.Context, re
 	tempTokenInfos := models.TempToken{
 		UserID:     req.Token.Id,
 		InstanceID: req.Token.InstanceId,
-		Purpose:    "contact-verification",
+		Purpose:    constants.TOKEN_PURPOSE_CONTACT_VERIFICATION,
 		Info: map[string]string{
 			"type":  "email",
 			"email": ci.Email,

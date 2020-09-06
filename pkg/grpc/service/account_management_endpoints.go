@@ -82,7 +82,7 @@ func (s *userManagementServer) ChangePassword(ctx context.Context, req *api.Pass
 	// ---
 
 	// remove all temptokens for password reset:
-	if err := s.globalDBService.DeleteAllTempTokenForUser(req.Token.InstanceId, req.Token.Id, "password-reset"); err != nil {
+	if err := s.globalDBService.DeleteAllTempTokenForUser(req.Token.InstanceId, req.Token.Id, constants.TOKEN_PURPOSE_PASSWORD_RESET); err != nil {
 		log.Printf("ChangePassword: %s", err.Error())
 	}
 
@@ -191,7 +191,7 @@ func (s *userManagementServer) ChangeAccountIDEmail(ctx context.Context, req *ap
 		tempTokenInfos := models.TempToken{
 			UserID:     user.ID.Hex(),
 			InstanceID: req.Token.InstanceId,
-			Purpose:    "contact-verification",
+			Purpose:    constants.TOKEN_PURPOSE_CONTACT_VERIFICATION,
 			Info: map[string]string{
 				"type":  "email",
 				"email": user.Account.AccountID,
@@ -450,7 +450,7 @@ func (s *userManagementServer) AddEmail(ctx context.Context, req *api.ContactInf
 	tempTokenInfos := models.TempToken{
 		UserID:     user.ID.Hex(),
 		InstanceID: req.Token.InstanceId,
-		Purpose:    "contact-verification",
+		Purpose:    constants.TOKEN_PURPOSE_CONTACT_VERIFICATION,
 		Info: map[string]string{
 			"type":  "email",
 			"email": req.ContactInfo.GetEmail(),

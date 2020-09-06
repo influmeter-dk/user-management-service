@@ -98,7 +98,8 @@ func (s *userManagementServer) GetInfosForPasswordReset(ctx context.Context, req
 	if req == nil || req.Token == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
-	tokenInfos, err := s.ValidateTempToken(req.Token, "password-reset")
+
+	tokenInfos, err := s.ValidateTempToken(req.Token, constants.TOKEN_PURPOSE_PASSWORD_RESET)
 	if err != nil {
 		log.Printf("GetInfosForPasswordReset: %s", err.Error())
 		return nil, status.Error(codes.InvalidArgument, "wrong token")
@@ -120,7 +121,7 @@ func (s *userManagementServer) ResetPassword(ctx context.Context, req *api.Reset
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
 
-	tokenInfos, err := s.ValidateTempToken(req.Token, "password-reset")
+	tokenInfos, err := s.ValidateTempToken(req.Token, constants.TOKEN_PURPOSE_PASSWORD_RESET)
 	if err != nil {
 		log.Printf("GetInfosForPasswordReset: %s", err.Error())
 		return nil, status.Error(codes.InvalidArgument, "wrong token")
@@ -159,7 +160,7 @@ func (s *userManagementServer) ResetPassword(ctx context.Context, req *api.Reset
 	// ---
 
 	// remove all temptokens for password reset:
-	if err := s.globalDBService.DeleteAllTempTokenForUser(tokenInfos.InstanceID, tokenInfos.UserID, "password-reset"); err != nil {
+	if err := s.globalDBService.DeleteAllTempTokenForUser(tokenInfos.InstanceID, tokenInfos.UserID, constants.TOKEN_PURPOSE_PASSWORD_RESET); err != nil {
 		log.Printf("ChangePassword: %s", err.Error())
 	}
 

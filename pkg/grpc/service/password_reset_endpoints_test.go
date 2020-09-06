@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/golang/mock/gomock"
+	"github.com/influenzanet/go-utils/pkg/constants"
 	"github.com/influenzanet/user-management-service/pkg/api"
 	"github.com/influenzanet/user-management-service/pkg/models"
 	"github.com/influenzanet/user-management-service/pkg/tokens"
@@ -133,7 +134,7 @@ func TestGetInfosForPasswordResetEndpoint(t *testing.T) {
 	testTempTokenOld := models.TempToken{
 		UserID:     testUsers[0].ID.Hex(),
 		InstanceID: testInstanceID,
-		Purpose:    "password-reset",
+		Purpose:    constants.TOKEN_PURPOSE_PASSWORD_RESET,
 		Expiration: time.Now().Unix() - 10,
 	}
 	token, err := testGlobalDBService.AddTempToken(testTempTokenOld)
@@ -146,7 +147,7 @@ func TestGetInfosForPasswordResetEndpoint(t *testing.T) {
 	testTempToken := models.TempToken{
 		UserID:     testUsers[0].ID.Hex(),
 		InstanceID: testInstanceID,
-		Purpose:    "password-reset",
+		Purpose:    constants.TOKEN_PURPOSE_PASSWORD_RESET,
 		Expiration: tokens.GetExpirationTime(10 * time.Second),
 	}
 	token, err = testGlobalDBService.AddTempToken(testTempToken)
@@ -249,7 +250,7 @@ func TestResetPasswordEndpoint(t *testing.T) {
 	testTempTokenOld := models.TempToken{
 		UserID:     testUsers[0].ID.Hex(),
 		InstanceID: testInstanceID,
-		Purpose:    "password-reset",
+		Purpose:    constants.TOKEN_PURPOSE_PASSWORD_RESET,
 		Expiration: time.Now().Unix() - 10,
 	}
 	token, err := testGlobalDBService.AddTempToken(testTempTokenOld)
@@ -262,7 +263,7 @@ func TestResetPasswordEndpoint(t *testing.T) {
 	testTempToken := models.TempToken{
 		UserID:     testUsers[0].ID.Hex(),
 		InstanceID: testInstanceID,
-		Purpose:    "password-reset",
+		Purpose:    constants.TOKEN_PURPOSE_PASSWORD_RESET,
 		Expiration: tokens.GetExpirationTime(10 * time.Second),
 	}
 	token, err = testGlobalDBService.AddTempToken(testTempToken)

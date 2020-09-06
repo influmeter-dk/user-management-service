@@ -7,6 +7,7 @@ import (
 
 	"github.com/golang/mock/gomock"
 	api_types "github.com/influenzanet/go-utils/pkg/api_types"
+	"github.com/influenzanet/go-utils/pkg/constants"
 	"github.com/influenzanet/user-management-service/pkg/api"
 	"github.com/influenzanet/user-management-service/pkg/models"
 	"github.com/influenzanet/user-management-service/pkg/pwhash"
@@ -155,7 +156,7 @@ func TestAutoValidateTempToken(t *testing.T) {
 		InstanceID: testInstanceID,
 		UserID:     testUser.ID.Hex(),
 		Expiration: time.Now().Unix() + 20,
-		Purpose:    "survey-login",
+		Purpose:    constants.TOKEN_PURPOSE_SURVEY_LOGIN,
 	})
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
@@ -167,7 +168,7 @@ func TestAutoValidateTempToken(t *testing.T) {
 		InstanceID: testInstanceID,
 		UserID:     testUser.ID.Hex(),
 		Expiration: time.Now().Unix() - 20,
-		Purpose:    "survey-login",
+		Purpose:    constants.TOKEN_PURPOSE_SURVEY_LOGIN,
 	})
 	if err != nil {
 		t.Errorf("unexpected error: %v", err)
@@ -860,7 +861,7 @@ func TestVerifyAccountEndpoint(t *testing.T) {
 		tempTokenInfos := models.TempToken{
 			UserID:     testUsers[0].ID.Hex(),
 			InstanceID: testInstanceID,
-			Purpose:    "contact-verification",
+			Purpose:    constants.TOKEN_PURPOSE_CONTACT_VERIFICATION,
 			Info: map[string]string{
 				"type":  "email",
 				"email": testUsers[0].ContactInfos[1].Email,
@@ -894,7 +895,7 @@ func TestVerifyAccountEndpoint(t *testing.T) {
 		tempTokenInfos := models.TempToken{
 			UserID:     testUsers[0].ID.Hex(),
 			InstanceID: testInstanceID,
-			Purpose:    "contact-verification",
+			Purpose:    constants.TOKEN_PURPOSE_CONTACT_VERIFICATION,
 			Info: map[string]string{
 				"type":  "email",
 				"email": testUsers[0].Account.AccountID,
