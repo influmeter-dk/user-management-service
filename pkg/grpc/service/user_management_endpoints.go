@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"log"
+	"math/rand"
 	"time"
 
 	"github.com/influenzanet/go-utils/pkg/constants"
@@ -64,6 +65,7 @@ func (s *userManagementServer) CreateUser(ctx context.Context, req *api.CreateUs
 	if req.Use_2Fa {
 		newUser.Account.AuthType = "2FA"
 	}
+	newUser.ContactPreferences.ReceiveWeeklyMessageDayOfWeek = int32(rand.Intn(7))
 
 	instanceID := req.Token.InstanceId
 	id, err := s.userDBservice.AddUser(instanceID, newUser)
