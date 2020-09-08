@@ -46,7 +46,7 @@ func (s *userManagementServer) SendVerificationCode(ctx context.Context, req *ap
 		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
 	}
 
-	if utils.HasMoreAttemptsRecently(user.Account.FailedLoginAttempts, 10, loginFailedAttemptWindow) {
+	if utils.HasMoreAttemptsRecently(user.Account.FailedLoginAttempts, allowedPasswordAttempts, loginFailedAttemptWindow) {
 		log.Printf("SECURITY WARNING: login attempt blocked for email address for %s - too many wrong tries recently", req.Email)
 		time.Sleep(time.Duration(rand.Intn(10)) * time.Second)
 		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
@@ -59,6 +59,9 @@ func (s *userManagementServer) SendVerificationCode(ctx context.Context, req *ap
 	match, err := pwhash.ComparePasswordWithHash(user.Account.Password, req.Password)
 	if err != nil || !match {
 		log.Printf("SECURITY WARNING: login step 1 attempt with wrong password for %s", user.ID.Hex())
+		if err2 := s.userDBservice.SaveFailedLoginAttempt(req.InstanceId, user.ID.Hex()); err != nil {
+			log.Printf("DB ERROR: unexpected error when updating user: %s ", err2.Error())
+		}
 		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
 	}
 
@@ -144,7 +147,7 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
 	}
 
-	if utils.HasMoreAttemptsRecently(user.Account.FailedLoginAttempts, 10, loginFailedAttemptWindow) {
+	if utils.HasMoreAttemptsRecently(user.Account.FailedLoginAttempts, allowedPasswordAttempts, loginFailedAttemptWindow) {
 		log.Printf("SECURITY WARNING: login attempt blocked for email address for %s - too many wrong tries recently", req.Email)
 		time.Sleep(time.Duration(rand.Intn(10)) * time.Second)
 		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
@@ -413,17 +416,7 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 		return nil, status.Error(codes.Internal, "user created, but token could not be saved")
 	}
 
-	_, err = s.clients.LoggingService.SaveLogEvent(context.TODO(), &loggingAPI.NewLogEvent{
-		Origin:     "user-management",
-		InstanceId: req.InstanceId,
-		UserId:     newUser.ID.Hex(),
-		EventType:  loggingAPI.LogEventType_LOG,
-		EventName:  "account created",
-		Msg:        newUser.Account.AccountID,
-	})
-	if err != nil {
-		log.Printf("ERROR: signup method failed to save log: %s", err.Error())
-	}
+	s.SaveLogEvent(req.InstanceId, newUser.ID.Hex(), loggingAPI.LogEventType_LOG, "account created", newUser.Account.AccountID)
 
 	response := &api.TokenResponse{
 		AccessToken:       token,
