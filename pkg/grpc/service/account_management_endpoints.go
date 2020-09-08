@@ -86,17 +86,7 @@ func (s *userManagementServer) ChangePassword(ctx context.Context, req *api.Pass
 		log.Printf("ChangePassword: %s", err.Error())
 	}
 
-	_, err = s.clients.LoggingService.SaveLogEvent(context.TODO(), &loggingAPI.NewLogEvent{
-		Origin:     "user-management",
-		InstanceId: req.Token.InstanceId,
-		UserId:     req.Token.Id,
-		EventType:  loggingAPI.LogEventType_LOG,
-		EventName:  "password changed",
-		// Msg:        updUser.Account.AccountID,
-	})
-	if err != nil {
-		log.Printf("ERROR: failed to save log: %s", err.Error())
-	}
+	s.SaveLogEvent(req.Token.InstanceId, req.Token.Id, loggingAPI.LogEventType_LOG, "password changed", "")
 
 	return &api.ServiceStatus{
 		Status: api.ServiceStatus_NORMAL,
@@ -234,17 +224,8 @@ func (s *userManagementServer) ChangeAccountIDEmail(ctx context.Context, req *ap
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	_, err = s.clients.LoggingService.SaveLogEvent(context.TODO(), &loggingAPI.NewLogEvent{
-		Origin:     "user-management",
-		InstanceId: req.Token.InstanceId,
-		UserId:     updUser.ID.Hex(),
-		EventType:  loggingAPI.LogEventType_LOG,
-		EventName:  "account ID changed",
-		Msg:        updUser.Account.AccountID,
-	})
-	if err != nil {
-		log.Printf("ERROR: failed to save log: %s", err.Error())
-	}
+	s.SaveLogEvent(req.Token.InstanceId, updUser.ID.Hex(), loggingAPI.LogEventType_LOG, "account ID changed", updUser.Account.AccountID)
+
 	return updUser.ToAPI(), nil
 }
 
@@ -286,17 +267,7 @@ func (s *userManagementServer) DeleteAccount(ctx context.Context, req *api.UserR
 		log.Printf("error, when trying to remove temp-tokens: %s", err.Error())
 	}
 
-	_, err = s.clients.LoggingService.SaveLogEvent(context.TODO(), &loggingAPI.NewLogEvent{
-		Origin:     "user-management",
-		InstanceId: req.InstanceId,
-		UserId:     req.UserId,
-		EventType:  loggingAPI.LogEventType_LOG,
-		EventName:  "account deleted",
-		Msg:        user.Account.AccountID,
-	})
-	if err != nil {
-		log.Printf("ERROR: failed to save log: %s", err.Error())
-	}
+	s.SaveLogEvent(req.Token.InstanceId, req.Token.Id, loggingAPI.LogEventType_LOG, "account deleted", user.Account.AccountID)
 
 	log.Printf("user account with id %s successfully removed", req.UserId)
 	return &api.ServiceStatus{
@@ -340,17 +311,7 @@ func (s *userManagementServer) SaveProfile(ctx context.Context, req *api.Profile
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	_, err = s.clients.LoggingService.SaveLogEvent(context.TODO(), &loggingAPI.NewLogEvent{
-		Origin:     "user-management",
-		InstanceId: req.Token.InstanceId,
-		UserId:     req.Token.Id,
-		EventType:  loggingAPI.LogEventType_LOG,
-		EventName:  "saved profile",
-		Msg:        req.Profile.Alias,
-	})
-	if err != nil {
-		log.Printf("ERROR: failed to save log: %s", err.Error())
-	}
+	s.SaveLogEvent(req.Token.InstanceId, req.Token.Id, loggingAPI.LogEventType_LOG, "saved profile", req.Profile.Alias)
 
 	return updUser.ToAPI(), nil
 }
@@ -377,17 +338,7 @@ func (s *userManagementServer) RemoveProfile(ctx context.Context, req *api.Profi
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	_, err = s.clients.LoggingService.SaveLogEvent(context.TODO(), &loggingAPI.NewLogEvent{
-		Origin:     "user-management",
-		InstanceId: req.Token.InstanceId,
-		UserId:     req.Token.Id,
-		EventType:  loggingAPI.LogEventType_LOG,
-		EventName:  "removed profile with id",
-		Msg:        req.Profile.Id,
-	})
-	if err != nil {
-		log.Printf("ERROR: failed to save log: %s", err.Error())
-	}
+	s.SaveLogEvent(req.Token.InstanceId, req.Token.Id, loggingAPI.LogEventType_LOG, "removed profile with id", req.Profile.Id)
 	return updUser.ToAPI(), nil
 }
 

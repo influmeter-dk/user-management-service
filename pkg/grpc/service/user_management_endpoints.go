@@ -106,17 +106,7 @@ func (s *userManagementServer) CreateUser(ctx context.Context, req *api.CreateUs
 	}
 	// <---
 
-	_, err = s.clients.LoggingService.SaveLogEvent(context.TODO(), &loggingAPI.NewLogEvent{
-		Origin:     "user-management",
-		InstanceId: req.Token.InstanceId,
-		UserId:     req.Token.Id,
-		EventType:  loggingAPI.LogEventType_LOG,
-		EventName:  "ACCOUNT CREATED",
-		Msg:        newUser.Account.AccountID,
-	})
-	if err != nil {
-		log.Printf("ERROR: failed to save log: %s", err.Error())
-	}
+	s.SaveLogEvent(req.Token.InstanceId, req.Token.Id, loggingAPI.LogEventType_LOG, "ACCOUNT CREATED BY ADMIN", newUser.Account.AccountID)
 
 	return newUser.ToAPI(), nil
 }
@@ -141,17 +131,7 @@ func (s *userManagementServer) AddRoleForUser(ctx context.Context, req *api.Role
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	_, err = s.clients.LoggingService.SaveLogEvent(context.TODO(), &loggingAPI.NewLogEvent{
-		Origin:     "user-management",
-		InstanceId: req.Token.InstanceId,
-		UserId:     user.ID.Hex(),
-		EventType:  loggingAPI.LogEventType_LOG,
-		EventName:  "ADD ROLE",
-		Msg:        user.Account.AccountID + " + " + req.Role,
-	})
-	if err != nil {
-		log.Printf("ERROR: failed to save log: %s", err.Error())
-	}
+	s.SaveLogEvent(req.Token.InstanceId, req.Token.Id, loggingAPI.LogEventType_LOG, "ADD ROLE", user.Account.AccountID+"("+user.ID.Hex()+") + "+req.Role)
 
 	return user.ToAPI(), nil
 }
@@ -174,18 +154,8 @@ func (s *userManagementServer) RemoveRoleForUser(ctx context.Context, req *api.R
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
-	_, err = s.clients.LoggingService.SaveLogEvent(context.TODO(), &loggingAPI.NewLogEvent{
-		Origin:     "user-management",
-		InstanceId: req.Token.InstanceId,
-		UserId:     user.ID.Hex(),
-		EventType:  loggingAPI.LogEventType_LOG,
-		EventName:  "REMOVE ROLE",
-		Msg:        user.Account.AccountID + " - " + req.Role,
-	})
-	if err != nil {
-		log.Printf("ERROR: failed to save log: %s", err.Error())
-	}
 
+	s.SaveLogEvent(req.Token.InstanceId, req.Token.Id, loggingAPI.LogEventType_LOG, "REMOVE ROLE", user.Account.AccountID+"("+user.ID.Hex()+") - "+req.Role)
 	return user.ToAPI(), nil
 }
 

@@ -75,18 +75,7 @@ func (s *userManagementServer) InitiatePasswordReset(ctx context.Context, req *a
 	}
 
 	// ---> Log Event
-	_, err = s.clients.LoggingService.SaveLogEvent(context.TODO(), &loggingAPI.NewLogEvent{
-		Origin:     "user-management",
-		InstanceId: req.InstanceId,
-		UserId:     user.ID.Hex(),
-		EventType:  loggingAPI.LogEventType_LOG,
-		EventName:  "password reset initiated",
-		Msg:        "email sent",
-	})
-	if err != nil {
-		log.Printf("ERROR: password reset initiation method failed to save log: %s", err.Error())
-	}
-	// <---
+	s.SaveLogEvent(req.InstanceId, user.ID.Hex(), loggingAPI.LogEventType_LOG, "password reset initiated", "email sent")
 
 	return &api.ServiceStatus{
 		Msg:     "email sending triggered",
@@ -174,18 +163,7 @@ func (s *userManagementServer) ResetPassword(ctx context.Context, req *api.Reset
 	}
 
 	// ---> Log Event
-	_, err = s.clients.LoggingService.SaveLogEvent(context.TODO(), &loggingAPI.NewLogEvent{
-		Origin:     "user-management",
-		InstanceId: tokenInfos.InstanceID,
-		UserId:     user.ID.Hex(),
-		EventType:  loggingAPI.LogEventType_LOG,
-		EventName:  "password reset",
-		Msg:        "new password set after password reset",
-	})
-	if err != nil {
-		log.Printf("ERROR: password reset method failed to save log: %s", err.Error())
-	}
-	// <---
+	s.SaveLogEvent(tokenInfos.InstanceID, user.ID.Hex(), loggingAPI.LogEventType_LOG, "password reset", "new password set after password reset")
 
 	return &api.ServiceStatus{
 		Version: apiVersion,
