@@ -406,7 +406,7 @@ func TestChangeAccountIDEmailEndpoint(t *testing.T) {
 			NewEmail: testUsers[0].Account.AccountID,
 		}
 		_, err := s.ChangeAccountIDEmail(context.Background(), req)
-		ok, msg := shouldHaveGrpcErrorStatus(err, "already in use")
+		ok, msg := shouldHaveGrpcErrorStatus(err, "action failed")
 		if !ok {
 			t.Error(msg)
 		}

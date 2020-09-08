@@ -109,10 +109,12 @@ func (s *userManagementServer) ChangeAccountIDEmail(ctx context.Context, req *ap
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
 
+	req.NewEmail = utils.SanitizeEmail(req.NewEmail)
+
 	// is email address still free to use?
 	_, err := s.userDBservice.GetUserByAccountID(req.Token.InstanceId, req.NewEmail)
 	if err == nil {
-		return nil, status.Error(codes.InvalidArgument, "already in use")
+		return nil, status.Error(codes.Internal, "action failed")
 	}
 
 	user, err := s.userDBservice.GetUserByID(req.Token.InstanceId, req.Token.Id)
@@ -135,7 +137,7 @@ func (s *userManagementServer) ChangeAccountIDEmail(ctx context.Context, req *ap
 		tempTokenInfos := models.TempToken{
 			UserID:     user.ID.Hex(),
 			InstanceID: req.Token.InstanceId,
-			Purpose:    "restore-account-id",
+			Purpose:    constants.TOKEN_PURPOSE_RESTORE_ACCOUNT_ID,
 			Info: map[string]string{
 				"oldEmail": user.Account.AccountID,
 				"newEmail": req.NewEmail,
@@ -444,7 +446,7 @@ func (s *userManagementServer) AddEmail(ctx context.Context, req *api.ContactInf
 		return nil, status.Error(codes.Internal, "user not found")
 	}
 
-	user.AddNewEmail(req.ContactInfo.GetEmail(), false)
+	user.AddNewEmail(utils.SanitizeEmail(req.ContactInfo.GetEmail()), false)
 
 	// TempToken for contact verification:
 	tempTokenInfos := models.TempToken{
