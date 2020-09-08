@@ -4,7 +4,6 @@ import (
 	"context"
 	"log"
 	"math/rand"
-	"strings"
 	"time"
 
 	"github.com/golang/protobuf/ptypes/empty"
@@ -36,15 +35,20 @@ func (s *userManagementServer) SendVerificationCode(ctx context.Context, req *ap
 		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
 	}
 
-	instanceID := req.InstanceId
-	if instanceID == "" {
-		instanceID = "default"
+	if req.InstanceId == "" {
+		req.InstanceId = "default"
 	}
 
-	email := strings.ToLower(req.Email)
-	user, err := s.userDBservice.GetUserByAccountID(instanceID, email)
+	req.Email = utils.SanitizeEmail(req.Email)
+	user, err := s.userDBservice.GetUserByAccountID(req.InstanceId, req.Email)
 	if err != nil {
-		log.Printf("SECURITY WARNING: login step 1 attempt with wrong email address for %s", email)
+		log.Printf("SECURITY WARNING: login step 1 attempt with wrong email address for %s", req.Email)
+		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
+	}
+
+	if utils.HasMoreAttemptsRecently(user.Account.FailedLoginAttempts, 10, loginFailedAttemptWindow) {
+		log.Printf("SECURITY WARNING: login attempt blocked for email address for %s - too many wrong tries recently", req.Email)
+		time.Sleep(time.Duration(rand.Intn(10)) * time.Second)
 		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
 	}
 
@@ -58,7 +62,7 @@ func (s *userManagementServer) SendVerificationCode(ctx context.Context, req *ap
 		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
 	}
 
-	err = s.generateAndSendVerificationCode(instanceID, user)
+	err = s.generateAndSendVerificationCode(req.InstanceId, user)
 	if err != nil {
 		return nil, err
 	}
@@ -129,22 +133,21 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
 	}
 
-	instanceID := req.InstanceId
-	if instanceID == "" {
-		instanceID = "default"
+	if req.InstanceId == "" {
+		req.InstanceId = "default"
 	}
 
-	email := strings.ToLower(req.Email)
-	user, err := s.userDBservice.GetUserByAccountID(instanceID, email)
+	req.Email = utils.SanitizeEmail(req.Email)
+	user, err := s.userDBservice.GetUserByAccountID(req.InstanceId, req.Email)
 	if err != nil {
-		log.Printf("SECURITY WARNING: login attempt with wrong email address for %s", email)
+		log.Printf("SECURITY WARNING: login attempt with wrong email address for %s", req.Email)
 		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
 	}
 
 	if utils.HasMoreAttemptsRecently(user.Account.FailedLoginAttempts, 10, loginFailedAttemptWindow) {
-		log.Printf("SECURITY WARNING: login attempt blocked for email address for %s - too many wrong tries recently", email)
-		time.Sleep(5 * time.Second)
-		return nil, status.Error(codes.InvalidArgument, "account blocked for 5 minutes")
+		log.Printf("SECURITY WARNING: login attempt blocked for email address for %s - too many wrong tries recently", req.Email)
+		time.Sleep(time.Duration(rand.Intn(10)) * time.Second)
+		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
 	}
 
 	match, err := pwhash.ComparePasswordWithHash(user.Account.Password, req.Password)
@@ -158,7 +161,7 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 
 	if user.Account.AuthType == "2FA" {
 		if user.Account.VerificationCode.Code == "" || req.VerificationCode == "" {
-			err = s.generateAndSendVerificationCode(instanceID, user)
+			err = s.generateAndSendVerificationCode(req.InstanceId, user)
 			if err != nil {
 				return nil, err
 			}
@@ -210,7 +213,7 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 		apiUser.Account.AccountConfirmedAt > 0,
 		apiUser.Profiles[0].Id,
 		currentRoles,
-		instanceID,
+		req.InstanceId,
 		s.JWT.TokenExpiryInterval,
 		username,
 		nil,
@@ -240,7 +243,7 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 	}
 
 	// remove all temptokens for password reset:
-	if err := s.globalDBService.DeleteAllTempTokenForUser(instanceID, user.ID.Hex(), constants.TOKEN_PURPOSE_PASSWORD_RESET); err != nil {
+	if err := s.globalDBService.DeleteAllTempTokenForUser(req.InstanceId, user.ID.Hex(), constants.TOKEN_PURPOSE_PASSWORD_RESET); err != nil {
 		log.Printf("LoginWithEmail: %s", err.Error())
 	}
 
@@ -264,6 +267,7 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
 
+	req.Email = utils.SanitizeEmail(req.Email)
 	if !utils.CheckEmailFormat(req.Email) {
 		return nil, status.Error(codes.InvalidArgument, "email not valid")
 	}
@@ -274,12 +278,11 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 		return nil, status.Error(codes.InvalidArgument, "password too weak")
 	}
 
-	instanceID := req.InstanceId
-	if instanceID == "" {
-		instanceID = "default"
+	if req.InstanceId == "" {
+		req.InstanceId = "default"
 	}
 
-	newUserCount, err := s.userDBservice.CountRecentlyCreatedUsers(instanceID, signupRateLimitWindow)
+	newUserCount, err := s.userDBservice.CountRecentlyCreatedUsers(req.InstanceId, signupRateLimitWindow)
 	if err != nil {
 		log.Printf("ERROR: signup - unexpected error when counting: %v", err)
 	} else {
@@ -294,12 +297,11 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	email := strings.ToLower(req.Email)
 	// Create user DB object from request:
 	newUser := models.User{
 		Account: models.Account{
 			Type:                  "email",
-			AccountID:             email,
+			AccountID:             req.Email,
 			AccountConfirmedAt:    0, // not confirmed yet
 			Password:              password,
 			PreferredLanguage:     req.PreferredLanguage,
@@ -320,7 +322,6 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 		},
 	}
 	newUser.AddNewEmail(req.Email, false)
-
 	if req.Use_2Fa {
 		newUser.Account.AuthType = "2FA"
 	}
@@ -333,7 +334,7 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 	newUser.ContactPreferences.SubscribedToWeekly = true
 	newUser.ContactPreferences.ReceiveWeeklyMessageDayOfWeek = int32(rand.Intn(7))
 
-	id, err := s.userDBservice.AddUser(instanceID, newUser)
+	id, err := s.userDBservice.AddUser(req.InstanceId, newUser)
 	if err != nil {
 		log.Printf("ERROR: when creating new user: %s", err.Error())
 		return nil, status.Error(codes.Internal, "user creation failed")
@@ -343,7 +344,7 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 	// TempToken for contact verification:
 	tempTokenInfos := models.TempToken{
 		UserID:     id,
-		InstanceID: instanceID,
+		InstanceID: req.InstanceId,
 		Purpose:    constants.TOKEN_PURPOSE_CONTACT_VERIFICATION,
 		Info: map[string]string{
 			"type":  "email",
@@ -371,7 +372,7 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 		if err != nil {
 			log.Printf("SignupWithEmail: %s", err.Error())
 		}
-	}(instanceID, newUser.Account.AccountID, tempToken, newUser.Account.PreferredLanguage)
+	}(req.InstanceId, newUser.Account.AccountID, tempToken, newUser.Account.PreferredLanguage)
 	// <---
 
 	var username string
@@ -386,7 +387,7 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 		apiUser.Account.AccountConfirmedAt > 0,
 		apiUser.Profiles[0].Id,
 		newUser.Roles,
-		instanceID,
+		req.InstanceId,
 		s.JWT.TokenExpiryInterval,
 		username,
 		nil,

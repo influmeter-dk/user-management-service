@@ -28,6 +28,7 @@ func (s *userManagementServer) CreateUser(ctx context.Context, req *api.CreateUs
 		return nil, status.Error(codes.PermissionDenied, "permission denied")
 	}
 
+	req.AccountId = utils.SanitizeEmail(req.AccountId)
 	if !utils.CheckEmailFormat(req.AccountId) {
 		return nil, status.Error(codes.InvalidArgument, "account id not a valid email")
 	}

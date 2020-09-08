@@ -525,7 +525,7 @@ func TestLogin(t *testing.T) {
 		}
 
 		_, err := s.LoginWithEmail(context.Background(), req)
-		ok, msg := shouldHaveGrpcErrorStatus(err, "account blocked for 5 minutes")
+		ok, msg := shouldHaveGrpcErrorStatus(err, "invalid username and/or password")
 		if !ok {
 			t.Error(msg)
 			return

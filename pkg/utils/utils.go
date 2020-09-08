@@ -7,6 +7,12 @@ import (
 	"github.com/influenzanet/go-utils/pkg/api_types"
 )
 
+func SanitizeEmail(email string) string {
+	email = strings.ToLower(email)
+	email = strings.Trim(email, " \n\r")
+	return email
+}
+
 // CheckEmailFormat to check if input string is a correct email address
 func CheckEmailFormat(email string) bool {
 	if len(email) > 254 {

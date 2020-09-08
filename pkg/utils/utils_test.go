@@ -8,6 +8,25 @@ import (
 	api_types "github.com/influenzanet/go-utils/pkg/api_types"
 )
 
+func TestSanitizeEmail(t *testing.T) {
+	t.Run("with different formats", func(t *testing.T) {
+		email := SanitizeEmail("\n23234@test.DE")
+		if email != "23234@test.de" {
+			t.Errorf("unexpected email: %s", email)
+		}
+
+		email = SanitizeEmail("  \n 23234@test.DE \n\r")
+		if email != "23234@test.de" {
+			t.Errorf("unexpected email: %s", email)
+		}
+
+		email = SanitizeEmail("23234@test.de")
+		if email != "23234@test.de" {
+			t.Errorf("unexpected email: %s", email)
+		}
+	})
+}
+
 func TestCheckPasswordFormat(t *testing.T) {
 	log.Println("RUN util test")
 	t.Run("with a too short password", func(t *testing.T) {

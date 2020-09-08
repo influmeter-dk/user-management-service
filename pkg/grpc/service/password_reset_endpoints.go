@@ -21,12 +21,13 @@ func (s *userManagementServer) InitiatePasswordReset(ctx context.Context, req *a
 	if req == nil || req.AccountId == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
-	instanceID := req.InstanceId
-	if instanceID == "" {
-		instanceID = "default"
-	}
 
-	user, err := s.userDBservice.GetUserByAccountID(instanceID, req.AccountId)
+	if req.InstanceId == "" {
+		req.InstanceId = "default"
+	}
+	req.AccountId = utils.SanitizeEmail(req.AccountId)
+
+	user, err := s.userDBservice.GetUserByAccountID(req.InstanceId, req.AccountId)
 	if err != nil {
 		log.Printf("InitiatePasswordReset: %s", err.Error())
 		return nil, status.Error(codes.InvalidArgument, "invalid account id")
@@ -41,7 +42,7 @@ func (s *userManagementServer) InitiatePasswordReset(ctx context.Context, req *a
 	// TempToken for contact verification:
 	tempTokenInfos := models.TempToken{
 		UserID:     user.ID.Hex(),
-		InstanceID: instanceID,
+		InstanceID: req.InstanceId,
 		Purpose:    constants.EMAIL_TYPE_PASSWORD_RESET,
 		Info: map[string]string{
 			"email": user.Account.AccountID,
@@ -55,7 +56,7 @@ func (s *userManagementServer) InitiatePasswordReset(ctx context.Context, req *a
 
 	// ---> Trigger message sending
 	_, err = s.clients.MessagingService.SendInstantEmail(ctx, &messageAPI.SendEmailReq{
-		InstanceId:  instanceID,
+		InstanceId:  req.InstanceId,
 		To:          []string{user.Account.AccountID},
 		MessageType: constants.EMAIL_TYPE_PASSWORD_RESET,
 		ContentInfos: map[string]string{
