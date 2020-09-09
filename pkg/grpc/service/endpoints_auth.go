@@ -555,6 +555,8 @@ func (s *userManagementServer) VerifyContact(ctx context.Context, req *api.TempT
 	}
 	user, err = s.userDBservice.UpdateUser(tokenInfos.InstanceID, user)
 
+	s.SaveLogEvent(tokenInfos.InstanceID, tokenInfos.UserID, loggingAPI.LogEventType_LOG, constants.LOG_EVENT_CONTACT_VERIFIED, email)
+
 	if tokenInfos.Purpose != constants.TOKEN_PURPOSE_INVITATION {
 		// invitation token will be required for password reset, so we don't remove it
 		if err := s.globalDBService.DeleteTempToken(req.Token); err != nil {
