@@ -5,12 +5,14 @@ import (
 	"strings"
 	"time"
 
+	loggingAPI "github.com/influenzanet/logging-service/pkg/api"
 	"github.com/influenzanet/user-management-service/pkg/api"
 	"github.com/influenzanet/user-management-service/pkg/tokens"
 	"github.com/influenzanet/user-management-service/pkg/utils"
 	"google.golang.org/grpc/codes"
 
 	api_types "github.com/influenzanet/go-utils/pkg/api_types"
+	"github.com/influenzanet/go-utils/pkg/constants"
 	"google.golang.org/grpc/status"
 )
 
@@ -53,6 +55,7 @@ func (s *userManagementServer) RenewJWT(ctx context.Context, req *api.RefreshJWT
 
 	err = user.RemoveRefreshToken(req.RefreshToken)
 	if err != nil {
+		s.SaveLogEvent(parsedToken.InstanceID, parsedToken.ID, loggingAPI.LogEventType_SECURITY, constants.LOG_EVENT_TOKEN_REFRESH_SUCCESS, "wrong refresh token, cannot renew")
 		return nil, status.Error(codes.Internal, "wrong refresh token")
 	}
 	user.Timestamps.LastTokenRefresh = time.Now().Unix()
@@ -80,6 +83,8 @@ func (s *userManagementServer) RenewJWT(ctx context.Context, req *api.RefreshJWT
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+
+	s.SaveLogEvent(parsedToken.InstanceID, parsedToken.ID, loggingAPI.LogEventType_LOG, constants.LOG_EVENT_TOKEN_REFRESH_SUCCESS, "")
 
 	return &api.TokenResponse{
 		AccessToken:       newToken,

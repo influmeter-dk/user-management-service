@@ -5,10 +5,12 @@ import (
 	"testing"
 	"time"
 
+	"github.com/golang/mock/gomock"
 	api_types "github.com/influenzanet/go-utils/pkg/api_types"
 	"github.com/influenzanet/user-management-service/pkg/api"
 	"github.com/influenzanet/user-management-service/pkg/models"
 	"github.com/influenzanet/user-management-service/pkg/tokens"
+	loggingMock "github.com/influenzanet/user-management-service/test/mocks/logging_service"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -124,11 +126,18 @@ func TestValidateJWT(t *testing.T) {
 }
 
 func TestRenewJWT(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockLoggingClient := loggingMock.NewMockLoggingServiceApiClient(mockCtrl)
+
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
 		JWT: models.JWTConfig{
 			TokenExpiryInterval: time.Second * 2,
+		},
+		clients: &models.APIClients{
+			LoggingService: mockLoggingClient,
 		},
 	}
 	refreshToken := "TEST-REFRESH-TOKEN-STRING"
@@ -188,6 +197,11 @@ func TestRenewJWT(t *testing.T) {
 	})
 
 	t.Run("with wrong refresh token", func(t *testing.T) {
+		mockLoggingClient.EXPECT().SaveLogEvent(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
+
 		req := &api.RefreshJWTRequest{
 			AccessToken:  userToken,
 			RefreshToken: userToken + "x",
@@ -200,6 +214,11 @@ func TestRenewJWT(t *testing.T) {
 	})
 
 	t.Run("with normal tokens", func(t *testing.T) {
+		mockLoggingClient.EXPECT().SaveLogEvent(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
+
 		req := &api.RefreshJWTRequest{
 			AccessToken:  userToken,
 			RefreshToken: refreshToken,
@@ -223,6 +242,11 @@ func TestRenewJWT(t *testing.T) {
 
 	// Test with expired token
 	t.Run("with expired token", func(t *testing.T) {
+		mockLoggingClient.EXPECT().SaveLogEvent(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
+
 		req := &api.RefreshJWTRequest{
 			AccessToken:  userToken,
 			RefreshToken: refreshToken,

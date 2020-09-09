@@ -710,11 +710,18 @@ func TestSignupWithEmail(t *testing.T) {
 }
 
 func TestSwitchProfileEndpoint(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockLoggingClient := loggingMock.NewMockLoggingServiceApiClient(mockCtrl)
+
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
 		JWT: models.JWTConfig{
 			TokenExpiryInterval: time.Second * 2,
+		},
+		clients: &models.APIClients{
+			LoggingService: mockLoggingClient,
 		},
 	}
 
@@ -782,6 +789,11 @@ func TestSwitchProfileEndpoint(t *testing.T) {
 	})
 
 	t.Run("with correct profile id", func(t *testing.T) {
+		mockLoggingClient.EXPECT().SaveLogEvent(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
+
 		req := &api.SwitchProfileRequest{
 			Token:        &token,
 			ProfileId:    testUsers[0].Profiles[2].ID.Hex(),

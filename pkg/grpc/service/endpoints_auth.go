@@ -506,6 +506,7 @@ func (s *userManagementServer) SwitchProfile(ctx context.Context, req *api.Switc
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
+	s.SaveLogEvent(req.Token.InstanceId, req.Token.Id, loggingAPI.LogEventType_LOG, constants.LOG_EVENT_TOKEN_REFRESH_SUCCESS, "")
 
 	response := &api.TokenResponse{
 		AccessToken:       token,
