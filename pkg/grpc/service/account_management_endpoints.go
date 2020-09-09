@@ -55,6 +55,7 @@ func (s *userManagementServer) ChangePassword(ctx context.Context, req *api.Pass
 
 	match, err := pwhash.ComparePasswordWithHash(user.Account.Password, req.OldPassword)
 	if err != nil || !match {
+		s.SaveLogEvent(req.Token.InstanceId, user.ID.Hex(), loggingAPI.LogEventType_SECURITY, constants.LOG_EVENT_AUTH_WRONG_PASSWORD, "change password endpoint")
 		return nil, status.Error(codes.InvalidArgument, "invalid user and/or password")
 	}
 

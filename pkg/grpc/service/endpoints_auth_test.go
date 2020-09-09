@@ -22,12 +22,14 @@ func TestSendVerificationCode(t *testing.T) {
 	mockCtrl := gomock.NewController(t)
 	defer mockCtrl.Finish()
 	mockMessagingClient := messageMock.NewMockMessagingServiceApiClient(mockCtrl)
+	mockLoggingClient := loggingMock.NewMockLoggingServiceApiClient(mockCtrl)
 
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
 		clients: &models.APIClients{
 			MessagingService: mockMessagingClient,
+			LoggingService:   mockLoggingClient,
 		},
 		JWT: models.JWTConfig{
 			TokenExpiryInterval: time.Second * 2,
@@ -80,6 +82,10 @@ func TestSendVerificationCode(t *testing.T) {
 	})
 
 	t.Run("with wrong password payload", func(t *testing.T) {
+		mockLoggingClient.EXPECT().SaveLogEvent(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
 		_, err := s.SendVerificationCode(context.Background(), &api.SendVerificationCodeReq{
 			InstanceId: testInstanceID,
 			Email:      "test-send-verification-code@test.com",

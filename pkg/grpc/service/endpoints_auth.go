@@ -47,6 +47,7 @@ func (s *userManagementServer) SendVerificationCode(ctx context.Context, req *ap
 	}
 
 	if utils.HasMoreAttemptsRecently(user.Account.FailedLoginAttempts, allowedPasswordAttempts, loginFailedAttemptWindow) {
+		s.SaveLogEvent(req.InstanceId, user.ID.Hex(), loggingAPI.LogEventType_SECURITY, constants.LOG_EVENT_LOGIN_ATTEMPT_ON_BLOCKED_ACCOUNT, "send verification code endpoint")
 		log.Printf("SECURITY WARNING: login attempt blocked for email address for %s - too many wrong tries recently", req.Email)
 		time.Sleep(time.Duration(rand.Intn(10)) * time.Second)
 		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
@@ -62,6 +63,7 @@ func (s *userManagementServer) SendVerificationCode(ctx context.Context, req *ap
 		if err2 := s.userDBservice.SaveFailedLoginAttempt(req.InstanceId, user.ID.Hex()); err != nil {
 			log.Printf("DB ERROR: unexpected error when updating user: %s ", err2.Error())
 		}
+		s.SaveLogEvent(req.InstanceId, user.ID.Hex(), loggingAPI.LogEventType_SECURITY, constants.LOG_EVENT_AUTH_WRONG_PASSWORD, "send verification code endpoint")
 		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
 	}
 

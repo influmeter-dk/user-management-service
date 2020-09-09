@@ -210,6 +210,11 @@ func TestChangePasswordEndpoint(t *testing.T) {
 	})
 
 	t.Run("with wrong old password", func(t *testing.T) {
+		mockLoggingClient.EXPECT().SaveLogEvent(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
+
 		req := &api.PasswordChangeMsg{
 			Token: &api_types.TokenInfos{
 				Id:         id,
