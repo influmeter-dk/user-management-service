@@ -102,15 +102,21 @@ func (s *userManagementServer) ChangeAccountIDEmail(ctx context.Context, req *ap
 
 	req.NewEmail = utils.SanitizeEmail(req.NewEmail)
 
-	// is email address still free to use?
-	_, err := s.userDBservice.GetUserByAccountID(req.Token.InstanceId, req.NewEmail)
-	if err == nil {
-		return nil, status.Error(codes.Internal, "action failed")
-	}
-
 	user, err := s.userDBservice.GetUserByID(req.Token.InstanceId, req.Token.Id)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "user not found")
+	}
+
+	match, err := pwhash.ComparePasswordWithHash(user.Account.Password, req.Password)
+	if err != nil || !match {
+		s.SaveLogEvent(req.Token.InstanceId, user.ID.Hex(), loggingAPI.LogEventType_SECURITY, constants.LOG_EVENT_AUTH_WRONG_PASSWORD, "change account id endpoint")
+		return nil, status.Error(codes.InvalidArgument, "action failed")
+	}
+
+	// is email address still free to use?
+	_, err = s.userDBservice.GetUserByAccountID(req.Token.InstanceId, req.NewEmail)
+	if err == nil {
+		return nil, status.Error(codes.Internal, "action failed")
 	}
 
 	if user.Account.Type != "email" {

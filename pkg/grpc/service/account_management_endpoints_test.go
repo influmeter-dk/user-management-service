@@ -315,6 +315,8 @@ func TestChangeAccountIDEmailEndpoint(t *testing.T) {
 		},
 	}
 
+	testPw := "test234-TESt??"
+	hashPw, _ := pwhash.HashPassword(testPw)
 	oldEmailContantID := primitive.NewObjectID()
 	// Create Test User
 	testUsers, err := addTestUsers([]models.User{
@@ -323,6 +325,7 @@ func TestChangeAccountIDEmailEndpoint(t *testing.T) {
 				Type:               "email",
 				AccountID:          "change_account_id_0@test.com",
 				AccountConfirmedAt: 1231239192,
+				Password:           hashPw,
 			},
 		},
 		{
@@ -330,6 +333,7 @@ func TestChangeAccountIDEmailEndpoint(t *testing.T) {
 				Type:               "email",
 				AccountID:          "change_account_id_1@test.com",
 				AccountConfirmedAt: 1231239192,
+				Password:           hashPw,
 			},
 			ContactInfos: []models.ContactInfo{
 				{
@@ -353,6 +357,7 @@ func TestChangeAccountIDEmailEndpoint(t *testing.T) {
 			Account: models.Account{
 				Type:               "email",
 				AccountID:          "change_account_id_2@test.com",
+				Password:           hashPw,
 				AccountConfirmedAt: 0,
 			},
 			ContactInfos: []models.ContactInfo{
@@ -368,6 +373,7 @@ func TestChangeAccountIDEmailEndpoint(t *testing.T) {
 			Account: models.Account{
 				Type:               "email",
 				AccountID:          "change_account_id_3@test.com",
+				Password:           hashPw,
 				AccountConfirmedAt: 123123123,
 			},
 			ContactInfos: []models.ContactInfo{
@@ -402,6 +408,26 @@ func TestChangeAccountIDEmailEndpoint(t *testing.T) {
 		}
 	})
 
+	t.Run("with wrong password", func(t *testing.T) {
+		mockLoggingClient.EXPECT().SaveLogEvent(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
+		req := &api.EmailChangeMsg{
+			Token: &api_types.TokenInfos{
+				Id:         testUsers[1].ID.Hex(),
+				InstanceId: testInstanceID,
+			},
+			NewEmail: testUsers[0].Account.AccountID,
+			Password: "worng",
+		}
+		_, err := s.ChangeAccountIDEmail(context.Background(), req)
+		ok, msg := shouldHaveGrpcErrorStatus(err, "action failed")
+		if !ok {
+			t.Error(msg)
+		}
+	})
+
 	t.Run("try to update to an already existing email", func(t *testing.T) {
 		req := &api.EmailChangeMsg{
 			Token: &api_types.TokenInfos{
@@ -409,6 +435,7 @@ func TestChangeAccountIDEmailEndpoint(t *testing.T) {
 				InstanceId: testInstanceID,
 			},
 			NewEmail: testUsers[0].Account.AccountID,
+			Password: testPw,
 		}
 		_, err := s.ChangeAccountIDEmail(context.Background(), req)
 		ok, msg := shouldHaveGrpcErrorStatus(err, "action failed")
@@ -433,6 +460,7 @@ func TestChangeAccountIDEmailEndpoint(t *testing.T) {
 				InstanceId: testInstanceID,
 			},
 			NewEmail: testUsers[1].ContactInfos[1].Email,
+			Password: testPw,
 		}
 
 		resp, err := s.ChangeAccountIDEmail(context.Background(), req)
@@ -470,6 +498,7 @@ func TestChangeAccountIDEmailEndpoint(t *testing.T) {
 				InstanceId: testInstanceID,
 			},
 			NewEmail: "newemail@test.com",
+			Password: testPw,
 		}
 		resp, err := s.ChangeAccountIDEmail(context.Background(), req)
 		if err != nil {
@@ -502,6 +531,7 @@ func TestChangeAccountIDEmailEndpoint(t *testing.T) {
 				InstanceId: testInstanceID,
 			},
 			NewEmail: "newemail2@test.com",
+			Password: testPw,
 		}
 		resp, err := s.ChangeAccountIDEmail(context.Background(), req)
 		if err != nil {
