@@ -249,7 +249,7 @@ func TestChangePasswordEndpoint(t *testing.T) {
 		mockLoggingClient.EXPECT().SaveLogEvent(
 			gomock.Any(),
 			gomock.Any(),
-		).Return(nil, nil)
+		).Times(2).Return(nil, nil)
 
 		mockMessagingClient.EXPECT().SendInstantEmail(
 			gomock.Any(),

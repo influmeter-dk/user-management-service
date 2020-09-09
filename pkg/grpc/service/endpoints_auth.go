@@ -144,11 +144,17 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 	user, err := s.userDBservice.GetUserByAccountID(req.InstanceId, req.Email)
 	if err != nil {
 		log.Printf("SECURITY WARNING: login attempt with wrong email address for %s", req.Email)
+		s.SaveLogEvent(req.InstanceId, "", loggingAPI.LogEventType_SECURITY, constants.LOG_EVENT_AUTH_WRONG_ACCOUNT_ID, req.Email)
 		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
 	}
 
 	if utils.HasMoreAttemptsRecently(user.Account.FailedLoginAttempts, allowedPasswordAttempts, loginFailedAttemptWindow) {
 		log.Printf("SECURITY WARNING: login attempt blocked for email address for %s - too many wrong tries recently", req.Email)
+
+		s.SaveLogEvent(req.InstanceId, user.ID.Hex(), loggingAPI.LogEventType_SECURITY, constants.LOG_EVENT_LOGIN_ATTEMPT_ON_BLOCKED_ACCOUNT, "")
+		if err2 := s.userDBservice.SaveFailedLoginAttempt(req.InstanceId, user.ID.Hex()); err != nil {
+			log.Printf("DB ERROR: unexpected error when updating user: %s ", err2.Error())
+		}
 		time.Sleep(time.Duration(rand.Intn(10)) * time.Second)
 		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
 	}
@@ -156,6 +162,7 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 	match, err := pwhash.ComparePasswordWithHash(user.Account.Password, req.Password)
 	if err != nil || !match {
 		log.Printf("SECURITY WARNING: login attempt with wrong password for %s", user.ID.Hex())
+		s.SaveLogEvent(req.InstanceId, user.ID.Hex(), loggingAPI.LogEventType_SECURITY, constants.LOG_EVENT_AUTH_WRONG_PASSWORD, "")
 		if err2 := s.userDBservice.SaveFailedLoginAttempt(req.InstanceId, user.ID.Hex()); err != nil {
 			log.Printf("DB ERROR: unexpected error when updating user: %s ", err2.Error())
 		}
@@ -186,6 +193,7 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 				log.Printf("LoginWithEmail: unexpected error when saving user -> %v", err)
 			}
 
+			s.SaveLogEvent(req.InstanceId, user.ID.Hex(), loggingAPI.LogEventType_SECURITY, constants.LOG_EVENT_AUTH_WRONG_VERIFICATION_CODE, "")
 			if err2 := s.userDBservice.SaveFailedLoginAttempt(req.InstanceId, user.ID.Hex()); err != nil {
 				log.Printf("DB ERROR: unexpected error when updating user: %s ", err2.Error())
 			}
@@ -249,6 +257,8 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 	if err := s.globalDBService.DeleteAllTempTokenForUser(req.InstanceId, user.ID.Hex(), constants.TOKEN_PURPOSE_PASSWORD_RESET); err != nil {
 		log.Printf("LoginWithEmail: %s", err.Error())
 	}
+
+	s.SaveLogEvent(req.InstanceId, apiUser.Id, loggingAPI.LogEventType_LOG, constants.LOG_EVENT_LOGIN_SUCCESS, "")
 
 	response := &api.LoginResponse{
 		Token: &api.TokenResponse{

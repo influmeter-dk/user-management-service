@@ -308,11 +308,18 @@ func TestAutoValidateTempToken(t *testing.T) {
 }
 
 func TestLogin(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockLoggingClient := loggingMock.NewMockLoggingServiceApiClient(mockCtrl)
+
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
 		JWT: models.JWTConfig{
 			TokenExpiryInterval: time.Second * 2,
+		},
+		clients: &models.APIClients{
+			LoggingService: mockLoggingClient,
 		},
 	}
 
@@ -401,6 +408,11 @@ func TestLogin(t *testing.T) {
 	})
 
 	t.Run("with wrong email", func(t *testing.T) {
+		mockLoggingClient.EXPECT().SaveLogEvent(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
+
 		req := &api.LoginWithEmailMsg{
 			Email:      "wrong@test.com",
 			Password:   currentPw,
@@ -419,6 +431,11 @@ func TestLogin(t *testing.T) {
 	})
 
 	t.Run("with wrong password", func(t *testing.T) {
+		mockLoggingClient.EXPECT().SaveLogEvent(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
+
 		req := &api.LoginWithEmailMsg{
 			Email:      testUser1.Account.AccountID,
 			Password:   currentPw + "w",
@@ -437,6 +454,11 @@ func TestLogin(t *testing.T) {
 	})
 
 	t.Run("with valid fields", func(t *testing.T) {
+		mockLoggingClient.EXPECT().SaveLogEvent(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
+
 		req := &api.LoginWithEmailMsg{
 			Email:         testUser1.Account.AccountID,
 			Password:      currentPw,
@@ -463,6 +485,11 @@ func TestLogin(t *testing.T) {
 
 	// 2FA tests
 	t.Run("with wrong verifcation code", func(t *testing.T) {
+		mockLoggingClient.EXPECT().SaveLogEvent(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
+
 		req := &api.LoginWithEmailMsg{
 			Email:            testUser2.Account.AccountID,
 			Password:         currentPw,
@@ -484,6 +511,11 @@ func TestLogin(t *testing.T) {
 	}
 
 	t.Run("with valid fields for 2FA", func(t *testing.T) {
+		mockLoggingClient.EXPECT().SaveLogEvent(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
+
 		req := &api.LoginWithEmailMsg{
 			Email:            testUser2.Account.AccountID,
 			Password:         currentPw,
@@ -510,6 +542,11 @@ func TestLogin(t *testing.T) {
 	})
 
 	t.Run("with brute force attack", func(t *testing.T) {
+		mockLoggingClient.EXPECT().SaveLogEvent(
+			gomock.Any(),
+			gomock.Any(),
+		).Times(12).Return(nil, nil)
+
 		req := &api.LoginWithEmailMsg{
 			Email:         testUser2.Account.AccountID,
 			Password:      currentPw + "w",
