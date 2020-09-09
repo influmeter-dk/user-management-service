@@ -164,6 +164,9 @@ func (s *userManagementServer) ChangeAccountIDEmail(ctx context.Context, req *ap
 		// <---
 	}
 	// if old AccountID was not confirmed probably wrong address used in the first place
+	if user.Profiles[0].Alias == user.Account.AccountID {
+		user.Profiles[0].Alias = req.NewEmail
+	}
 	user.Account.AccountID = req.NewEmail
 	user.Account.AccountConfirmedAt = 0
 
