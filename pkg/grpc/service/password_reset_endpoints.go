@@ -75,7 +75,7 @@ func (s *userManagementServer) InitiatePasswordReset(ctx context.Context, req *a
 	}
 
 	// ---> Log Event
-	s.SaveLogEvent(req.InstanceId, user.ID.Hex(), loggingAPI.LogEventType_LOG, "password reset initiated", "email sent")
+	s.SaveLogEvent(req.InstanceId, user.ID.Hex(), loggingAPI.LogEventType_LOG, constants.LOG_EVENT_PASSWORD_RESET_INITIATED, "email sent")
 
 	return &api.ServiceStatus{
 		Msg:     "email sending triggered",
@@ -163,7 +163,7 @@ func (s *userManagementServer) ResetPassword(ctx context.Context, req *api.Reset
 	}
 
 	// ---> Log Event
-	s.SaveLogEvent(tokenInfos.InstanceID, user.ID.Hex(), loggingAPI.LogEventType_LOG, "password reset", "new password set after password reset")
+	s.SaveLogEvent(tokenInfos.InstanceID, user.ID.Hex(), loggingAPI.LogEventType_LOG, constants.LOG_EVENT_PASSWORD_RESET, "new password set after password reset")
 
 	return &api.ServiceStatus{
 		Version: apiVersion,

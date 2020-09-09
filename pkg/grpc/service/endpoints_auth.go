@@ -416,7 +416,7 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 		return nil, status.Error(codes.Internal, "user created, but token could not be saved")
 	}
 
-	s.SaveLogEvent(req.InstanceId, newUser.ID.Hex(), loggingAPI.LogEventType_LOG, "account created", newUser.Account.AccountID)
+	s.SaveLogEvent(req.InstanceId, newUser.ID.Hex(), loggingAPI.LogEventType_LOG, constants.LOG_EVENT_ACCOUNT_CREATED, newUser.Account.AccountID)
 
 	response := &api.TokenResponse{
 		AccessToken:       token,

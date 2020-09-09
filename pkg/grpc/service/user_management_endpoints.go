@@ -106,7 +106,7 @@ func (s *userManagementServer) CreateUser(ctx context.Context, req *api.CreateUs
 	}
 	// <---
 
-	s.SaveLogEvent(req.Token.InstanceId, req.Token.Id, loggingAPI.LogEventType_LOG, "ACCOUNT CREATED BY ADMIN", newUser.Account.AccountID)
+	s.SaveLogEvent(req.Token.InstanceId, req.Token.Id, loggingAPI.LogEventType_LOG, constants.LOG_EVENT_ACCOUNT_CREATED, "by admin - "+newUser.ID.Hex()+" - "+newUser.Account.AccountID)
 
 	return newUser.ToAPI(), nil
 }
@@ -131,7 +131,7 @@ func (s *userManagementServer) AddRoleForUser(ctx context.Context, req *api.Role
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	s.SaveLogEvent(req.Token.InstanceId, req.Token.Id, loggingAPI.LogEventType_LOG, "ADD ROLE", user.Account.AccountID+"("+user.ID.Hex()+") + "+req.Role)
+	s.SaveLogEvent(req.Token.InstanceId, req.Token.Id, loggingAPI.LogEventType_LOG, constants.LOG_EVENT_ACCOUNT_ROLE_ADDED, user.Account.AccountID+"("+user.ID.Hex()+") + "+req.Role)
 
 	return user.ToAPI(), nil
 }
@@ -155,7 +155,7 @@ func (s *userManagementServer) RemoveRoleForUser(ctx context.Context, req *api.R
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	s.SaveLogEvent(req.Token.InstanceId, req.Token.Id, loggingAPI.LogEventType_LOG, "REMOVE ROLE", user.Account.AccountID+"("+user.ID.Hex()+") - "+req.Role)
+	s.SaveLogEvent(req.Token.InstanceId, req.Token.Id, loggingAPI.LogEventType_LOG, constants.LOG_EVENT_ACCOUNT_ROLE_REMOVED, user.Account.AccountID+"("+user.ID.Hex()+") - "+req.Role)
 	return user.ToAPI(), nil
 }
 

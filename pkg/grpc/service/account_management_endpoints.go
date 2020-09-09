@@ -86,7 +86,7 @@ func (s *userManagementServer) ChangePassword(ctx context.Context, req *api.Pass
 		log.Printf("ChangePassword: %s", err.Error())
 	}
 
-	s.SaveLogEvent(req.Token.InstanceId, req.Token.Id, loggingAPI.LogEventType_LOG, "password changed", "")
+	s.SaveLogEvent(req.Token.InstanceId, req.Token.Id, loggingAPI.LogEventType_LOG, constants.LOG_EVENT_PASSWORD_CHANGED, "")
 
 	return &api.ServiceStatus{
 		Status: api.ServiceStatus_NORMAL,
@@ -224,7 +224,7 @@ func (s *userManagementServer) ChangeAccountIDEmail(ctx context.Context, req *ap
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	s.SaveLogEvent(req.Token.InstanceId, updUser.ID.Hex(), loggingAPI.LogEventType_LOG, "account ID changed", updUser.Account.AccountID)
+	s.SaveLogEvent(req.Token.InstanceId, updUser.ID.Hex(), loggingAPI.LogEventType_LOG, constants.LOG_EVENT_ACCOUNT_ID_CHANGED, updUser.Account.AccountID)
 
 	return updUser.ToAPI(), nil
 }
@@ -267,7 +267,7 @@ func (s *userManagementServer) DeleteAccount(ctx context.Context, req *api.UserR
 		log.Printf("error, when trying to remove temp-tokens: %s", err.Error())
 	}
 
-	s.SaveLogEvent(req.Token.InstanceId, req.Token.Id, loggingAPI.LogEventType_LOG, "account deleted", user.Account.AccountID)
+	s.SaveLogEvent(req.Token.InstanceId, req.Token.Id, loggingAPI.LogEventType_LOG, constants.LOG_EVENT_ACCOUNT_DELETED, user.Account.AccountID)
 
 	log.Printf("user account with id %s successfully removed", req.UserId)
 	return &api.ServiceStatus{
@@ -311,7 +311,7 @@ func (s *userManagementServer) SaveProfile(ctx context.Context, req *api.Profile
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	s.SaveLogEvent(req.Token.InstanceId, req.Token.Id, loggingAPI.LogEventType_LOG, "saved profile", req.Profile.Alias)
+	s.SaveLogEvent(req.Token.InstanceId, req.Token.Id, loggingAPI.LogEventType_LOG, constants.LOG_EVENT_PROFILE_SAVED, req.Profile.Alias)
 
 	return updUser.ToAPI(), nil
 }
@@ -338,7 +338,7 @@ func (s *userManagementServer) RemoveProfile(ctx context.Context, req *api.Profi
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
-	s.SaveLogEvent(req.Token.InstanceId, req.Token.Id, loggingAPI.LogEventType_LOG, "removed profile with id", req.Profile.Id)
+	s.SaveLogEvent(req.Token.InstanceId, req.Token.Id, loggingAPI.LogEventType_LOG, constants.LOG_EVENT_PROFILE_REMOVED, "id: "+req.Profile.Id)
 	return updUser.ToAPI(), nil
 }
 
