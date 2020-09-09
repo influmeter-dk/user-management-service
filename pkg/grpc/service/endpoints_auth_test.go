@@ -820,11 +820,18 @@ func TestSwitchProfileEndpoint(t *testing.T) {
 }
 
 func TestVerifyAccountEndpoint(t *testing.T) {
+	mockCtrl := gomock.NewController(t)
+	defer mockCtrl.Finish()
+	mockLoggingClient := loggingMock.NewMockLoggingServiceApiClient(mockCtrl)
+
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
 		JWT: models.JWTConfig{
 			TokenExpiryInterval: time.Second * 2,
+		},
+		clients: &models.APIClients{
+			LoggingService: mockLoggingClient,
 		},
 	}
 
@@ -913,6 +920,11 @@ func TestVerifyAccountEndpoint(t *testing.T) {
 	})
 
 	t.Run("verify secondary address", func(t *testing.T) {
+		mockLoggingClient.EXPECT().SaveLogEvent(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
+
 		tempTokenInfos := models.TempToken{
 			UserID:     testUsers[0].ID.Hex(),
 			InstanceID: testInstanceID,
@@ -947,6 +959,11 @@ func TestVerifyAccountEndpoint(t *testing.T) {
 	})
 
 	t.Run("verify main address", func(t *testing.T) {
+		mockLoggingClient.EXPECT().SaveLogEvent(
+			gomock.Any(),
+			gomock.Any(),
+		).Return(nil, nil)
+
 		tempTokenInfos := models.TempToken{
 			UserID:     testUsers[0].ID.Hex(),
 			InstanceID: testInstanceID,
