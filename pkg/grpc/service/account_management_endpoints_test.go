@@ -327,6 +327,9 @@ func TestChangeAccountIDEmailEndpoint(t *testing.T) {
 				AccountConfirmedAt: 1231239192,
 				Password:           hashPw,
 			},
+			Profiles: []models.Profile{
+				{ID: primitive.NewObjectID(), Alias: "test"},
+			},
 		},
 		{
 			Account: models.Account{
@@ -334,6 +337,9 @@ func TestChangeAccountIDEmailEndpoint(t *testing.T) {
 				AccountID:          "change_account_id_1@test.com",
 				AccountConfirmedAt: 1231239192,
 				Password:           hashPw,
+			},
+			Profiles: []models.Profile{
+				{ID: primitive.NewObjectID(), Alias: "test"},
 			},
 			ContactInfos: []models.ContactInfo{
 				{
@@ -360,6 +366,9 @@ func TestChangeAccountIDEmailEndpoint(t *testing.T) {
 				Password:           hashPw,
 				AccountConfirmedAt: 0,
 			},
+			Profiles: []models.Profile{
+				{ID: primitive.NewObjectID(), Alias: "test"},
+			},
 			ContactInfos: []models.ContactInfo{
 				{
 					ID:          primitive.NewObjectID(),
@@ -375,6 +384,9 @@ func TestChangeAccountIDEmailEndpoint(t *testing.T) {
 				AccountID:          "change_account_id_3@test.com",
 				Password:           hashPw,
 				AccountConfirmedAt: 123123123,
+			},
+			Profiles: []models.Profile{
+				{ID: primitive.NewObjectID(), Alias: "test"},
 			},
 			ContactInfos: []models.ContactInfo{
 				{

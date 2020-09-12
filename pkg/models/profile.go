@@ -12,6 +12,7 @@ type Profile struct {
 	ConsentConfirmedAt int64              `bson:"consentConfirmedAt"`
 	CreatedAt          int64              `bson:"createdAt"`
 	AvatarID           string             `bson:"avatarID,omitempty"`
+	MainProfile        bool               `bson:"mainProfile"`
 }
 
 func ProfileFromAPI(p *api.Profile) Profile {
@@ -23,6 +24,7 @@ func ProfileFromAPI(p *api.Profile) Profile {
 		ConsentConfirmedAt: p.ConsentConfirmedAt,
 		CreatedAt:          p.CreatedAt,
 		AvatarID:           p.AvatarId,
+		MainProfile:        p.MainProfile,
 	}
 	if len(p.Id) > 0 {
 		_id, _ := primitive.ObjectIDFromHex(p.Id)
@@ -39,5 +41,6 @@ func (p Profile) ToAPI() *api.Profile {
 		ConsentConfirmedAt: p.ConsentConfirmedAt,
 		CreatedAt:          p.CreatedAt,
 		AvatarId:           p.AvatarID,
+		MainProfile:        p.MainProfile,
 	}
 }

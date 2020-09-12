@@ -179,6 +179,7 @@ func (u *User) AddProfile(p Profile) {
 func (u *User) UpdateProfile(p Profile) error {
 	for i, cP := range u.Profiles {
 		if cP.ID == p.ID {
+			p.MainProfile = cP.MainProfile
 			u.Profiles[i] = p
 			return nil
 		}
@@ -200,6 +201,9 @@ func (u User) FindProfile(id string) (Profile, error) {
 func (u *User) RemoveProfile(id string) error {
 	for i, cP := range u.Profiles {
 		if cP.ID.Hex() == id {
+			if cP.MainProfile {
+				return errors.New("cannot remove main profile")
+			}
 			u.Profiles = append(u.Profiles[:i], u.Profiles[i+1:]...)
 			return nil
 		}

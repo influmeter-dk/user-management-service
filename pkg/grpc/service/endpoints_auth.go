@@ -214,17 +214,25 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 	}
 
 	apiUser := user.ToAPI()
+	mainProfileID := ""
 	otherProfileIDs := []string{}
 	for _, p := range apiUser.Profiles {
-		if p.Id != apiUser.Profiles[0].Id {
+		if !p.MainProfile {
 			otherProfileIDs = append(otherProfileIDs, p.Id)
+		} else {
+			mainProfileID = p.Id
 		}
 	}
+	if mainProfileID == "" {
+		mainProfileID = otherProfileIDs[0]
+		otherProfileIDs = otherProfileIDs[1:]
+	}
+
 	// Access Token
 	token, err := tokens.GenerateNewToken(
 		apiUser.Id,
 		apiUser.Account.AccountConfirmedAt > 0,
-		apiUser.Profiles[0].Id,
+		mainProfileID,
 		currentRoles,
 		req.InstanceId,
 		s.JWT.TokenExpiryInterval,
@@ -268,7 +276,7 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 			RefreshToken:      rt,
 			ExpiresIn:         int32(s.JWT.TokenExpiryInterval / time.Minute),
 			Profiles:          apiUser.Profiles,
-			SelectedProfileId: apiUser.Profiles[0].Id,
+			SelectedProfileId: mainProfileID,
 			PreferredLanguage: apiUser.Account.PreferredLanguage,
 		},
 		User: user.ToAPI(),
@@ -330,6 +338,7 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 				Alias:              req.Email,
 				ConsentConfirmedAt: time.Now().Unix(),
 				AvatarID:           "default",
+				MainProfile:        true,
 			},
 		},
 		Timestamps: models.Timestamps{
@@ -436,84 +445,6 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 		ExpiresIn:         int32(s.JWT.TokenExpiryInterval / time.Minute),
 		Profiles:          apiUser.Profiles,
 		SelectedProfileId: apiUser.Profiles[0].Id,
-		PreferredLanguage: apiUser.Account.PreferredLanguage,
-	}
-	return response, nil
-}
-
-func (s *userManagementServer) SwitchProfile(ctx context.Context, req *api.SwitchProfileRequest) (*api.TokenResponse, error) {
-	if req == nil || utils.IsTokenEmpty(req.Token) || req.ProfileId == "" {
-		return nil, status.Error(codes.InvalidArgument, "missing argument")
-	}
-	if req.Token.TempToken == nil && req.RefreshToken == "" {
-		return nil, status.Error(codes.InvalidArgument, "missing argument")
-	}
-
-	user, err := s.userDBservice.GetUserByID(req.Token.InstanceId, req.Token.Id)
-	if err != nil {
-		return nil, status.Error(codes.Internal, "user not found")
-	}
-
-	profile, err := user.FindProfile(req.ProfileId)
-	if err != nil {
-		return nil, status.Error(codes.Internal, "profile not found")
-	}
-
-	var rt string
-	if req.RefreshToken != "" {
-		// only if not temptoken
-		if err := user.RemoveRefreshToken(req.RefreshToken); err != nil {
-			return nil, status.Error(codes.Internal, "wrong refresh token")
-		}
-		// Refresh Token
-		rt, err = tokens.GenerateUniqueTokenString()
-		if err != nil {
-			return nil, status.Error(codes.Internal, err.Error())
-		}
-		user.AddRefreshToken(rt)
-
-		user, err = s.userDBservice.UpdateUser(req.Token.InstanceId, user)
-		if err != nil {
-			log.Printf("ERROR: SwitchProfile method failed to save user: %s", err.Error())
-			return nil, status.Error(codes.Internal, "user couldn't be updated")
-		}
-	}
-
-	var username string
-	if len(user.Roles) > 1 || len(user.Roles) == 1 && user.Roles[0] != "PARTICIPANT" {
-		username = user.Account.AccountID
-	}
-	apiUser := user.ToAPI()
-	otherProfileIDs := []string{}
-	for _, p := range apiUser.Profiles {
-		if p.Id != req.ProfileId {
-			otherProfileIDs = append(otherProfileIDs, p.Id)
-		}
-	}
-
-	// Access Token
-	token, err := tokens.GenerateNewToken(
-		apiUser.Id,
-		apiUser.Account.AccountConfirmedAt > 0,
-		profile.ID.Hex(),
-		user.Roles,
-		req.Token.InstanceId,
-		s.JWT.TokenExpiryInterval,
-		username,
-		models.TempTokenFromAPI(req.Token.TempToken),
-		otherProfileIDs,
-	)
-	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
-	s.SaveLogEvent(req.Token.InstanceId, req.Token.Id, loggingAPI.LogEventType_LOG, constants.LOG_EVENT_TOKEN_REFRESH_SUCCESS, "")
-
-	response := &api.TokenResponse{
-		AccessToken:       token,
-		RefreshToken:      rt,
-		ExpiresIn:         int32(s.JWT.TokenExpiryInterval / time.Minute),
-		Profiles:          apiUser.Profiles,
-		SelectedProfileId: profile.ID.Hex(),
 		PreferredLanguage: apiUser.Account.PreferredLanguage,
 	}
 	return response, nil
