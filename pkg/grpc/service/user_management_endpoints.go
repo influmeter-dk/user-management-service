@@ -53,9 +53,10 @@ func (s *userManagementServer) CreateUser(ctx context.Context, req *api.CreateUs
 		Roles: req.Roles,
 		Profiles: []models.Profile{
 			{
-				ID:       primitive.NewObjectID(),
-				Alias:    req.AccountId,
-				AvatarID: "default",
+				ID:          primitive.NewObjectID(),
+				Alias:       req.AccountId,
+				AvatarID:    "default",
+				MainProfile: true,
 			},
 		},
 		Timestamps: models.Timestamps{
@@ -100,6 +101,7 @@ func (s *userManagementServer) CreateUser(ctx context.Context, req *api.CreateUs
 			"token": tempToken,
 		},
 		PreferredLanguage: newUser.Account.PreferredLanguage,
+		UseLowPrio:        true,
 	})
 	if err != nil {
 		log.Printf("CreateUser: %s", err.Error())

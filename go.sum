@@ -87,6 +87,9 @@ github.com/influenzanet/go-utils v0.2.0 h1:8I+yXMUKMjCo+UHVL76duyaemeKeK/wVjLwzR
 github.com/influenzanet/go-utils v0.2.0/go.mod h1:uHC1DNbnHH0zACsMLLP98pcH9R0BJuV4d+vUAqcqoS0=
 github.com/influenzanet/go-utils v0.2.1 h1:/wFsUkfvJVi4wwkcJnDe3lSRib69aTVED+pN5LrQt9k=
 github.com/influenzanet/go-utils v0.2.1/go.mod h1:uHC1DNbnHH0zACsMLLP98pcH9R0BJuV4d+vUAqcqoS0=
+github.com/influenzanet/go-utils v0.2.2/go.mod h1:uHC1DNbnHH0zACsMLLP98pcH9R0BJuV4d+vUAqcqoS0=
+github.com/influenzanet/go-utils v0.2.4 h1:HrAeOFeCgwTaE5uqP9bkazU9tDEMbqfXQSMpWQ6DA7o=
+github.com/influenzanet/go-utils v0.2.4/go.mod h1:uHC1DNbnHH0zACsMLLP98pcH9R0BJuV4d+vUAqcqoS0=
 github.com/influenzanet/logging-service v0.1.0 h1:9LBiyGvIVhoF8JRZge45xEj8XmSUozfpY4PgiOmArI0=
 github.com/influenzanet/logging-service v0.1.0/go.mod h1:IJ4fo8B8zMhzG3HnFDLCQWDYQmO3rejqYVcN0c/h8eU=
 github.com/influenzanet/messaging-service v0.2.0 h1:dNvWILhHnx0bbZV3UDQoJy/MR2isEJB4sCvt1gJcFOk=
@@ -101,16 +104,20 @@ github.com/influenzanet/messaging-service v0.7.0 h1:LRaQMSi3Hvd2gNoViHq9q9zWLNvI
 github.com/influenzanet/messaging-service v0.7.0/go.mod h1:9ar0W9QwzYz6lrZF42kS8ES5lvNA1x4D7p/HQuqsQoc=
 github.com/influenzanet/messaging-service v0.7.1 h1:k1WizGh0Z2mj8KM/19MmI1Fn/5G1LWYfvhU0/jebGH4=
 github.com/influenzanet/messaging-service v0.7.1/go.mod h1:mnd4+t7q/EaWGRGOliu5YVYRk4pZeC+q9Y2hWiLcrwE=
+github.com/influenzanet/messaging-service v0.8.0 h1:S6qUvEAO/3/TkPX2WrgbAkgxb7oUQO8AcaPOPcy+mPo=
+github.com/influenzanet/messaging-service v0.8.0/go.mod h1:JnbHpEDNp/YI+GGnIr/7n9hGCP87aBY1M+8h40dzg7k=
 github.com/influenzanet/study-service v0.6.2/go.mod h1:S/inqN3mSNT0cQ3xgi8upUEXWzBIxn6CirfXzhuLZsw=
 github.com/influenzanet/study-service v0.8.0/go.mod h1:S/inqN3mSNT0cQ3xgi8upUEXWzBIxn6CirfXzhuLZsw=
 github.com/influenzanet/study-service v0.9.0 h1:1PCUImqaEZMxocFgXWvHxFwAlt8zSFwVBtmKMDZWiL8=
 github.com/influenzanet/study-service v0.9.0/go.mod h1:/eeTlMOv7AcKfPFQLVgX5eu+dWU4QbgS6Hud6P+HDRs=
 github.com/influenzanet/study-service v0.11.0/go.mod h1:/eeTlMOv7AcKfPFQLVgX5eu+dWU4QbgS6Hud6P+HDRs=
+github.com/influenzanet/study-service v0.12.0/go.mod h1:fYwv5ZaD4sdz63nwLIY3kAfwqSHC02ndF5IoBEKm25Q=
 github.com/influenzanet/user-management-service v0.4.0-alpha/go.mod h1:hzpAlj0vcpZByruRB5IQmjiuiYuAAy2E7tkr9sc1B64=
 github.com/influenzanet/user-management-service v0.7.0/go.mod h1:0z88Izqm7YWEUFUTC7dHrN9XVG2CevyWXyNeoTkRWvk=
 github.com/influenzanet/user-management-service v0.10.0/go.mod h1:Qn1E8bFezQ1peyaC+P5dAo0PqH3G8/UNV5pnShfuwGI=
 github.com/influenzanet/user-management-service v0.10.1/go.mod h1:XPngUpSor1iAHM8NfeWkpP3MnuX6CoQC7yNhBVoDIp0=
 github.com/influenzanet/user-management-service v0.14.2/go.mod h1:o2y5z0vb8RmutQTUv7UO8yBu2pQctdxtcUwegVztkZA=
+github.com/influenzanet/user-management-service v0.16.1/go.mod h1:EdF7PcJJSNAAGBfsTA87zdq5mDfw/OQpm+/wsPiAdsA=
 github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af h1:pmfjZENx5imkbgOkpRUYLnmbU7UEFbjtDA2hxJ1ichM=
 github.com/jmespath/go-jmespath v0.0.0-20180206201540-c2b33e8439af/go.mod h1:Nht3zPeWKUH0NzdCt2Blrr5ys8VGpn0CEB0cQHVjt7k=
 github.com/joho/godotenv v1.3.0/go.mod h1:7hK45KPybAkOC6peb+G5yklZfMxEjkZhHbwpqxOKXbg=
@@ -181,6 +188,7 @@ golang.org/x/crypto v0.0.0-20200429183012-4b2356b1ed79 h1:IaQbIIB2X/Mp/DKctl6ROx
 golang.org/x/crypto v0.0.0-20200429183012-4b2356b1ed79/go.mod h1:LzIPMQfyMNhhGPhUkYOs5KpL4U8rLKemX1yGLhDgUto=
 golang.org/x/crypto v0.0.0-20200510223506-06a226fb4e37/go.mod h1:LzIPMQfyMNhhGPhUkYOs5KpL4U8rLKemX1yGLhDgUto=
 golang.org/x/crypto v0.0.0-20200602180216-279210d13fed/go.mod h1:LzIPMQfyMNhhGPhUkYOs5KpL4U8rLKemX1yGLhDgUto=
+golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9/go.mod h1:LzIPMQfyMNhhGPhUkYOs5KpL4U8rLKemX1yGLhDgUto=
 golang.org/x/crypto v0.0.0-20200709230013-948cd5f35899 h1:DZhuSZLsGlFL4CmhA8BcRA0mnthyA/nZ00AqCUo7vHg=
 golang.org/x/crypto v0.0.0-20200709230013-948cd5f35899/go.mod h1:LzIPMQfyMNhhGPhUkYOs5KpL4U8rLKemX1yGLhDgUto=
 golang.org/x/crypto v0.0.0-20200728195943-123391ffb6de h1:ikNHVSjEfnvz6sxdSPCaPt572qowuyMDMJLLm3Db3ig=
@@ -201,6 +209,8 @@ golang.org/x/net v0.0.0-20200520182314-0ba52f642ac2 h1:eDrdRpKgkcCqKZQwyZRyeFZgf
 golang.org/x/net v0.0.0-20200520182314-0ba52f642ac2/go.mod h1:qpuaurCH72eLCgpAm/N6yyVIVM9cpaDIP3A8BGJEC5A=
 golang.org/x/net v0.0.0-20200602114024-627f9648deb9 h1:pNX+40auqi2JqRfOP1akLGtYcn15TUbkhwuCO3foqqM=
 golang.org/x/net v0.0.0-20200602114024-627f9648deb9/go.mod h1:qpuaurCH72eLCgpAm/N6yyVIVM9cpaDIP3A8BGJEC5A=
+golang.org/x/net v0.0.0-20200904194848-62affa334b73 h1:MXfv8rhZWmFeqX3GNZRsd6vOLoaCHjYEX3qkRo3YBUA=
+golang.org/x/net v0.0.0-20200904194848-62affa334b73/go.mod h1:/O7V0waA8r7cgGh81Ro3o1hOxt32SMVPicZroKQ2sZA=
 golang.org/x/oauth2 v0.0.0-20180821212333-d2e6202438be/go.mod h1:N/0e6XlmueqKjAGxoOufVs8QHGRruUQn6yWY3a++T0U=
 golang.org/x/sync v0.0.0-20180314180146-1d60e4601c6f/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
 golang.org/x/sync v0.0.0-20181108010431-42b317875d0f/go.mod h1:RxMgew5VJxzue5/jJTE5uejpjVlOe/izrB70Jof72aM=
@@ -227,6 +237,8 @@ golang.org/x/sys v0.0.0-20200625212154-ddb9806d33ae h1:Ih9Yo4hSPImZOpfGuA4bR/ORK
 golang.org/x/sys v0.0.0-20200625212154-ddb9806d33ae/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20200802091954-4b90ce9b60b3 h1:qDJKu1y/1SjhWac4BQZjLljqvqiWUhjmDMnonmVGDAU=
 golang.org/x/sys v0.0.0-20200802091954-4b90ce9b60b3/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
+golang.org/x/sys v0.0.0-20200909081042-eff7692f9009 h1:W0lCpv29Hv0UaM1LXb9QlBHLNP8UFfcKjblhVCWftOM=
+golang.org/x/sys v0.0.0-20200909081042-eff7692f9009/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/text v0.0.0-20170915032832-14c0d48ead0c/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/text v0.3.2 h1:tW2bmiBqwgJj/UpqtC8EpXEZVYOwU0yG4iWbprSVAcs=
@@ -256,6 +268,8 @@ google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013 h1:+kGHl1aib/qcwaR
 google.golang.org/genproto v0.0.0-20200526211855-cb27e3aa2013/go.mod h1:NbSheEEYHJ7i3ixzK3sjbqSGDJWnxyFXZblF3eUsNvo=
 google.golang.org/genproto v0.0.0-20200605102947-12044bf5ea91 h1:ES+5k7Xz+sYByd2L7mvcanaIuY0Iz3L3O6OhN+cRdu8=
 google.golang.org/genproto v0.0.0-20200605102947-12044bf5ea91/go.mod h1:jDfRM7FcilCzHH/e9qn6dsT145K34l5v+OpcnNgKAAA=
+google.golang.org/genproto v0.0.0-20200904004341-0bd0a958aa1d h1:92D1fum1bJLKSdr11OJ+54YeCMCGYIygTA7R/YZxH5M=
+google.golang.org/genproto v0.0.0-20200904004341-0bd0a958aa1d/go.mod h1:FWY/as6DDZQgahTzZj3fqbO1CbirC29ZNUFHwi0/+no=
 google.golang.org/grpc v1.19.0/go.mod h1:mqu4LbDTu4XGKhr4mRzUsmM4RtVoemTSY81AxZiDr8c=
 google.golang.org/grpc v1.23.0/go.mod h1:Y5yQAOtifL1yxbo5wqy6BxZv8vAUGQwXBOALyacEbxg=
 google.golang.org/grpc v1.25.1/go.mod h1:c3i+UQWmh7LiEpx4sFZnkU36qjEYZ0imhYfXVyQciAY=
