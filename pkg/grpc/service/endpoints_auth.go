@@ -214,19 +214,8 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 	}
 
 	apiUser := user.ToAPI()
-	mainProfileID := ""
-	otherProfileIDs := []string{}
-	for _, p := range apiUser.Profiles {
-		if !p.MainProfile {
-			otherProfileIDs = append(otherProfileIDs, p.Id)
-		} else {
-			mainProfileID = p.Id
-		}
-	}
-	if mainProfileID == "" {
-		mainProfileID = otherProfileIDs[0]
-		otherProfileIDs = otherProfileIDs[1:]
-	}
+
+	mainProfileID, otherProfileIDs := utils.GetMainAndOtherProfiles(user)
 
 	// Access Token
 	token, err := tokens.GenerateNewToken(

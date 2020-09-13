@@ -63,8 +63,10 @@ func (s *userManagementServer) RenewJWT(ctx context.Context, req *api.RefreshJWT
 	roles := tokens.GetRolesFromPayload(parsedToken.Payload)
 	username := tokens.GetUsernameFromPayload(parsedToken.Payload)
 
+	mainProfileID, otherProfileIDs := utils.GetMainAndOtherProfiles(user)
+
 	// Generate new access token:
-	newToken, err := tokens.GenerateNewToken(parsedToken.ID, user.Account.AccountConfirmedAt > 0, parsedToken.ProfileID, roles, parsedToken.InstanceID, s.JWT.TokenExpiryInterval, username, nil, parsedToken.OtherProfileIDs)
+	newToken, err := tokens.GenerateNewToken(parsedToken.ID, user.Account.AccountConfirmedAt > 0, mainProfileID, roles, parsedToken.InstanceID, s.JWT.TokenExpiryInterval, username, nil, otherProfileIDs)
 	if err != nil {
 		return nil, status.Error(codes.Internal, err.Error())
 	}
