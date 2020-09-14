@@ -48,12 +48,14 @@ func (s *userManagementServer) SendVerificationCode(ctx context.Context, req *ap
 
 	if utils.HasMoreAttemptsRecently(user.Account.FailedLoginAttempts, allowedPasswordAttempts, loginFailedAttemptWindow) {
 		s.SaveLogEvent(req.InstanceId, user.ID.Hex(), loggingAPI.LogEventType_SECURITY, constants.LOG_EVENT_LOGIN_ATTEMPT_ON_BLOCKED_ACCOUNT, "send verification code endpoint")
-		log.Printf("SECURITY WARNING: login attempt blocked for email address for %s - too many wrong tries recently", req.Email)
+		log.Printf("SECURITY WARNING: login attempt blocked for email address for %s - too many wrong tries recently", user.ID.Hex())
 		time.Sleep(time.Duration(rand.Intn(10)) * time.Second)
 		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
 	}
 
 	if user.Account.VerificationCode.CreatedAt > time.Now().Unix()-loginVerificationCodeCooldown {
+		s.SaveLogEvent(req.InstanceId, user.ID.Hex(), loggingAPI.LogEventType_SECURITY, constants.LOG_EVENT_LOGIN_ATTEMPT_ON_BLOCKED_ACCOUNT, "try resending verification code too often")
+		log.Printf("SECURITY WARNING: resend verification code %s - too many wrong tries recently", req.Email)
 		return nil, status.Error(codes.InvalidArgument, "cannot generate verification code so often")
 	}
 
@@ -173,6 +175,12 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 
 	if user.Account.AuthType == "2FA" {
 		if user.Account.VerificationCode.Code == "" || req.VerificationCode == "" {
+			if user.Account.VerificationCode.CreatedAt > time.Now().Unix()-loginVerificationCodeCooldown {
+				s.SaveLogEvent(req.InstanceId, user.ID.Hex(), loggingAPI.LogEventType_SECURITY, constants.LOG_EVENT_LOGIN_ATTEMPT_ON_BLOCKED_ACCOUNT, "try resending verification code too often")
+				log.Printf("SECURITY WARNING: resend verification code %s - too many wrong tries recently", user.ID.Hex())
+				return nil, status.Error(codes.InvalidArgument, "cannot generate verification code so often")
+			}
+
 			err = s.generateAndSendVerificationCode(req.InstanceId, user)
 			if err != nil {
 				return nil, err
