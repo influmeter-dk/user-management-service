@@ -308,6 +308,10 @@ func (s *userManagementServer) SaveProfile(ctx context.Context, req *api.Profile
 	}
 
 	if req.Profile.Id == "" {
+		if len(user.Profiles) > maximumProfilesAllowed {
+			s.SaveLogEvent(req.Token.InstanceId, req.Token.Id, loggingAPI.LogEventType_SECURITY, constants.LOG_EVENT_PROFILE_SAVED, "too many profiles added"+req.Profile.Alias)
+			return nil, status.Error(codes.Internal, "reached profile limit")
+		}
 		user.AddProfile(models.ProfileFromAPI(req.Profile))
 	} else {
 		err := user.UpdateProfile(models.ProfileFromAPI(req.Profile))

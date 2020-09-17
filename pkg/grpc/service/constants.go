@@ -11,4 +11,6 @@ const (
 	allowedPasswordAttempts    = 10
 
 	userCreationTimestampOffset = 7 * 24 * 3600 // consider user deletion only after this time, when created by admin
+
+	maximumProfilesAllowed = 6
 )

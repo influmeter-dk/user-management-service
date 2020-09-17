@@ -33,6 +33,7 @@ func (s *userManagementServer) ValidateJWT(ctx context.Context, req *api.JWTRequ
 		AccountConfirmed: parsedToken.AccountConfirmed,
 		Payload:          parsedToken.Payload,
 		ProfilId:         parsedToken.ProfileID,
+		OtherProfileIds:  parsedToken.OtherProfileIDs,
 		TempToken:        parsedToken.TempTokenInfos.ToAPI(),
 	}, nil
 }
@@ -75,11 +76,6 @@ func (s *userManagementServer) RenewJWT(ctx context.Context, req *api.RefreshJWT
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	user.AddRefreshToken(newRefreshToken)
-
-	user, err = s.userDBservice.UpdateUser(parsedToken.InstanceID, user)
-	if err != nil {
-		return nil, status.Error(codes.Internal, err.Error())
-	}
 
 	user, err = s.userDBservice.UpdateUser(parsedToken.InstanceID, user)
 	if err != nil {
