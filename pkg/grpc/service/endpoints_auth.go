@@ -332,7 +332,7 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 		Profiles: []models.Profile{
 			{
 				ID:                 primitive.NewObjectID(),
-				Alias:              req.Email,
+				Alias:              utils.BlurEmailAddress(req.Email),
 				ConsentConfirmedAt: time.Now().Unix(),
 				AvatarID:           "default",
 				MainProfile:        true,

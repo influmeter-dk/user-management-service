@@ -23,6 +23,16 @@ func CheckEmailFormat(email string) bool {
 	return re.MatchString(email)
 }
 
+func BlurEmailAddress(email string) string {
+	items := strings.Split(email, "@")
+	if len(items) < 1 || len(items[0]) < 1 {
+		return "****@**"
+	}
+
+	blurredEmail := string([]rune(items[0])[0]) + "****@" + strings.Join(items[1:], "")
+	return blurredEmail
+}
+
 // CheckPasswordFormat to check if password fulfills password rules
 func CheckPasswordFormat(password string) bool {
 	pl := len(password)

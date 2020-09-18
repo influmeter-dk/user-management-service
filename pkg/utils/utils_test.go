@@ -27,6 +27,25 @@ func TestSanitizeEmail(t *testing.T) {
 	})
 }
 
+func TestBlurEmailAddress(t *testing.T) {
+	t.Run("with different formats", func(t *testing.T) {
+		email := BlurEmailAddress("a@test.de")
+		if email != "a****@test.de" {
+			t.Errorf("unexpected email: %s", email)
+		}
+
+		email = BlurEmailAddress("a1234@test.de")
+		if email != "a****@test.de" {
+			t.Errorf("unexpected email: %s", email)
+		}
+
+		email = BlurEmailAddress("a123sdfsdfsdfa34@test.de")
+		if email != "a****@test.de" {
+			t.Errorf("unexpected email: %s", email)
+		}
+	})
+}
+
 func TestCheckPasswordFormat(t *testing.T) {
 	log.Println("RUN util test")
 	t.Run("with a too short password", func(t *testing.T) {
