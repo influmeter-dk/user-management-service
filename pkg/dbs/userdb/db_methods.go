@@ -271,7 +271,8 @@ func (dbService *UserDBService) PerfomActionForUsers(
 		var result models.User
 		err := cur.Decode(&result)
 		if err != nil {
-			return err
+			log.Printf("wrong user model %v, %v", result, err)
+			continue
 		}
 
 		if err := cbk(instanceID, result, args...); err != nil {
