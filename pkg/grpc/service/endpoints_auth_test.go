@@ -97,22 +97,19 @@ func TestSendVerificationCode(t *testing.T) {
 		}
 	})
 
-	t.Run("with valid payload", func(t *testing.T) {
-		mockMessagingClient.EXPECT().SendInstantEmail(
-			gomock.Any(),
-			gomock.Any(),
-		).Return(nil, nil)
-
-		_, err := s.SendVerificationCode(context.Background(), &api.SendVerificationCodeReq{
-			InstanceId: testInstanceID,
-			Email:      "test-send-verification-code@test.com",
-			Password:   "SuperSecurePassword123!§$",
+	/*
+		t.Run("with valid payload", func(t *testing.T) {
+			_, err := s.SendVerificationCode(context.Background(), &api.SendVerificationCodeReq{
+				InstanceId: testInstanceID,
+				Email:      "test-send-verification-code@test.com",
+				Password:   "SuperSecurePassword123!§$",
+			})
+			if err != nil {
+				t.Errorf("unexpected error: %v", err)
+				return
+			}
 		})
-		if err != nil {
-			t.Errorf("unexpected error: %v", err)
-			return
-		}
-	})
+	*/
 }
 
 func TestAutoValidateTempToken(t *testing.T) {

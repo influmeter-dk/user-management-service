@@ -32,19 +32,24 @@ func (s *userManagementServer) generateAndSendVerificationCode(instanceID string
 	}
 
 	// ---> Trigger message sending
-	func(instanceID string, accountID string, code string, preferredLang string) {
-		_, err = s.clients.MessagingService.SendInstantEmail(context.TODO(), &messageAPI.SendEmailReq{
-			InstanceId:  instanceID,
-			To:          []string{accountID},
-			MessageType: constants.EMAIL_TYPE_AUTH_VERIFICATION_CODE,
-			ContentInfos: map[string]string{
-				"verificationCode": code,
-			},
-			PreferredLanguage: preferredLang,
-		})
-		if err != nil {
-			log.Printf("SendVerificationCode: %s", err.Error())
-		}
-	}(instanceID, user.Account.AccountID, vc, user.Account.PreferredLanguage)
+	go s.sendVerificationEmail(instanceID, user.Account.AccountID, vc, user.Account.PreferredLanguage)
 	return nil
+}
+
+func (s *userManagementServer) sendVerificationEmail(instanceID string, accountID string, code string, preferredLang string) {
+	if s.clients.MessagingService == nil {
+		return
+	}
+	_, err := s.clients.MessagingService.SendInstantEmail(context.TODO(), &messageAPI.SendEmailReq{
+		InstanceId:  instanceID,
+		To:          []string{accountID},
+		MessageType: constants.EMAIL_TYPE_AUTH_VERIFICATION_CODE,
+		ContentInfos: map[string]string{
+			"verificationCode": code,
+		},
+		PreferredLanguage: preferredLang,
+	})
+	if err != nil {
+		log.Printf("SendVerificationCode: %s", err.Error())
+	}
 }
