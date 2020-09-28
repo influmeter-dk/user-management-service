@@ -157,6 +157,7 @@ func (s *userManagementServer) ChangeAccountIDEmail(ctx context.Context, req *ap
 				"validUntil":   strconv.Itoa(24 * 7 * 60),
 				"newEmail":     req.NewEmail,
 			},
+			UseLowPrio: true,
 		})
 		if err != nil {
 			log.Printf("ChangeAccountIDEmail: %s", err.Error())
@@ -262,6 +263,7 @@ func (s *userManagementServer) DeleteAccount(ctx context.Context, req *api.UserR
 		To:                []string{user.Account.AccountID},
 		MessageType:       constants.EMAIL_TYPE_ACCOUNT_DELETED,
 		PreferredLanguage: user.Account.PreferredLanguage,
+		UseLowPrio:        true,
 	})
 	if err != nil {
 		log.Printf("DeleteAccount: %s", err.Error())

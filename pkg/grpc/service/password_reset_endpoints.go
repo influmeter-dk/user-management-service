@@ -151,6 +151,7 @@ func (s *userManagementServer) ResetPassword(ctx context.Context, req *api.Reset
 		To:                []string{user.Account.AccountID},
 		MessageType:       constants.EMAIL_TYPE_PASSWORD_CHANGED,
 		PreferredLanguage: user.Account.PreferredLanguage,
+		UseLowPrio:        true,
 	})
 	if err != nil {
 		log.Printf("ChangePassword: %s", err.Error())
