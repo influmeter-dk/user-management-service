@@ -213,7 +213,7 @@ func TestAutoValidateTempToken(t *testing.T) {
 		_, err := s.AutoValidateTempToken(context.Background(), &api.AutoValidateReq{
 			TempToken: token2,
 		})
-		ok, msg := shouldHaveGrpcErrorStatus(err, "token expired")
+		ok, msg := shouldHaveGrpcErrorStatus(err, "invalid token")
 		if !ok {
 			t.Error(msg)
 		}

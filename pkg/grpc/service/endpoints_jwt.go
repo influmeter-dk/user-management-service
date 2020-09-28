@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"log"
 	"strings"
 	"time"
 
@@ -46,16 +47,19 @@ func (s *userManagementServer) RenewJWT(ctx context.Context, req *api.RefreshJWT
 	// Parse and validate token
 	parsedToken, _, err := tokens.ValidateToken(req.AccessToken)
 	if err != nil && !strings.Contains(err.Error(), "token is expired by") {
+		log.Printf("renew token error: %v", err.Error())
 		return nil, status.Error(codes.PermissionDenied, "wrong access token")
 	}
 
 	user, err := s.userDBservice.GetUserByID(parsedToken.InstanceID, parsedToken.ID)
 	if err != nil {
+		log.Printf("renew token error: %v", err.Error())
 		return nil, status.Error(codes.Internal, "user not found")
 	}
 
 	err = user.RemoveRefreshToken(req.RefreshToken)
 	if err != nil {
+		log.Printf("renew token error: %v", err.Error())
 		s.SaveLogEvent(parsedToken.InstanceID, parsedToken.ID, loggingAPI.LogEventType_SECURITY, constants.LOG_EVENT_TOKEN_REFRESH_SUCCESS, "wrong refresh token, cannot renew")
 		return nil, status.Error(codes.Internal, "wrong refresh token")
 	}
@@ -69,16 +73,19 @@ func (s *userManagementServer) RenewJWT(ctx context.Context, req *api.RefreshJWT
 	// Generate new access token:
 	newToken, err := tokens.GenerateNewToken(parsedToken.ID, user.Account.AccountConfirmedAt > 0, mainProfileID, roles, parsedToken.InstanceID, s.JWT.TokenExpiryInterval, username, nil, otherProfileIDs)
 	if err != nil {
+		log.Printf("renew token error: %v", err.Error())
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	newRefreshToken, err := tokens.GenerateUniqueTokenString()
 	if err != nil {
+		log.Printf("renew token error: %v", err.Error())
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 	user.AddRefreshToken(newRefreshToken)
 
 	user, err = s.userDBservice.UpdateUser(parsedToken.InstanceID, user)
 	if err != nil {
+		log.Printf("renew token error: %v", err.Error())
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 

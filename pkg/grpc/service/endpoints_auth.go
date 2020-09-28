@@ -86,21 +86,27 @@ func (s *userManagementServer) AutoValidateTempToken(ctx context.Context, req *a
 		return nil, status.Error(codes.InvalidArgument, "invalid token")
 	}
 
-	tempToken, err := s.globalDBService.GetTempToken(req.TempToken)
+	tokenInfos, err := s.ValidateTempToken(req.TempToken,
+		[]string{
+			constants.TOKEN_PURPOSE_INVITATION,
+			constants.TOKEN_PURPOSE_SURVEY_LOGIN,
+			constants.TOKEN_PURPOSE_CONTACT_VERIFICATION,
+		})
+
 	if err != nil {
-		log.Printf("SECURITY WARNING: temptoken cannot be found %s", req.TempToken)
+		if err.Error() == "wrong token" {
+			log.Printf("SECURITY WARNING: temptoken cannot be found %s", req.TempToken)
+		} else if err.Error() == "wrong token purpose" {
+			log.Printf("SECURITY WARNING: temptoken with wrong prupose found: %s - by user %s in instance %s", tokenInfos.Purpose, tokenInfos.UserID, tokenInfos.InstanceID)
+		} else if err.Error() == "token expired" {
+			log.Printf("SECURITY WARNING: temptoken is expired - by user %s in instance %s", tokenInfos.UserID, tokenInfos.InstanceID)
+		} else {
+			log.Printf("SECURITY WARNING: unexpected error for autovalidating temp token - by user %s in instance %s", tokenInfos.UserID, tokenInfos.InstanceID)
+		}
 		return nil, status.Error(codes.InvalidArgument, "invalid token")
-	}
-	if tempToken.Purpose != constants.TOKEN_PURPOSE_SURVEY_LOGIN {
-		log.Printf("SECURITY WARNING: temptoken with wrong prupose found: %s - by user %s in instance %s", tempToken.Purpose, tempToken.UserID, tempToken.InstanceID)
-		return nil, status.Error(codes.InvalidArgument, "invalid token")
-	}
-	if tempToken.Expiration < time.Now().Unix() {
-		log.Printf("SECURITY WARNING: temptoken is expired - by user %s in instance %s", tempToken.UserID, tempToken.InstanceID)
-		return nil, status.Error(codes.InvalidArgument, "token expired")
 	}
 
-	user, err := s.userDBservice.GetUserByID(tempToken.InstanceID, tempToken.UserID)
+	user, err := s.userDBservice.GetUserByID(tokenInfos.InstanceID, tokenInfos.UserID)
 	if err != nil {
 		return nil, status.Error(codes.InvalidArgument, "user not found")
 	}
@@ -115,7 +121,7 @@ func (s *userManagementServer) AutoValidateTempToken(ctx context.Context, req *a
 		Code:      vc,
 		ExpiresAt: time.Now().Unix() + verificationCodeLifetime,
 	}
-	user, err = s.userDBservice.UpdateUser(tempToken.InstanceID, user)
+	user, err = s.userDBservice.UpdateUser(tokenInfos.InstanceID, user)
 	if err != nil {
 		log.Printf("AutoValidateTempToken: unexpected error when saving user -> %v", err)
 		return nil, status.Error(codes.Internal, "user couldn't be updated")
@@ -127,12 +133,12 @@ func (s *userManagementServer) AutoValidateTempToken(ctx context.Context, req *a
 		if err != nil {
 			log.Printf("AutoValidateTempToken: unexpected error when parsing token -> %v", err)
 		}
-		if validatedToken.ID == tempToken.UserID && validatedToken.InstanceID == tempToken.InstanceID {
+		if validatedToken.ID == tokenInfos.UserID && validatedToken.InstanceID == tokenInfos.InstanceID {
 			sameUser = true
 		}
 	}
 
-	return &api.AutoValidateResponse{AccountId: user.Account.AccountID, IsSameUser: sameUser, VerificationCode: vc, InstanceId: tempToken.InstanceID}, nil
+	return &api.AutoValidateResponse{AccountId: user.Account.AccountID, IsSameUser: sameUser, VerificationCode: vc, InstanceId: tokenInfos.InstanceID}, nil
 }
 
 func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.LoginWithEmailMsg) (*api.LoginResponse, error) {
