@@ -138,6 +138,13 @@ func (s *userManagementServer) AutoValidateTempToken(ctx context.Context, req *a
 		}
 	}
 
+	if err := s.globalDBService.DeleteAllTempTokenForUser(tokenInfos.InstanceID, user.ID.Hex(), constants.TOKEN_PURPOSE_INVITATION); err != nil {
+		log.Printf("AutoValidateTempToken: %s", err.Error())
+	}
+	if err := s.globalDBService.DeleteAllTempTokenForUser(tokenInfos.InstanceID, user.ID.Hex(), constants.TOKEN_PURPOSE_PASSWORD_RESET); err != nil {
+		log.Printf("AutoValidateTempToken: %s", err.Error())
+	}
+
 	return &api.AutoValidateResponse{AccountId: user.Account.AccountID, IsSameUser: sameUser, VerificationCode: vc, InstanceId: tokenInfos.InstanceID}, nil
 }
 
@@ -490,13 +497,6 @@ func (s *userManagementServer) VerifyContact(ctx context.Context, req *api.TempT
 	user, err = s.userDBservice.UpdateUser(tokenInfos.InstanceID, user)
 
 	s.SaveLogEvent(tokenInfos.InstanceID, tokenInfos.UserID, loggingAPI.LogEventType_LOG, constants.LOG_EVENT_CONTACT_VERIFIED, email)
-
-	if tokenInfos.Purpose != constants.TOKEN_PURPOSE_INVITATION {
-		// invitation token will be required for password reset, so we don't remove it
-		if err := s.globalDBService.DeleteTempToken(req.Token); err != nil {
-			log.Printf("VerifyContact delete token: %s", err.Error())
-		}
-	}
 	return user.ToAPI(), err
 }
 
