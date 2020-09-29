@@ -487,7 +487,7 @@ func TestLogin(t *testing.T) {
 	})
 
 	// 2FA tests
-	t.Run("with wrong verifcation code", func(t *testing.T) {
+	t.Run("with wrong verification code", func(t *testing.T) {
 		mockLoggingClient.EXPECT().SaveLogEvent(
 			gomock.Any(),
 			gomock.Any(),
@@ -501,7 +501,7 @@ func TestLogin(t *testing.T) {
 			VerificationCode: "234855",
 		}
 		_, err := s.LoginWithEmail(context.Background(), req)
-		ok, msg := shouldHaveGrpcErrorStatus(err, "wrong verficiation code")
+		ok, msg := shouldHaveGrpcErrorStatus(err, "wrong verfication code")
 		if !ok {
 			t.Error(msg)
 		}

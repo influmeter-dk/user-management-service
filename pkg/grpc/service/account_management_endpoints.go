@@ -102,7 +102,9 @@ func (s *userManagementServer) ChangeAccountIDEmail(ctx context.Context, req *ap
 	}
 
 	req.NewEmail = utils.SanitizeEmail(req.NewEmail)
-
+	if !utils.CheckEmailFormat(req.NewEmail) {
+		return nil, status.Error(codes.InvalidArgument, "email not valid")
+	}
 	user, err := s.userDBservice.GetUserByID(req.Token.InstanceId, req.Token.Id)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "user not found")
@@ -409,12 +411,17 @@ func (s *userManagementServer) AddEmail(ctx context.Context, req *api.ContactInf
 		return nil, status.Error(codes.InvalidArgument, "wrong contact type")
 	}
 
+	email := utils.SanitizeEmail(req.ContactInfo.GetEmail())
+	if !utils.CheckEmailFormat(email) {
+		return nil, status.Error(codes.InvalidArgument, "email not valid")
+	}
+
 	user, err := s.userDBservice.GetUserByID(req.Token.InstanceId, req.Token.Id)
 	if err != nil {
 		return nil, status.Error(codes.Internal, "user not found")
 	}
 
-	user.AddNewEmail(utils.SanitizeEmail(req.ContactInfo.GetEmail()), false)
+	user.AddNewEmail(email, false)
 
 	// TempToken for contact verification:
 	tempTokenInfos := models.TempToken{
@@ -423,8 +430,9 @@ func (s *userManagementServer) AddEmail(ctx context.Context, req *api.ContactInf
 		Purpose:    constants.TOKEN_PURPOSE_CONTACT_VERIFICATION,
 		Info: map[string]string{
 			"type":  "email",
-			"email": req.ContactInfo.GetEmail(),
+			"email": email,
 		},
+
 		Expiration: tokens.GetExpirationTime(time.Hour * 24 * 30),
 	}
 	tempToken, err := s.globalDBService.AddTempToken(tempTokenInfos)
