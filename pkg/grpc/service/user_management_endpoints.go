@@ -53,10 +53,11 @@ func (s *userManagementServer) CreateUser(ctx context.Context, req *api.CreateUs
 		Roles: req.Roles,
 		Profiles: []models.Profile{
 			{
-				ID:          primitive.NewObjectID(),
-				Alias:       req.AccountId,
-				AvatarID:    "default",
-				MainProfile: true,
+				ID:                 primitive.NewObjectID(),
+				Alias:              req.AccountId,
+				AvatarID:           "default",
+				ConsentConfirmedAt: time.Now().Unix(),
+				MainProfile:        true,
 			},
 		},
 		Timestamps: models.Timestamps{
