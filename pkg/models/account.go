@@ -22,6 +22,7 @@ type Account struct {
 
 type VerificationCode struct {
 	Code      string `bson:"code"`
+	Attempts  int64  `bson:"attempts"`
 	CreatedAt int64  `bson:"createdAt"`
 	ExpiresAt int64  `bson:"expiresAt"`
 }

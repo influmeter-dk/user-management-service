@@ -22,6 +22,7 @@ func (s *userManagementServer) generateAndSendVerificationCode(instanceID string
 
 	user.Account.VerificationCode = models.VerificationCode{
 		Code:      vc,
+		Attempts:  0,
 		CreatedAt: time.Now().Unix(),
 		ExpiresAt: time.Now().Unix() + verificationCodeLifetime,
 	}

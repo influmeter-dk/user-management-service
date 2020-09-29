@@ -187,16 +187,19 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 	}
 
 	if user.Account.AuthType == "2FA" {
-		if user.Account.VerificationCode.Code == "" || req.VerificationCode == "" {
-			if user.Account.VerificationCode.CreatedAt > time.Now().Unix()-loginVerificationCodeCooldown {
-				s.SaveLogEvent(req.InstanceId, user.ID.Hex(), loggingAPI.LogEventType_SECURITY, constants.LOG_EVENT_LOGIN_ATTEMPT_ON_BLOCKED_ACCOUNT, "try resending verification code too often")
-				log.Printf("SECURITY WARNING: resend verification code %s - too many wrong tries recently", user.ID.Hex())
-				return nil, status.Error(codes.InvalidArgument, "cannot generate verification code so often")
-			}
-
-			err = s.generateAndSendVerificationCode(req.InstanceId, user)
-			if err != nil {
-				return nil, err
+		if req.VerificationCode == "" {
+			// user tries first step
+			if user.Account.VerificationCode.Code == "" || user.Account.VerificationCode.ExpiresAt < time.Now().Unix() {
+				if user.Account.VerificationCode.CreatedAt > time.Now().Unix()-loginVerificationCodeCooldown {
+					s.SaveLogEvent(req.InstanceId, user.ID.Hex(), loggingAPI.LogEventType_SECURITY, constants.LOG_EVENT_LOGIN_ATTEMPT_ON_BLOCKED_ACCOUNT, "try resending verification code too often")
+					log.Printf("SECURITY WARNING: resend verification code %s - too many wrong tries recently", user.ID.Hex())
+					return nil, status.Error(codes.InvalidArgument, "cannot generate verification code so often")
+				}
+				err = s.generateAndSendVerificationCode(req.InstanceId, user)
+				if err != nil {
+					log.Printf("login: unexpected error %v", err)
+					return nil, status.Error(codes.InvalidArgument, "code generation error")
+				}
 			}
 			return &api.LoginResponse{
 				User: &api.User{
@@ -207,20 +210,36 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 				},
 				SecondFactorNeeded: true,
 			}, nil
-		}
-		if user.Account.VerificationCode.ExpiresAt < time.Now().Unix() || user.Account.VerificationCode.Code != req.VerificationCode {
-			log.Printf("SECURITY WARNING: login attempt with wrong or expired verification code for %s", user.ID.Hex())
-			user.Account.VerificationCode = models.VerificationCode{}
-			user, err = s.userDBservice.UpdateUser(req.InstanceId, user)
-			if err != nil {
-				log.Printf("LoginWithEmail: unexpected error when saving user -> %v", err)
-			}
+		} else {
+			// user tries second step
+			if user.Account.VerificationCode.ExpiresAt < time.Now().Unix() || user.Account.VerificationCode.Code != req.VerificationCode {
+				log.Printf("SECURITY WARNING: login attempt with wrong or expired verification code for %s", user.ID.Hex())
+				s.SaveLogEvent(req.InstanceId, user.ID.Hex(), loggingAPI.LogEventType_SECURITY, constants.LOG_EVENT_AUTH_WRONG_VERIFICATION_CODE, "")
+				if err2 := s.userDBservice.SaveFailedLoginAttempt(req.InstanceId, user.ID.Hex()); err != nil {
+					log.Printf("DB ERROR: unexpected error when updating user: %s ", err2.Error())
+				}
 
-			s.SaveLogEvent(req.InstanceId, user.ID.Hex(), loggingAPI.LogEventType_SECURITY, constants.LOG_EVENT_AUTH_WRONG_VERIFICATION_CODE, "")
-			if err2 := s.userDBservice.SaveFailedLoginAttempt(req.InstanceId, user.ID.Hex()); err != nil {
-				log.Printf("DB ERROR: unexpected error when updating user: %s ", err2.Error())
+				if user.Account.VerificationCode.Attempts <= allowedVerificationCodeAttempts {
+					user.Account.VerificationCode.Attempts += 1
+					user, err = s.userDBservice.UpdateUser(req.InstanceId, user)
+					if err != nil {
+						log.Printf("LoginWithEmail: unexpected error when saving user -> %v", err)
+					}
+					return nil, status.Error(codes.InvalidArgument, "wrong verfication code")
+				} else {
+					if user.Account.VerificationCode.CreatedAt > time.Now().Unix()-loginVerificationCodeCooldown {
+						s.SaveLogEvent(req.InstanceId, user.ID.Hex(), loggingAPI.LogEventType_SECURITY, constants.LOG_EVENT_LOGIN_ATTEMPT_ON_BLOCKED_ACCOUNT, "try resending verification code too often")
+						log.Printf("SECURITY WARNING: resend verification code %s - too many wrong tries recently", user.ID.Hex())
+						return nil, status.Error(codes.InvalidArgument, "cannot generate verification code so often")
+					}
+					err = s.generateAndSendVerificationCode(req.InstanceId, user)
+					if err != nil {
+						log.Printf("login: unexpected error %v", err)
+						return nil, status.Error(codes.InvalidArgument, "code generation error")
+					}
+					return nil, status.Error(codes.InvalidArgument, "new verification code")
+				}
 			}
-			return nil, status.Error(codes.InvalidArgument, "wrong verficiation code")
 		}
 	}
 
