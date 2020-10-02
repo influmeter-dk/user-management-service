@@ -60,7 +60,7 @@ func (s *userManagementServer) RenewJWT(ctx context.Context, req *api.RefreshJWT
 	err = user.RemoveRefreshToken(req.RefreshToken)
 	if err != nil {
 		log.Printf("renew token error: %v", err.Error())
-		s.SaveLogEvent(parsedToken.InstanceID, parsedToken.ID, loggingAPI.LogEventType_SECURITY, constants.LOG_EVENT_TOKEN_REFRESH_SUCCESS, "wrong refresh token, cannot renew")
+		s.SaveLogEvent(parsedToken.InstanceID, parsedToken.ID, loggingAPI.LogEventType_SECURITY, constants.LOG_EVENT_TOKEN_REFRESH_FAILED, "wrong refresh token, cannot renew")
 		return nil, status.Error(codes.Internal, "wrong refresh token")
 	}
 	user.Timestamps.LastTokenRefresh = time.Now().Unix()
