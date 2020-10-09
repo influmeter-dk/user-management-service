@@ -54,7 +54,7 @@ func (s *userManagementServer) CreateUser(ctx context.Context, req *api.CreateUs
 		Profiles: []models.Profile{
 			{
 				ID:                 primitive.NewObjectID(),
-				Alias:              req.AccountId,
+				Alias:              utils.BlurEmailAddress(req.AccountId),
 				AvatarID:           "default",
 				ConsentConfirmedAt: time.Now().Unix(),
 				MainProfile:        true,
