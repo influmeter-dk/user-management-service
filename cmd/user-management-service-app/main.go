@@ -37,6 +37,7 @@ func main() {
 		globalDBService,
 		userDBService,
 		clients,
+		conf.CleanUpUnverifiedUsersAfter,
 	)
 	userTimerService.Run()
 

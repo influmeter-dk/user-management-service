@@ -17,10 +17,11 @@ type Config struct {
 		MessagingService string
 		LoggingService   string
 	}
-	UserDBConfig      models.DBConfig
-	GlobalDBConfig    models.DBConfig
-	JWT               models.JWTConfig
-	NewUserCountLimit int64
+	UserDBConfig                models.DBConfig
+	GlobalDBConfig              models.DBConfig
+	JWT                         models.JWTConfig
+	NewUserCountLimit           int64
+	CleanUpUnverifiedUsersAfter int64
 }
 
 func InitConfig() Config {
@@ -38,6 +39,12 @@ func InitConfig() Config {
 		log.Fatal("NEW_USER_RATE_LIMIT: " + err.Error())
 	}
 	conf.NewUserCountLimit = int64(rl)
+
+	cleanUpThreshold, err := strconv.Atoi(os.Getenv("CLEAN_UP_UNVERIFIED_USERS_AFTER"))
+	if err != nil {
+		log.Fatal("CLEAN_UP_UNVERIFIED_USERS_AFTER: " + err.Error())
+	}
+	conf.CleanUpUnverifiedUsersAfter = int64(cleanUpThreshold)
 	return conf
 }
 
