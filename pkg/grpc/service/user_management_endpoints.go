@@ -68,9 +68,9 @@ func (s *userManagementServer) CreateUser(ctx context.Context, req *api.CreateUs
 	if req.Use_2Fa {
 		newUser.Account.AuthType = "2FA"
 	}
-	newUser.ContactPreferences.SubscribedToNewsletter = true
+	newUser.ContactPreferences.SubscribedToNewsletter = false
 	newUser.ContactPreferences.SendNewsletterTo = []string{newUser.ContactInfos[0].ID.Hex()}
-	newUser.ContactPreferences.SubscribedToWeekly = true
+	newUser.ContactPreferences.SubscribedToWeekly = false
 	newUser.ContactPreferences.ReceiveWeeklyMessageDayOfWeek = int32(rand.Intn(7))
 
 	instanceID := req.Token.InstanceId

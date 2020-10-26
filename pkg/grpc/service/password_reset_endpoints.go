@@ -145,6 +145,16 @@ func (s *userManagementServer) ResetPassword(ctx context.Context, req *api.Reset
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
+	if tokenInfos.Purpose == constants.TOKEN_PURPOSE_INVITATION {
+		newContactPrefs := user.ContactPreferences
+		newContactPrefs.SubscribedToNewsletter = true
+		newContactPrefs.SubscribedToWeekly = true
+		_, err = s.userDBservice.UpdateContactPreferences(tokenInfos.InstanceID, tokenInfos.UserID, newContactPrefs)
+		if err != nil {
+			log.Printf("unexpected error when updating contact preferences: %v", err)
+		}
+	}
+
 	// Trigger message sending
 	_, err = s.clients.MessagingService.SendInstantEmail(ctx, &messageAPI.SendEmailReq{
 		InstanceId:        tokenInfos.InstanceID,
