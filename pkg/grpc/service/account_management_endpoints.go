@@ -172,7 +172,7 @@ func (s *userManagementServer) ChangeAccountIDEmail(ctx context.Context, req *ap
 		user.Profiles[0].Alias = req.NewEmail
 	}
 	user.Account.AccountID = req.NewEmail
-	user.Account.AccountConfirmedAt = 0
+	user.Account.AccountConfirmedAt = -1
 
 	// Add new address to contact list if necessary:
 	ci, found := user.FindContactInfoByTypeAndAddr("email", req.NewEmail)
