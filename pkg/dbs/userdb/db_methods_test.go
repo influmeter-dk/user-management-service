@@ -254,6 +254,7 @@ func TestDbPerformActionForUsers(t *testing.T) {
 
 	err := testDBService.PerfomActionForUsers(
 		testInstanceID,
+		false,
 		testCallback,
 		2,
 		"hello",

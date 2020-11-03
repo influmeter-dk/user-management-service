@@ -206,7 +206,8 @@ func (s *userManagementServer) StreamUsers(req *api.StreamUsersMsg, stream api.U
 		return nil
 	}
 
-	err := s.userDBservice.PerfomActionForUsers(req.InstanceId, sendUserOverGrpc, stream)
+	onlyConfirmedAccounts := true
+	err := s.userDBservice.PerfomActionForUsers(req.InstanceId, onlyConfirmedAccounts, sendUserOverGrpc, stream)
 	if err != nil {
 		return status.Error(codes.Internal, err.Error())
 	}

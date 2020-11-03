@@ -251,6 +251,7 @@ func (dbService *UserDBService) FindNonParticipantUsers(instanceID string) (user
 
 func (dbService *UserDBService) PerfomActionForUsers(
 	instanceID string,
+	onlyConfirmed bool,
 	cbk func(instanceID string, user models.User, args ...interface{}) error,
 	args ...interface{},
 ) (err error) {
@@ -258,6 +259,9 @@ func (dbService *UserDBService) PerfomActionForUsers(
 	defer cancel()
 
 	filter := bson.M{}
+	if onlyConfirmed {
+		filter["account.accountConfirmedAt"] = bson.M{"$gt": 0}
+	}
 	cur, err := dbService.collectionRefUsers(instanceID).Find(
 		ctx,
 		filter,
