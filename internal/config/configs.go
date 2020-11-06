@@ -19,7 +19,7 @@ type Config struct {
 	}
 	UserDBConfig                models.DBConfig
 	GlobalDBConfig              models.DBConfig
-	JWT                         models.JWTConfig
+	Intervals                   models.Intervals
 	NewUserCountLimit           int64
 	CleanUpUnverifiedUsersAfter int64
 }
@@ -32,7 +32,7 @@ func InitConfig() Config {
 
 	conf.UserDBConfig = getUserDBConfig()
 	conf.GlobalDBConfig = getGlobalDBConfig()
-	conf.JWT = getJWTConfig()
+	conf.Intervals = getIntervalsConfig()
 
 	rl, err := strconv.Atoi(os.Getenv("NEW_USER_RATE_LIMIT"))
 	if err != nil {
@@ -48,14 +48,27 @@ func InitConfig() Config {
 	return conf
 }
 
-func getJWTConfig() models.JWTConfig {
-	accessTokenExpiration, err := strconv.Atoi(os.Getenv("TOKEN_EXPIRATION_MIN"))
+func getIntervalsConfig() models.Intervals {
+	intervals := models.Intervals{
+		TokenExpiryInterval:      time.Minute * time.Duration(defaultTokenExpirationMin),
+		VerificationCodeLifetime: defaultVerificationCodeLifetime,
+	}
+
+	accessTokenExpiration, err := strconv.Atoi(os.Getenv(ENV_TOKEN_EXPIRATION_MIN))
 	if err != nil {
-		log.Fatal("TOKEN_EXPIRATION_MIN: " + err.Error())
+		log.Println("using default token expiration")
+	} else {
+		intervals.TokenExpiryInterval = time.Minute * time.Duration(accessTokenExpiration)
 	}
-	return models.JWTConfig{
-		TokenExpiryInterval: time.Minute * time.Duration(accessTokenExpiration),
+
+	newVerificationCodeLifetime, err := strconv.Atoi(os.Getenv(ENV_VERIFICATION_CODE_LIFETIME))
+	if err != nil {
+		log.Println("using default verification code lifetime")
+	} else {
+		intervals.VerificationCodeLifetime = int64(newVerificationCodeLifetime)
 	}
+
+	return intervals
 }
 
 func getUserDBConfig() models.DBConfig {
@@ -83,12 +96,15 @@ func getUserDBConfig() models.DBConfig {
 		log.Fatal("DB_MAX_POOL_SIZE: " + err.Error())
 	}
 
+	noCursorTimeout := os.Getenv(ENV_USE_NO_CURSOR_TIMEOUT) == "true"
+
 	DBNamePrefix := os.Getenv("DB_DB_NAME_PREFIX")
 
 	return models.DBConfig{
 		URI:             URI,
 		Timeout:         Timeout,
 		IdleConnTimeout: IdleConnTimeout,
+		NoCursorTimeout: noCursorTimeout,
 		MaxPoolSize:     MaxPoolSize,
 		DBNamePrefix:    DBNamePrefix,
 	}

@@ -119,7 +119,7 @@ func (s *userManagementServer) AutoValidateTempToken(ctx context.Context, req *a
 
 	user.Account.VerificationCode = models.VerificationCode{
 		Code:      vc,
-		ExpiresAt: time.Now().Unix() + verificationCodeLifetime,
+		ExpiresAt: time.Now().Unix() + s.Intervals.VerificationCodeLifetime,
 	}
 	user, err = s.userDBservice.UpdateUser(tokenInfos.InstanceID, user)
 	if err != nil {
@@ -264,7 +264,7 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 		mainProfileID,
 		currentRoles,
 		req.InstanceId,
-		s.JWT.TokenExpiryInterval,
+		s.Intervals.TokenExpiryInterval,
 		username,
 		nil,
 		otherProfileIDs,
@@ -303,7 +303,7 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 		Token: &api.TokenResponse{
 			AccessToken:       token,
 			RefreshToken:      rt,
-			ExpiresIn:         int32(s.JWT.TokenExpiryInterval / time.Minute),
+			ExpiresIn:         int32(s.Intervals.TokenExpiryInterval / time.Minute),
 			Profiles:          apiUser.Profiles,
 			SelectedProfileId: mainProfileID,
 			PreferredLanguage: apiUser.Account.PreferredLanguage,
@@ -441,7 +441,7 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 		apiUser.Profiles[0].Id,
 		newUser.Roles,
 		req.InstanceId,
-		s.JWT.TokenExpiryInterval,
+		s.Intervals.TokenExpiryInterval,
 		username,
 		nil,
 		[]string{},
@@ -471,7 +471,7 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 	response := &api.TokenResponse{
 		AccessToken:       token,
 		RefreshToken:      rt,
-		ExpiresIn:         int32(s.JWT.TokenExpiryInterval / time.Minute),
+		ExpiresIn:         int32(s.Intervals.TokenExpiryInterval / time.Minute),
 		Profiles:          apiUser.Profiles,
 		SelectedProfileId: apiUser.Profiles[0].Id,
 		PreferredLanguage: apiUser.Account.PreferredLanguage,

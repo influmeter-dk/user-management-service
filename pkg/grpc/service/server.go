@@ -6,7 +6,6 @@ import (
 	"net"
 	"os"
 	"os/signal"
-	"time"
 
 	"github.com/influenzanet/user-management-service/pkg/api"
 	"github.com/influenzanet/user-management-service/pkg/dbs/globaldb"
@@ -24,7 +23,7 @@ type userManagementServer struct {
 	clients           *models.APIClients
 	userDBservice     *userdb.UserDBService
 	globalDBService   *globaldb.GlobalDBService
-	JWT               models.JWTConfig
+	Intervals         models.Intervals
 	newUserCountLimit int64
 }
 
@@ -33,16 +32,14 @@ func NewUserManagementServer(
 	clients *models.APIClients,
 	userDBservice *userdb.UserDBService,
 	globalDBservice *globaldb.GlobalDBService,
-	JWT struct {
-		TokenExpiryInterval time.Duration // interpreted in minutes later
-	},
+	intervals models.Intervals,
 	newUserCountLimit int64,
 ) api.UserManagementApiServer {
 	return &userManagementServer{
 		clients:           clients,
 		userDBservice:     userDBservice,
 		globalDBService:   globalDBservice,
-		JWT:               JWT,
+		Intervals:         intervals,
 		newUserCountLimit: newUserCountLimit,
 	}
 }
@@ -52,9 +49,7 @@ func RunServer(ctx context.Context, port string,
 	clients *models.APIClients,
 	userDBservice *userdb.UserDBService,
 	globalDBservice *globaldb.GlobalDBService,
-	JWT struct {
-		TokenExpiryInterval time.Duration // interpreted in minutes later
-	},
+	intervals models.Intervals,
 	newUserCountLimit int64,
 ) error {
 	lis, err := net.Listen("tcp", ":"+port)
@@ -68,7 +63,7 @@ func RunServer(ctx context.Context, port string,
 		clients,
 		userDBservice,
 		globalDBservice,
-		JWT,
+		intervals,
 		newUserCountLimit,
 	))
 

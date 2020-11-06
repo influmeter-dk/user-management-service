@@ -24,8 +24,9 @@ func TestInitiatePasswordResetEndpoint(t *testing.T) {
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
-		JWT: models.JWTConfig{
-			TokenExpiryInterval: time.Second * 2,
+		Intervals: models.Intervals{
+			TokenExpiryInterval:      time.Second * 2,
+			VerificationCodeLifetime: 60,
 		},
 		clients: &models.APIClients{
 			MessagingService: mockMessagingClient,
@@ -105,8 +106,9 @@ func TestGetInfosForPasswordResetEndpoint(t *testing.T) {
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
-		JWT: models.JWTConfig{
-			TokenExpiryInterval: time.Second * 2,
+		Intervals: models.Intervals{
+			TokenExpiryInterval:      time.Second * 2,
+			VerificationCodeLifetime: 60,
 		},
 	}
 
@@ -217,8 +219,9 @@ func TestResetPasswordEndpoint(t *testing.T) {
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
-		JWT: models.JWTConfig{
-			TokenExpiryInterval: time.Second * 2,
+		Intervals: models.Intervals{
+			TokenExpiryInterval:      time.Second * 2,
+			VerificationCodeLifetime: 60,
 		},
 		clients: &models.APIClients{
 			MessagingService: mockMessagingClient,

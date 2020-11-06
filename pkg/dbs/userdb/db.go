@@ -11,9 +11,10 @@ import (
 )
 
 type UserDBService struct {
-	DBClient     *mongo.Client
-	timeout      int
-	DBNamePrefix string
+	DBClient        *mongo.Client
+	timeout         int
+	noCursorTimeout bool
+	DBNamePrefix    string
 }
 
 func NewUserDBService(configs models.DBConfig) *UserDBService {
@@ -43,9 +44,10 @@ func NewUserDBService(configs models.DBConfig) *UserDBService {
 	}
 
 	return &UserDBService{
-		DBClient:     dbClient,
-		timeout:      configs.Timeout,
-		DBNamePrefix: configs.DBNamePrefix,
+		DBClient:        dbClient,
+		timeout:         configs.Timeout,
+		noCursorTimeout: configs.NoCursorTimeout,
+		DBNamePrefix:    configs.DBNamePrefix,
 	}
 }
 

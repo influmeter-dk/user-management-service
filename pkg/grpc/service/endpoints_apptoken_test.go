@@ -14,8 +14,9 @@ func TestValidateAppTokenEndpoint(t *testing.T) {
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
-		JWT: models.JWTConfig{
-			TokenExpiryInterval: time.Second * 2,
+		Intervals: models.Intervals{
+			TokenExpiryInterval:      time.Second * 2,
+			VerificationCodeLifetime: 60,
 		},
 	}
 

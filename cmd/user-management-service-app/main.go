@@ -50,7 +50,7 @@ func main() {
 		clients,
 		userDBService,
 		globalDBService,
-		conf.JWT,
+		conf.Intervals,
 		conf.NewUserCountLimit,
 	); err != nil {
 		log.Fatal(err)

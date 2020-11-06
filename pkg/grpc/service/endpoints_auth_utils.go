@@ -24,7 +24,7 @@ func (s *userManagementServer) generateAndSendVerificationCode(instanceID string
 		Code:      vc,
 		Attempts:  0,
 		CreatedAt: time.Now().Unix(),
-		ExpiresAt: time.Now().Unix() + verificationCodeLifetime,
+		ExpiresAt: time.Now().Unix() + s.Intervals.VerificationCodeLifetime,
 	}
 	user, err = s.userDBservice.UpdateUser(instanceID, user)
 	if err != nil {

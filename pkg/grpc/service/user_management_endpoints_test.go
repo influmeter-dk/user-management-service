@@ -23,8 +23,9 @@ func TestCreateUserEndpoint(t *testing.T) {
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
-		JWT: models.JWTConfig{
-			TokenExpiryInterval: time.Second * 2,
+		Intervals: models.Intervals{
+			TokenExpiryInterval:      time.Second * 2,
+			VerificationCodeLifetime: 60,
 		},
 		clients: &models.APIClients{
 			MessagingService: mockMessagingClient,
@@ -131,8 +132,9 @@ func TestAddRoleForUserEndpoint(t *testing.T) {
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
-		JWT: models.JWTConfig{
-			TokenExpiryInterval: time.Second * 2,
+		Intervals: models.Intervals{
+			TokenExpiryInterval:      time.Second * 2,
+			VerificationCodeLifetime: 60,
 		},
 		clients: &models.APIClients{
 			LoggingService: mockLoggingClient,
@@ -246,8 +248,9 @@ func TestRemoveRoleForUserEndpoint(t *testing.T) {
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
-		JWT: models.JWTConfig{
-			TokenExpiryInterval: time.Second * 2,
+		Intervals: models.Intervals{
+			TokenExpiryInterval:      time.Second * 2,
+			VerificationCodeLifetime: 60,
 		},
 		clients: &models.APIClients{
 			LoggingService: mockLoggingClient,
@@ -356,8 +359,9 @@ func TestFindNonParticipantUsersEndpoint(t *testing.T) {
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
-		JWT: models.JWTConfig{
-			TokenExpiryInterval: time.Second * 2,
+		Intervals: models.Intervals{
+			TokenExpiryInterval:      time.Second * 2,
+			VerificationCodeLifetime: 60,
 		},
 	}
 
@@ -460,8 +464,9 @@ func TestStreamUsersEndpoint(t *testing.T) {
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
-		JWT: models.JWTConfig{
-			TokenExpiryInterval: time.Second * 2,
+		Intervals: models.Intervals{
+			TokenExpiryInterval:      time.Second * 2,
+			VerificationCodeLifetime: 60,
 		},
 	}
 

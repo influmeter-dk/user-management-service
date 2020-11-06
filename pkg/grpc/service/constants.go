@@ -1,7 +1,6 @@
 package service
 
 const (
-	verificationCodeLifetime           = 5 * 60 // for 2FA 6 digit code
 	contactVerificationMessageCooldown = 1 * 60
 	loginVerificationCodeCooldown      = 20
 

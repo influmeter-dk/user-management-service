@@ -16,8 +16,9 @@ func TestGetOrCreateTemptokenEndpoint(t *testing.T) {
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
-		JWT: models.JWTConfig{
-			TokenExpiryInterval: time.Second * 2,
+		Intervals: models.Intervals{
+			TokenExpiryInterval:      time.Second * 2,
+			VerificationCodeLifetime: 60,
 		},
 	}
 
@@ -90,8 +91,9 @@ func TestGenerateTempTokenEndpoint(t *testing.T) {
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
-		JWT: models.JWTConfig{
-			TokenExpiryInterval: time.Second * 2,
+		Intervals: models.Intervals{
+			TokenExpiryInterval:      time.Second * 2,
+			VerificationCodeLifetime: 60,
 		},
 	}
 
@@ -142,8 +144,9 @@ func TestGetTempTokensEndpoint(t *testing.T) {
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
-		JWT: models.JWTConfig{
-			TokenExpiryInterval: time.Second * 2,
+		Intervals: models.Intervals{
+			TokenExpiryInterval:      time.Second * 2,
+			VerificationCodeLifetime: 60,
 		},
 	}
 
@@ -221,8 +224,9 @@ func TestDeleteTempTokenEndpoint(t *testing.T) {
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
-		JWT: models.JWTConfig{
-			TokenExpiryInterval: time.Second * 2,
+		Intervals: models.Intervals{
+			TokenExpiryInterval:      time.Second * 2,
+			VerificationCodeLifetime: 60,
 		},
 	}
 
@@ -300,8 +304,9 @@ func TestPurgeUserTempTokensEndpoint(t *testing.T) {
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
-		JWT: models.JWTConfig{
-			TokenExpiryInterval: time.Second * 2,
+		Intervals: models.Intervals{
+			TokenExpiryInterval:      time.Second * 2,
+			VerificationCodeLifetime: 60,
 		},
 	}
 

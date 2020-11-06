@@ -18,9 +18,9 @@ func TestValidateJWT(t *testing.T) {
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
-		JWT: models.JWTConfig{
-
-			TokenExpiryInterval: time.Second * 2,
+		Intervals: models.Intervals{
+			TokenExpiryInterval:      time.Second * 2,
+			VerificationCodeLifetime: 60,
 		},
 	}
 
@@ -41,14 +41,14 @@ func TestValidateJWT(t *testing.T) {
 		}
 	})
 
-	adminToken, err1 := tokens.GenerateNewToken("test-admin-id", true, "testprofid", []string{"PARTICIPANT", "ADMIN"}, testInstanceID, s.JWT.TokenExpiryInterval, "", nil, []string{})
+	adminToken, err1 := tokens.GenerateNewToken("test-admin-id", true, "testprofid", []string{"PARTICIPANT", "ADMIN"}, testInstanceID, s.Intervals.TokenExpiryInterval, "", nil, []string{})
 	userToken, err2 := tokens.GenerateNewToken(
 		"test-user-id",
 		true,
 		"testprofid",
 		[]string{"PARTICIPANT"},
 		testInstanceID,
-		s.JWT.TokenExpiryInterval,
+		s.Intervals.TokenExpiryInterval,
 		"",
 		&models.TempToken{UserID: "test-user-id", Purpose: "testpurpose"},
 		[]string{},
@@ -111,7 +111,7 @@ func TestValidateJWT(t *testing.T) {
 	if testing.Short() {
 		t.Skip("skipping waiting for token test in short mode, since it has to wait for token expiration.")
 	}
-	time.Sleep(s.JWT.TokenExpiryInterval + time.Second)
+	time.Sleep(s.Intervals.TokenExpiryInterval + time.Second)
 
 	t.Run("with expired token", func(t *testing.T) {
 		req := &api.JWTRequest{
@@ -133,8 +133,9 @@ func TestRenewJWT(t *testing.T) {
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
-		JWT: models.JWTConfig{
-			TokenExpiryInterval: time.Second * 2,
+		Intervals: models.Intervals{
+			TokenExpiryInterval:      time.Second * 2,
+			VerificationCodeLifetime: 60,
 		},
 		clients: &models.APIClients{
 			LoggingService: mockLoggingClient,
@@ -160,7 +161,7 @@ func TestRenewJWT(t *testing.T) {
 		t.Errorf("failed to create testusers: %s", err.Error())
 		return
 	}
-	userToken, err := tokens.GenerateNewToken(testUsers[0].ID.Hex(), true, "testprofid", []string{"PARTICIPANT"}, testInstanceID, s.JWT.TokenExpiryInterval, "", nil, []string{})
+	userToken, err := tokens.GenerateNewToken(testUsers[0].ID.Hex(), true, "testprofid", []string{"PARTICIPANT"}, testInstanceID, s.Intervals.TokenExpiryInterval, "", nil, []string{})
 	if err != nil {
 		t.Errorf("unexpected error: %s", err)
 		return
@@ -238,7 +239,7 @@ func TestRenewJWT(t *testing.T) {
 		}
 	})
 
-	time.Sleep(s.JWT.TokenExpiryInterval)
+	time.Sleep(s.Intervals.TokenExpiryInterval)
 
 	// Test with expired token
 	t.Run("with expired token", func(t *testing.T) {
@@ -271,8 +272,9 @@ func TestRevokeAllRefreshTokens(t *testing.T) {
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
-		JWT: models.JWTConfig{
-			TokenExpiryInterval: time.Second * 2,
+		Intervals: models.Intervals{
+			TokenExpiryInterval:      time.Second * 2,
+			VerificationCodeLifetime: 60,
 		},
 	}
 	refreshToken := "TEST-REFRESH-TOKEN-STRING"

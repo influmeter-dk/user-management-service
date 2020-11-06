@@ -71,7 +71,7 @@ func (s *userManagementServer) RenewJWT(ctx context.Context, req *api.RefreshJWT
 	mainProfileID, otherProfileIDs := utils.GetMainAndOtherProfiles(user)
 
 	// Generate new access token:
-	newToken, err := tokens.GenerateNewToken(parsedToken.ID, user.Account.AccountConfirmedAt > 0, mainProfileID, roles, parsedToken.InstanceID, s.JWT.TokenExpiryInterval, username, nil, otherProfileIDs)
+	newToken, err := tokens.GenerateNewToken(parsedToken.ID, user.Account.AccountConfirmedAt > 0, mainProfileID, roles, parsedToken.InstanceID, s.Intervals.TokenExpiryInterval, username, nil, otherProfileIDs)
 	if err != nil {
 		log.Printf("renew token error: %v", err.Error())
 		return nil, status.Error(codes.Internal, err.Error())
@@ -94,7 +94,7 @@ func (s *userManagementServer) RenewJWT(ctx context.Context, req *api.RefreshJWT
 	return &api.TokenResponse{
 		AccessToken:       newToken,
 		RefreshToken:      newRefreshToken,
-		ExpiresIn:         int32(s.JWT.TokenExpiryInterval / time.Minute),
+		ExpiresIn:         int32(s.Intervals.TokenExpiryInterval / time.Minute),
 		SelectedProfileId: parsedToken.ProfileID,
 		Profiles:          user.ToAPI().Profiles,
 		PreferredLanguage: user.Account.PreferredLanguage,

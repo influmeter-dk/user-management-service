@@ -271,9 +271,16 @@ func (dbService *UserDBService) PerfomActionForUsers(
 		filter["contactPreferences.receiveWeeklyMessageDayOfWeek"] = filters.ReminderWeekDay
 	}
 
+	batchSize := int32(32)
+	options := options.FindOptions{
+		NoCursorTimeout: &dbService.noCursorTimeout,
+		BatchSize:       &batchSize,
+	}
+
 	cur, err := dbService.collectionRefUsers(instanceID).Find(
 		ctx,
 		filter,
+		&options,
 	)
 	if err != nil {
 		return err

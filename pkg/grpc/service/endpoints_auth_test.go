@@ -31,8 +31,9 @@ func TestSendVerificationCode(t *testing.T) {
 			MessagingService: mockMessagingClient,
 			LoggingService:   mockLoggingClient,
 		},
-		JWT: models.JWTConfig{
-			TokenExpiryInterval: time.Second * 2,
+		Intervals: models.Intervals{
+			TokenExpiryInterval:      time.Second * 2,
+			VerificationCodeLifetime: 60,
 		},
 	}
 
@@ -116,8 +117,9 @@ func TestAutoValidateTempToken(t *testing.T) {
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
-		JWT: models.JWTConfig{
-			TokenExpiryInterval: time.Second * 2,
+		Intervals: models.Intervals{
+			TokenExpiryInterval:      time.Second * 2,
+			VerificationCodeLifetime: 60,
 		},
 	}
 
@@ -257,7 +259,7 @@ func TestAutoValidateTempToken(t *testing.T) {
 
 	t.Run("correct temptoken with access token same user", func(t *testing.T) {
 		accessToken, err := tokens.GenerateNewToken(
-			testUser.ID.Hex(), true, "profid", []string{}, testInstanceID, s.JWT.TokenExpiryInterval, "", nil, []string{},
+			testUser.ID.Hex(), true, "profid", []string{}, testInstanceID, s.Intervals.TokenExpiryInterval, "", nil, []string{},
 		)
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
@@ -284,7 +286,7 @@ func TestAutoValidateTempToken(t *testing.T) {
 
 	t.Run("correct temptoken with access token different user", func(t *testing.T) {
 		accessToken, err := tokens.GenerateNewToken(
-			"different", true, "profid", []string{}, testInstanceID, s.JWT.TokenExpiryInterval, "", nil, []string{},
+			"different", true, "profid", []string{}, testInstanceID, s.Intervals.TokenExpiryInterval, "", nil, []string{},
 		)
 		if err != nil {
 			t.Errorf("unexpected error: %v", err)
@@ -318,8 +320,9 @@ func TestLogin(t *testing.T) {
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
-		JWT: models.JWTConfig{
-			TokenExpiryInterval: time.Second * 2,
+		Intervals: models.Intervals{
+			TokenExpiryInterval:      time.Second * 2,
+			VerificationCodeLifetime: 60,
 		},
 		clients: &models.APIClients{
 			LoggingService: mockLoggingClient,
@@ -582,8 +585,9 @@ func TestSignupWithEmail(t *testing.T) {
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
-		JWT: models.JWTConfig{
-			TokenExpiryInterval: time.Second * 2,
+		Intervals: models.Intervals{
+			TokenExpiryInterval:      time.Second * 2,
+			VerificationCodeLifetime: 60,
 		},
 		clients: &models.APIClients{
 			MessagingService: mockMessagingClient,
@@ -714,8 +718,9 @@ func TestVerifyAccountEndpoint(t *testing.T) {
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
-		JWT: models.JWTConfig{
-			TokenExpiryInterval: time.Second * 2,
+		Intervals: models.Intervals{
+			TokenExpiryInterval:      time.Second * 2,
+			VerificationCodeLifetime: 60,
 		},
 		clients: &models.APIClients{
 			LoggingService: mockLoggingClient,
@@ -893,8 +898,9 @@ func TestResendContactVerificationEndpoint(t *testing.T) {
 	s := userManagementServer{
 		userDBservice:   testUserDBService,
 		globalDBService: testGlobalDBService,
-		JWT: models.JWTConfig{
-			TokenExpiryInterval: time.Second * 2,
+		Intervals: models.Intervals{
+			TokenExpiryInterval:      time.Second * 2,
+			VerificationCodeLifetime: 60,
 		},
 		clients: &models.APIClients{
 			MessagingService: mockMessagingClient,
