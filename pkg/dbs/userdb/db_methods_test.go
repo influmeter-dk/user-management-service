@@ -254,7 +254,10 @@ func TestDbPerformActionForUsers(t *testing.T) {
 
 	err := testDBService.PerfomActionForUsers(
 		testInstanceID,
-		false,
+		UserFilter{
+			OnlyConfirmed:   false,
+			ReminderWeekDay: -1,
+		},
 		testCallback,
 		2,
 		"hello",

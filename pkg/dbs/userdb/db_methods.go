@@ -249,9 +249,14 @@ func (dbService *UserDBService) FindNonParticipantUsers(instanceID string) (user
 	return users, nil
 }
 
+type UserFilter struct {
+	OnlyConfirmed   bool
+	ReminderWeekDay int32
+}
+
 func (dbService *UserDBService) PerfomActionForUsers(
 	instanceID string,
-	onlyConfirmed bool,
+	filters UserFilter,
 	cbk func(instanceID string, user models.User, args ...interface{}) error,
 	args ...interface{},
 ) (err error) {
@@ -259,9 +264,13 @@ func (dbService *UserDBService) PerfomActionForUsers(
 	defer cancel()
 
 	filter := bson.M{}
-	if onlyConfirmed {
+	if filters.OnlyConfirmed {
 		filter["account.accountConfirmedAt"] = bson.M{"$gt": 0}
 	}
+	if filters.ReminderWeekDay > -1 {
+		filter["contactPreferences.receiveWeeklyMessageDayOfWeek"] = filters.ReminderWeekDay
+	}
+
 	cur, err := dbService.collectionRefUsers(instanceID).Find(
 		ctx,
 		filter,

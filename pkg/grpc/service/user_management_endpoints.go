@@ -11,6 +11,7 @@ import (
 	loggingAPI "github.com/influenzanet/logging-service/pkg/api"
 	messageAPI "github.com/influenzanet/messaging-service/pkg/api/messaging_service"
 	"github.com/influenzanet/user-management-service/pkg/api"
+	"github.com/influenzanet/user-management-service/pkg/dbs/userdb"
 	"github.com/influenzanet/user-management-service/pkg/models"
 	"github.com/influenzanet/user-management-service/pkg/pwhash"
 	"github.com/influenzanet/user-management-service/pkg/tokens"
@@ -206,8 +207,18 @@ func (s *userManagementServer) StreamUsers(req *api.StreamUsersMsg, stream api.U
 		return nil
 	}
 
-	onlyConfirmedAccounts := true
-	err := s.userDBservice.PerfomActionForUsers(req.InstanceId, onlyConfirmedAccounts, sendUserOverGrpc, stream)
+	filter := userdb.UserFilter{
+		OnlyConfirmed:   false,
+		ReminderWeekDay: -1,
+	}
+	if req.Filters != nil {
+		filter.OnlyConfirmed = req.Filters.OnlyConfirmedAccounts
+		if req.Filters.UseReminderWeekdayFilter {
+			filter.ReminderWeekDay = req.Filters.ReminderWeekday
+		}
+	}
+
+	err := s.userDBservice.PerfomActionForUsers(req.InstanceId, filter, sendUserOverGrpc, stream)
 	if err != nil {
 		return status.Error(codes.Internal, err.Error())
 	}
