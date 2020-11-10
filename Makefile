@@ -1,7 +1,10 @@
-.PHONY: build test install-dev mock docker api
+.PHONY: build test install-dev mock docker api user-management-service-app
 
 PROTO_BUILD_DIR = ../../..
 DOCKER_OPTS ?= --rm
+
+# Where binary are put
+TARGET_DIR ?= ./
 
 # TEST_ARGS = -v | grep -c RUN
 
@@ -22,8 +25,10 @@ api:
 	if [ ! -d "./pkg/api" ]; then mkdir -p "./pkg/api"; else  find "./pkg/api" -type f -delete &&  mkdir -p "./pkg/api"; fi
 	find ./api/user_management/*.proto -maxdepth 1 -type f -exec protoc {} --proto_path=./api --go_out=plugins=grpc:$(PROTO_BUILD_DIR) \;
 
-build:
-	go build .
+user-management-service-app:
+	go build -o $(TARGET_DIR) ./cmd/user-management-service-app
+
+build: user-management-service-app
 
 test:
 	./test/test.sh $(TEST_ARGS)
