@@ -27,9 +27,11 @@ DB_DB_NAME_PREFIX=<db name prefix>
 #################
 # JWT config
 #################
+
+# Token expiration delay (in minutes)
 TOKEN_EXPIRATION_MIN=5
-TOKEN_MINIMUM_AGE_MIN=2
-# should be secret:
+
+# Random generated base64 encoded key, should be secret
 JWT_TOKEN_KEY=<secret key to sign jwts>
 
 #################
@@ -39,8 +41,14 @@ ARGON2_MEMORY=65536
 ARGON2_ITERATIONS=4
 ARGON2_PARALLELISM=2
 
+# Maximum number of new created accounts, during the signupRateLimitWindow (5 minutes)
 NEW_USER_RATE_LIMIT=100
+
+# Delay (seconds) after which to cleanup user account when it has not been verified
 CLEAN_UP_UNVERIFIED_USERS_AFTER=129000
+
+# Lifetime in seconds for verification code of a new account. Default is 15 minutes
+VERIFICATION_CODE_LIFETIME=900
 
 #################
 # grpc services

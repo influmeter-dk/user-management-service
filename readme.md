@@ -35,6 +35,12 @@ You can create a pull request with adding the Dockerfile into `build/docker` wit
 
 An example to run your created docker image - with the set environment variables - can be found [here](build/docker/example).
 
+## Config
+
+The available environment variables to configure the services are available in the docker example file.
+
+### JWT_TOKEN_KEY
+The private key JWT_TOKEN_KEY can be generated using the `key-generator` tool provided. It obviously needs to be stored in a secured way once generated.
 
 ## Misc
 Maximum ten devices can get a refresh token at the same time - see pkg/models/user.go
