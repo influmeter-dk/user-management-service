@@ -1,1 +1,1 @@
-You can use the key generator, to generate a random private key to sign tokens.
+You can use the key generator, to generate a random secret key to sign tokens. The key will be encoded in base64 as expected by the service.
