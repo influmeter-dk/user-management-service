@@ -25,10 +25,14 @@ api:
 	if [ ! -d "./pkg/api" ]; then mkdir -p "./pkg/api"; else  find "./pkg/api" -type f -delete &&  mkdir -p "./pkg/api"; fi
 	find ./api/user_management/*.proto -maxdepth 1 -type f -exec protoc {} --proto_path=./api --go_out=plugins=grpc:$(PROTO_BUILD_DIR) \;
 
+key-generator:
+	go build -o $(TARGET_DIR) ./tools/key-generator
+
+
 user-management-service-app:
 	go build -o $(TARGET_DIR) ./cmd/user-management-service-app
 
-build: user-management-service-app
+build: user-management-service-app key-generator
 
 test:
 	./test/test.sh $(TEST_ARGS)
