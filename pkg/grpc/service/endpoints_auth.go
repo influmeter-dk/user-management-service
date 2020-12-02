@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 	"math/rand"
+	"strings"
 	"time"
 
 	"github.com/golang/protobuf/ptypes/empty"
@@ -130,7 +131,7 @@ func (s *userManagementServer) AutoValidateTempToken(ctx context.Context, req *a
 	sameUser := false
 	if len(req.AccessToken) > 0 {
 		validatedToken, _, err := tokens.ValidateToken(req.AccessToken)
-		if err != nil {
+		if err != nil && !strings.Contains(err.Error(), "token is expired by") {
 			log.Printf("AutoValidateTempToken: unexpected error when parsing token -> %v", err)
 		}
 		if validatedToken.ID == tokenInfos.UserID && validatedToken.InstanceID == tokenInfos.InstanceID {
@@ -189,7 +190,7 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 	if user.Account.AuthType == "2FA" {
 		if req.VerificationCode == "" {
 			// user tries first step
-			if user.Account.VerificationCode.Code == "" || user.Account.VerificationCode.ExpiresAt < time.Now().Unix() {
+			if user.Account.VerificationCode.Code == "" || user.Account.VerificationCode.CreatedAt == 0 || user.Account.VerificationCode.ExpiresAt < time.Now().Unix() {
 				if user.Account.VerificationCode.CreatedAt > time.Now().Unix()-loginVerificationCodeCooldown {
 					s.SaveLogEvent(req.InstanceId, user.ID.Hex(), loggingAPI.LogEventType_SECURITY, constants.LOG_EVENT_LOGIN_ATTEMPT_ON_BLOCKED_ACCOUNT, "try resending verification code too often")
 					log.Printf("SECURITY WARNING: resend verification code %s - too many wrong tries recently", user.ID.Hex())
