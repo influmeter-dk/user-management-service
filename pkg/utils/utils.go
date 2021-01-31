@@ -63,7 +63,7 @@ func CheckPasswordFormat(password string) bool {
 }
 
 func CheckLanguageCode(code string) bool {
-	codeRule := regexp.MustCompile("^[a-z]{2}$")
+	codeRule := regexp.MustCompile("^[a-z]{2}(-[a-zA-z]{2})?$")
 	return codeRule.MatchString(code)
 }
 
