@@ -241,6 +241,9 @@ func (u *User) RemoveRefreshToken(token string) error {
 }
 
 // Timestamps describes metadata for the User
+// createdAt contains the account creation time, an offset is added if this account is created by admin, to reduce
+// risk this account to be deleled if account verification is not done in time (use case of migration when users are invited from previous platfom).
+// The offset applied is defined in pkg/grpc/service/constant.go
 type Timestamps struct {
 	LastTokenRefresh   int64 `bson:"lastTokenRefresh"`
 	LastLogin          int64 `bson:"lastLogin"`
