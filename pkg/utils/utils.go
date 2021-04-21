@@ -23,6 +23,7 @@ func CheckEmailFormat(email string) bool {
 	return re.MatchString(email)
 }
 
+// BlurEmailAddress transforms an email address to reduce exposed personal info
 func BlurEmailAddress(email string) string {
 	items := strings.Split(email, "@")
 	if len(items) < 1 || len(items[0]) < 1 {
@@ -62,6 +63,7 @@ func CheckPasswordFormat(password string) bool {
 	return res > 2
 }
 
+// CheckLanguageCode checks if a string can be considered as a language code
 func CheckLanguageCode(code string) bool {
 	codeRule := regexp.MustCompile("^[a-z]{2}(-[a-zA-z]{2})?$")
 	return codeRule.MatchString(code)

@@ -8,6 +8,7 @@ import (
 	"github.com/influenzanet/user-management-service/pkg/models"
 )
 
+// UserManagementTimerService handles background times for user management (cleanup for example).
 type UserManagementTimerService struct {
 	globalDBService      *globaldb.GlobalDBService
 	userDBService        *userdb.UserDBService
