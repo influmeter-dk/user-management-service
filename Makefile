@@ -28,13 +28,13 @@ api:
 key-generator:
 	go build -o $(TARGET_DIR) ./tools/key-generator
 
-create-user:
-	go build -o $(TARGET_DIR) ./tools/create-user
+create-admin-user:
+	go build -o $(TARGET_DIR) ./tools/create-admin-user
 
 user-management-service-app:
 	go build -o $(TARGET_DIR) ./cmd/user-management-service-app
 
-build: user-management-service-app key-generator create-user
+build: user-management-service-app key-generator create-admin-user
 
 test:
 	./test/test.sh $(TEST_ARGS)
