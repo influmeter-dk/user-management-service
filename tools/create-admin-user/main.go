@@ -20,8 +20,6 @@ import (
 	"github.com/influenzanet/user-management-service/pkg/dbs/userdb"
 )
 
-const userManagementTimerEventFrequency = 90 * 60 // seconds
-
 type UserRequest struct {
 	email      string `yaml:"email"`
 	password   string `yaml:"password"`
