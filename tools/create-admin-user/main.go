@@ -120,5 +120,5 @@ func main() {
 	}
 	newUser.ID, _ = primitive.ObjectIDFromHex(id)
 
-	fmt.Println("User created with id : %s", id)
+	fmt.Printf("User created with id : %s", id)
 }
