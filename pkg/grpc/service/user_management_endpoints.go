@@ -51,20 +51,34 @@ func (s *userManagementServer) CreateUser(ctx context.Context, req *api.CreateUs
 			Password:           password,
 			PreferredLanguage:  req.PreferredLanguage,
 		},
-		Roles: req.Roles,
-		Profiles: []models.Profile{
-			{
-				ID:                 primitive.NewObjectID(),
-				Alias:              utils.BlurEmailAddress(req.AccountId),
-				AvatarID:           "default",
-				ConsentConfirmedAt: time.Now().Unix(),
-				MainProfile:        true,
-			},
-		},
+		Roles:    req.Roles,
+		Profiles: []models.Profile{},
 		Timestamps: models.Timestamps{
 			CreatedAt: time.Now().Unix() + userCreationTimestampOffset,
 		},
 	}
+
+	// Init profiles:
+	if len(req.ProfileNames) < 1 {
+		newUser.Profiles = append(newUser.Profiles, models.Profile{
+			ID:                 primitive.NewObjectID(),
+			Alias:              utils.BlurEmailAddress(req.AccountId),
+			AvatarID:           "default",
+			ConsentConfirmedAt: time.Now().Unix(),
+			MainProfile:        true,
+		})
+	} else {
+		for i, pn := range req.ProfileNames {
+			newUser.Profiles = append(newUser.Profiles, models.Profile{
+				ID:                 primitive.NewObjectID(),
+				Alias:              pn,
+				AvatarID:           "default",
+				ConsentConfirmedAt: time.Now().Unix(),
+				MainProfile:        i == 0,
+			})
+		}
+	}
+
 	newUser.AddNewEmail(req.AccountId, false)
 	if req.Use_2Fa {
 		newUser.Account.AuthType = "2FA"

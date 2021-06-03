@@ -91,6 +91,7 @@ func TestCreateUserEndpoint(t *testing.T) {
 			InitialPassword:   "initPW543",
 			PreferredLanguage: "en",
 			Roles:             []string{"PARTICIPANT", "ADMIN"},
+			ProfileNames:      []string{"main", "secondary"},
 		}
 		resp, err := s.CreateUser(context.Background(), req)
 		if err != nil {
@@ -98,6 +99,10 @@ func TestCreateUserEndpoint(t *testing.T) {
 			return
 		}
 		if resp.Account.AccountId != req.AccountId {
+			t.Errorf("unexpected response: %s", resp)
+			return
+		}
+		if len(resp.Profiles) != 2 {
 			t.Errorf("unexpected response: %s", resp)
 			return
 		}
