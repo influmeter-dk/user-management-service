@@ -1,4 +1,4 @@
-.PHONY: build test install-dev mock docker api user-management-service-app
+.PHONY: build test install-dev mock docker api user-management-service-app create-user key-generator
 
 PROTO_BUILD_DIR = ../../..
 DOCKER_OPTS ?= --rm
@@ -28,11 +28,13 @@ api:
 key-generator:
 	go build -o $(TARGET_DIR) ./tools/key-generator
 
+create-admin-user:
+	go build -o $(TARGET_DIR) ./tools/create-admin-user
 
 user-management-service-app:
 	go build -o $(TARGET_DIR) ./cmd/user-management-service-app
 
-build: user-management-service-app key-generator
+build: user-management-service-app key-generator create-admin-user
 
 test:
 	./test/test.sh $(TEST_ARGS)
