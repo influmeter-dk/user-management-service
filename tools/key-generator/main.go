@@ -2,8 +2,8 @@ package main
 
 import (
 	"crypto/rand"
+	"fmt"
 	"log"
-
 	b64 "encoding/base64"
 )
 
@@ -17,5 +17,5 @@ func main() {
 		log.Fatal(err)
 	}
 	secretStr := b64.StdEncoding.EncodeToString(secret)
-	log.Println(secretStr)
+	fmt.Println(secretStr)
 }

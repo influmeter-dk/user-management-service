@@ -5,6 +5,7 @@ import (
 	"time"
 )
 
+// CleanUpUnverifiedUsers handles the deletion of unverified accounts after a threshold delay
 func (s *UserManagementTimerService) CleanUpUnverifiedUsers() {
 	log.Println("Starting clean up job for unverified users:")
 	instances, err := s.globalDBService.GetAllInstances()

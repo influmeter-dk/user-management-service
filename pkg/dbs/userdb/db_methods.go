@@ -5,6 +5,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/influenzanet/go-utils/pkg/constants"
 	"github.com/influenzanet/user-management-service/pkg/models"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -220,7 +221,11 @@ func (dbService *UserDBService) FindNonParticipantUsers(instanceID string) (user
 	defer cancel()
 
 	filter := bson.M{
-		"roles": bson.M{"$elemMatch": bson.M{"$in": bson.A{"RESEARCHER", "ADMIN"}}},
+		"roles": bson.M{"$elemMatch": bson.M{"$in": bson.A{
+			constants.USER_ROLE_SERVICE_ACCOUNT,
+			constants.USER_ROLE_RESEARCHER,
+			constants.USER_ROLE_ADMIN,
+		}}},
 	}
 	cur, err := dbService.collectionRefUsers(instanceID).Find(
 		ctx,

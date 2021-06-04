@@ -1,6 +1,8 @@
 package timer_event
 
 import (
+	"context"
+	"log"
 	"time"
 
 	"github.com/influenzanet/user-management-service/pkg/dbs/globaldb"
@@ -8,6 +10,7 @@ import (
 	"github.com/influenzanet/user-management-service/pkg/models"
 )
 
+// UserManagementTimerService handles background times for user management (cleanup for example).
 type UserManagementTimerService struct {
 	globalDBService      *globaldb.GlobalDBService
 	userDBService        *userdb.UserDBService
@@ -32,14 +35,19 @@ func NewUserManagmentTimerService(
 	}
 }
 
-func (s *UserManagementTimerService) Run() {
-	go s.startTimerThread(s.TimerEventFrequency)
+func (s *UserManagementTimerService) Run(ctx context.Context) {
+	go s.startTimerThread(ctx, s.TimerEventFrequency)
 }
 
-func (s *UserManagementTimerService) startTimerThread(timeCheckInterval int64) {
-	// TODO: turn off gracefully
+func (s *UserManagementTimerService) startTimerThread(ctx context.Context, timeCheckInterval int64) {
+	log.Printf("Starting timer thread with frequecy %d seconds", timeCheckInterval)
 	for {
-		<-time.After(time.Duration(timeCheckInterval) * time.Second)
-		go s.CleanUpUnverifiedUsers()
+		select {
+		case <-time.After(time.Duration(timeCheckInterval) * time.Second):
+			go s.CleanUpUnverifiedUsers()
+
+		case <-ctx.Done():
+			return
+		}
 	}
 }

@@ -20,6 +20,7 @@ type Account struct {
 	PasswordResetTriggers []int64 `bson:"passwordResetTriggers"`
 }
 
+// VerificationCode holds account verification data
 type VerificationCode struct {
 	Code      string `bson:"code"`
 	Attempts  int64  `bson:"attempts"`

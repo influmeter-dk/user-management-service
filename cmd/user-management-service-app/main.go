@@ -39,10 +39,11 @@ func main() {
 		clients,
 		conf.CleanUpUnverifiedUsersAfter,
 	)
-	userTimerService.Run()
 
 	// Start server thread
 	ctx := context.Background()
+
+	userTimerService.Run(ctx)
 
 	if err := service.RunServer(
 		ctx,
