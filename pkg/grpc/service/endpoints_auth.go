@@ -112,6 +112,22 @@ func (s *userManagementServer) AutoValidateTempToken(ctx context.Context, req *a
 		return nil, status.Error(codes.InvalidArgument, "user not found")
 	}
 
+	sameUser := false
+	if len(req.AccessToken) > 0 {
+		validatedToken, _, err := tokens.ValidateToken(req.AccessToken)
+		if err != nil && !strings.Contains(err.Error(), "token is expired by") {
+			log.Printf("AutoValidateTempToken: unexpected error when parsing token -> %v", err)
+		}
+		if validatedToken.ID == tokenInfos.UserID && validatedToken.InstanceID == tokenInfos.InstanceID {
+			sameUser = true
+		}
+	}
+
+	if user.Account.VerificationCode.ExpiresAt > time.Now().Unix()+loginVerificationCodeCooldown {
+		log.Printf("AutoValidateTempToken: verification code re-used for %s", user.ID.Hex())
+		return &api.AutoValidateResponse{AccountId: user.Account.AccountID, IsSameUser: sameUser, VerificationCode: user.Account.VerificationCode.Code, InstanceId: tokenInfos.InstanceID}, nil
+	}
+
 	vc, err := tokens.GenerateVerificationCode(6)
 	if err != nil {
 		log.Printf("unexpected error while generating verification code: %v", err)
@@ -126,17 +142,6 @@ func (s *userManagementServer) AutoValidateTempToken(ctx context.Context, req *a
 	if err != nil {
 		log.Printf("AutoValidateTempToken: unexpected error when saving user -> %v", err)
 		return nil, status.Error(codes.Internal, "user couldn't be updated")
-	}
-
-	sameUser := false
-	if len(req.AccessToken) > 0 {
-		validatedToken, _, err := tokens.ValidateToken(req.AccessToken)
-		if err != nil && !strings.Contains(err.Error(), "token is expired by") {
-			log.Printf("AutoValidateTempToken: unexpected error when parsing token -> %v", err)
-		}
-		if validatedToken.ID == tokenInfos.UserID && validatedToken.InstanceID == tokenInfos.InstanceID {
-			sameUser = true
-		}
 	}
 
 	if err := s.globalDBService.DeleteAllTempTokenForUser(tokenInfos.InstanceID, user.ID.Hex(), constants.TOKEN_PURPOSE_INVITATION); err != nil {

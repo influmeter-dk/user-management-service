@@ -1,5 +1,12 @@
 # Changelog
 
+## [v0.19.4] - 2021-06-16
+
+### Changed:
+
+- Changing endpoint for auto verificiation code generation through temp token received by email. There were occasional reports of people not able to login with email link. After catching one of such instances, it is likely that somehow a double request to that endpoint caused the replacement of the verification code. With this update, if the user identified by temp token, has a recently generated valid verification code in the DB, we won't replace it, but send this one back (agian).
+
+
 ## [v0.19.3] - 2021-06-03
 
 ### Added:
