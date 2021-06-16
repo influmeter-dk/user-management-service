@@ -48,3 +48,19 @@ Maximum ten devices can get a refresh token at the same time - see pkg/models/us
 Create a database index on user collection for:
 - account.accountID
 - account.accountConfirmedAt + timestamps.createdAt
+
+## Github Actions
+
+The repository also contains a Github actions script to build and push a docker image to a dockerhub repository. 
+The action is a manually triggered workflow dispatch that requires the following secrets to be configured in order to run successfully:
+
+| Secret Name        | Value to be configured           |
+| -------------- | -------------------- |
+| DOCKER_USER     | Username of the account authorized to push docker image to the dockerhub repository |
+| DOCKER_PASSWORD     | Password of the account authorized to push docker image to the dockerhub repository |
+| DOCKER_ORGANIZATION     | Organization or collection name that hosts the repository being pushed to |
+| DOCKER_REPO_NAME     | Name of the user-management-service dockerhub image repository |
+
+Once this is configured, navigate to the Actions tab on Github > Docker Image CI > Run Workflow
+
+By default the version to be tagged is picked from the latest release version, but it can also be overriden by a user specified tag name.
