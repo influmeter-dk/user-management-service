@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"math/rand"
 	"strings"
@@ -318,6 +319,138 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 	}
 	return response, nil
 
+}
+
+func (s *userManagementServer) LoginWithExternalIDP(ctx context.Context, req *api.LoginWithExternalIDPMsg) (*api.LoginResponse, error) {
+	if req == nil || req.Email == "" || req.InstanceId == "" {
+		log.Printf("[ERROR] LoginWithExternalIDP: invalid request - %v", req)
+		return nil, status.Error(codes.InvalidArgument, "invalid request")
+	}
+
+	req.Email = utils.SanitizeEmail(req.Email)
+	user, err := s.userDBservice.GetUserByAccountID(req.InstanceId, req.Email)
+	if err != nil {
+		// user does not exists - create user
+		randomPW, err := tokens.GenerateUniqueTokenString()
+		if err != nil {
+			log.Printf("[ERROR] LoginWithExternalIDP: random pw error - %v", err)
+		}
+		// Create user DB object from request:
+		newUser := models.User{
+			Account: models.Account{
+				Type:                  models.ACCOUNT_TYPE_EXTERNAL,
+				AccountID:             req.Email,
+				AccountConfirmedAt:    time.Now().Unix(),
+				Password:              randomPW, // not used, just to not leave it empty
+				PreferredLanguage:     "",
+				FailedLoginAttempts:   []int64{},
+				PasswordResetTriggers: []int64{},
+			},
+			Roles: []string{req.Role},
+			Profiles: []models.Profile{
+				{
+					ID:                 primitive.NewObjectID(),
+					Alias:              utils.BlurEmailAddress(req.Email),
+					ConsentConfirmedAt: time.Now().Unix(),
+					AvatarID:           "default",
+					MainProfile:        true,
+				},
+			},
+			Timestamps: models.Timestamps{
+				CreatedAt: time.Now().Unix(),
+			},
+		}
+		newUser.AddNewEmail(req.Email, false)
+
+		newUser.Account.AuthType = req.Customer
+		newUser.ContactPreferences.SubscribedToNewsletter = false
+		newUser.ContactPreferences.SendNewsletterTo = []string{newUser.ContactInfos[0].ID.Hex()}
+
+		// on which weekday the user will receive the reminder emails
+		newUser.ContactPreferences.SubscribedToWeekly = false
+		newUser.ContactPreferences.ReceiveWeeklyMessageDayOfWeek = int32(rand.Intn(7))
+
+		id, err := s.userDBservice.AddUser(req.InstanceId, newUser)
+		if err != nil {
+			log.Printf("ERROR: when creating new user: %s", err.Error())
+			return nil, status.Error(codes.Internal, "user creation failed")
+		}
+		newUser.ID, _ = primitive.ObjectIDFromHex(id)
+
+	} else {
+		if user.Account.Type != models.ACCOUNT_TYPE_EXTERNAL {
+			log.Printf("[ERROR] LoginWithExternalIDP: wrong account type '%s' for %v", user.Account.Type, req)
+			s.SaveLogEvent(req.InstanceId, user.ID.Hex(), loggingAPI.LogEventType_ERROR, constants.LOG_EVENT_AUTH_WRONG_ACCOUNT_ID, "wrong account type for external login: "+user.Account.Type)
+			return nil, status.Error(codes.PermissionDenied, "wrong account type")
+		}
+
+		if !user.HasRole(req.Role) {
+			user.Roles = append(user.Roles, req.Role)
+		}
+	}
+
+	username := user.Account.AccountID
+	currentRoles := []string{req.Role}
+
+	apiUser := user.ToAPI()
+
+	mainProfileID, otherProfileIDs := utils.GetMainAndOtherProfiles(user)
+
+	// Access Token
+	token, err := tokens.GenerateNewToken(
+		apiUser.Id,
+		apiUser.Account.AccountConfirmedAt > 0,
+		mainProfileID,
+		currentRoles,
+		req.InstanceId,
+		s.Intervals.TokenExpiryInterval,
+		username,
+		nil,
+		otherProfileIDs,
+	)
+	if err != nil {
+		log.Printf("[ERROR] LoginWithExternalIDP: unexpected error during token generation -> %v", err)
+		return nil, status.Error(codes.Internal, "token generation error")
+	}
+
+	// Refresh Token
+	rt, err := tokens.GenerateUniqueTokenString()
+	if err != nil {
+		log.Printf("[ERROR] LoginWithExternalIDP: unexpected error during refresh token generation -> %v", err)
+		return nil, status.Error(codes.Internal, "token generation error")
+	}
+	user.AddRefreshToken(rt)
+	user.Timestamps.LastLogin = time.Now().Unix()
+	user.Account.VerificationCode = models.VerificationCode{}
+	user.Account.FailedLoginAttempts = utils.RemoveAttemptsOlderThan(user.Account.FailedLoginAttempts, 3600)
+	user.Account.PasswordResetTriggers = utils.RemoveAttemptsOlderThan(user.Account.PasswordResetTriggers, 7200)
+
+	user, err = s.userDBservice.UpdateUser(req.InstanceId, user)
+	if err != nil {
+		log.Printf("[ERROR] LoginWithExternalIDP: unexpected error when saving user -> %v", err)
+		return nil, status.Error(codes.Internal, "user couldn't be updated")
+	}
+
+	// remove all temptokens for password reset:
+	if err := s.globalDBService.DeleteAllTempTokenForUser(req.InstanceId, user.ID.Hex(), constants.TOKEN_PURPOSE_PASSWORD_RESET); err != nil {
+		log.Printf("[ERROR] LoginWithExternalIDP: %s", err.Error())
+	}
+
+	msg := fmt.Sprintf("User: %s\nIDP: %s\nGroup info: %s", req.Idp, req.GroupInfo, user.Account.AccountID)
+	s.SaveLogEvent(req.InstanceId, apiUser.Id, loggingAPI.LogEventType_LOG, constants.LOG_EVENT_LOGIN_SUCCESS, msg)
+
+	response := &api.LoginResponse{
+		Token: &api.TokenResponse{
+			AccessToken:       token,
+			RefreshToken:      rt,
+			ExpiresIn:         int32(s.Intervals.TokenExpiryInterval / time.Minute),
+			Profiles:          apiUser.Profiles,
+			SelectedProfileId: mainProfileID,
+			PreferredLanguage: apiUser.Account.PreferredLanguage,
+		},
+		User: user.ToAPI(),
+	}
+	return response, nil
 }
 
 func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.SignupWithEmailMsg) (*api.TokenResponse, error) {

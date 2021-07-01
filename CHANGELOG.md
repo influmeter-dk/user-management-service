@@ -1,5 +1,16 @@
 # Changelog
 
+## [v0.20.0] - 2021-07-01
+
+### Added:
+
+- New endpoint: LoginWithExternalIDP. This method handles logic for login process when a user is using an external identity provider (IDP) to login. If user did not exist in the system before, an account with type "external" will be created. If an account of type "email" already exists, the method will fail.
+
+### Changed:
+
+- LoginWithEmail endpoint will check account type, if external account is accessed through this endpoint, login will fail - use the external IDP instead.
+- minor code improvements to use globally defined constants instead of locally hard-coded strings
+
 ## [v0.19.4] - 2021-06-16
 
 ### Changed:
