@@ -342,7 +342,7 @@ func (s *userManagementServer) LoginWithExternalIDP(ctx context.Context, req *ap
 			log.Printf("[ERROR] LoginWithExternalIDP: random pw error - %v", err)
 		}
 		// Create user DB object from request:
-		newUser := models.User{
+		user = models.User{
 			Account: models.Account{
 				Type:                  models.ACCOUNT_TYPE_EXTERNAL,
 				AccountID:             req.Email,
@@ -366,22 +366,22 @@ func (s *userManagementServer) LoginWithExternalIDP(ctx context.Context, req *ap
 				CreatedAt: time.Now().Unix(),
 			},
 		}
-		newUser.AddNewEmail(req.Email, false)
+		user.AddNewEmail(req.Email, false)
 
-		newUser.Account.AuthType = req.Customer
-		newUser.ContactPreferences.SubscribedToNewsletter = false
-		newUser.ContactPreferences.SendNewsletterTo = []string{newUser.ContactInfos[0].ID.Hex()}
+		user.Account.AuthType = req.Customer
+		user.ContactPreferences.SubscribedToNewsletter = false
+		user.ContactPreferences.SendNewsletterTo = []string{user.ContactInfos[0].ID.Hex()}
 
 		// on which weekday the user will receive the reminder emails
-		newUser.ContactPreferences.SubscribedToWeekly = false
-		newUser.ContactPreferences.ReceiveWeeklyMessageDayOfWeek = int32(rand.Intn(7))
+		user.ContactPreferences.SubscribedToWeekly = false
+		user.ContactPreferences.ReceiveWeeklyMessageDayOfWeek = int32(rand.Intn(7))
 
-		id, err := s.userDBservice.AddUser(req.InstanceId, newUser)
+		id, err := s.userDBservice.AddUser(req.InstanceId, user)
 		if err != nil {
 			log.Printf("ERROR: when creating new user: %s", err.Error())
 			return nil, status.Error(codes.Internal, "user creation failed")
 		}
-		newUser.ID, _ = primitive.ObjectIDFromHex(id)
+		user.ID, _ = primitive.ObjectIDFromHex(id)
 
 	} else {
 		if user.Account.Type != models.ACCOUNT_TYPE_EXTERNAL {

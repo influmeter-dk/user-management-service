@@ -1,5 +1,12 @@
 # Changelog
 
+## [v0.20.1] - 2021-07-01
+
+### Changed:
+
+- LoginWithExternalIDP: user newly created user object to handle first time login.
+
+
 ## [v0.20.0] - 2021-07-01
 
 ### Added:
