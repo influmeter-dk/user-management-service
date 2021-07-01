@@ -122,7 +122,7 @@ func (s *userManagementServer) ChangeAccountIDEmail(ctx context.Context, req *ap
 		return nil, status.Error(codes.Internal, "action failed")
 	}
 
-	if user.Account.Type != "email" {
+	if user.Account.Type != models.ACCOUNT_TYPE_EMAIL {
 		return nil, status.Error(codes.Internal, "account is not email type")
 	}
 	oldCI, oldFound := user.FindContactInfoByTypeAndAddr("email", user.Account.AccountID)

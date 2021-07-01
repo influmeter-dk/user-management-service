@@ -253,9 +253,9 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 	var username string
 	currentRoles := user.Roles
 	if req.AsParticipant {
-		currentRoles = []string{"PARTICIPANT"}
+		currentRoles = []string{constants.USER_ROLE_PARTICIPANT}
 	} else {
-		if len(user.Roles) > 1 || len(user.Roles) == 1 && user.Roles[0] != "PARTICIPANT" {
+		if len(user.Roles) > 1 || len(user.Roles) == 1 && user.Roles[0] != constants.USER_ROLE_PARTICIPANT {
 			username = user.Account.AccountID
 		}
 	}
@@ -491,7 +491,7 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 	// Create user DB object from request:
 	newUser := models.User{
 		Account: models.Account{
-			Type:                  "email",
+			Type:                  models.ACCOUNT_TYPE_EMAIL,
 			AccountID:             req.Email,
 			AccountConfirmedAt:    0, // not confirmed yet
 			Password:              password,
@@ -499,7 +499,7 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 			FailedLoginAttempts:   []int64{},
 			PasswordResetTriggers: []int64{},
 		},
-		Roles: []string{"PARTICIPANT"},
+		Roles: []string{constants.USER_ROLE_PARTICIPANT},
 		Profiles: []models.Profile{
 			{
 				ID:                 primitive.NewObjectID(),
@@ -539,7 +539,7 @@ func (s *userManagementServer) SignupWithEmail(ctx context.Context, req *api.Sig
 		InstanceID: req.InstanceId,
 		Purpose:    constants.TOKEN_PURPOSE_CONTACT_VERIFICATION,
 		Info: map[string]string{
-			"type":  "email",
+			"type":  models.ACCOUNT_TYPE_EMAIL,
 			"email": newUser.Account.AccountID,
 		},
 		Expiration: tokens.GetExpirationTime(time.Hour * 24 * 30),
@@ -649,7 +649,7 @@ func (s *userManagementServer) VerifyContact(ctx context.Context, req *api.TempT
 		return nil, status.Error(codes.InvalidArgument, err.Error())
 	}
 
-	if user.Account.Type == "email" && user.Account.AccountID == email {
+	if user.Account.Type == models.ACCOUNT_TYPE_EMAIL && user.Account.AccountID == email {
 		user.Account.AccountConfirmedAt = time.Now().Unix()
 	}
 	user, err = s.userDBservice.UpdateUser(tokenInfos.InstanceID, user)
@@ -684,7 +684,7 @@ func (s *userManagementServer) ResendContactVerification(ctx context.Context, re
 		InstanceID: req.Token.InstanceId,
 		Purpose:    constants.TOKEN_PURPOSE_CONTACT_VERIFICATION,
 		Info: map[string]string{
-			"type":  "email",
+			"type":  models.ACCOUNT_TYPE_EMAIL,
 			"email": ci.Email,
 		},
 		Expiration: tokens.GetExpirationTime(time.Hour * 24 * 30),
