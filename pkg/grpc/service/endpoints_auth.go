@@ -183,6 +183,12 @@ func (s *userManagementServer) LoginWithEmail(ctx context.Context, req *api.Logi
 		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
 	}
 
+	if user.Account.Type == models.ACCOUNT_TYPE_EXTERNAL {
+		log.Printf("[SECURITY WARNING]: invalid login attempt for external account (%s)", req.Email)
+		s.SaveLogEvent(req.InstanceId, user.ID.Hex(), loggingAPI.LogEventType_SECURITY, constants.LOG_EVENT_AUTH_WRONG_ACCOUNT_ID, "reason: account id used for external user")
+		return nil, status.Error(codes.InvalidArgument, "invalid username and/or password")
+	}
+
 	match, err := pwhash.ComparePasswordWithHash(user.Account.Password, req.Password)
 	if err != nil || !match {
 		log.Printf("SECURITY WARNING: login attempt with wrong password for %s", user.ID.Hex())
