@@ -1,5 +1,12 @@
 # Changelog
 
+## [v0.20.2] - 2021-07-27
+
+### Security Update:
+
+- Migrating to `github.com/golang-jwt/jwt`
+- Updating other dependencies
+
 ## [v0.20.1] - 2021-07-01
 
 ### Changed:
