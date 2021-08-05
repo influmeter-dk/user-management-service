@@ -1,5 +1,10 @@
 # Changelog
 
+## [v0.21.0] - ??
+
+### Changed:
+- CreateUser: accepts a configurable for account confirmation time (when migrating users from previous system and does not need confirmation). Also can set account created at time from the API request.
+
 ## [v0.20.2] - 2021-07-27
 
 ### Security Update:

@@ -42,19 +42,24 @@ func (s *userManagementServer) CreateUser(ctx context.Context, req *api.CreateUs
 		return nil, status.Error(codes.Internal, err.Error())
 	}
 
+	accountCreatedAt := time.Now().Unix() + userCreationTimestampOffset
+	if req.CreatedAt > 0 {
+		accountCreatedAt = req.CreatedAt
+	}
+
 	// Create user DB object from request:
 	newUser := models.User{
 		Account: models.Account{
 			Type:               "email",
 			AccountID:          req.AccountId,
-			AccountConfirmedAt: 0, // not confirmed yet
+			AccountConfirmedAt: req.AccountConfirmedAt,
 			Password:           password,
 			PreferredLanguage:  req.PreferredLanguage,
 		},
 		Roles:    req.Roles,
 		Profiles: []models.Profile{},
 		Timestamps: models.Timestamps{
-			CreatedAt: time.Now().Unix() + userCreationTimestampOffset,
+			CreatedAt: accountCreatedAt,
 		},
 	}
 
