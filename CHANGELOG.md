@@ -2,8 +2,12 @@
 
 ## [v0.21.0] - ??
 
-### Changed:
+### Changed
+
 - CreateUser: accepts a configurable for account confirmation time (when migrating users from previous system and does not need confirmation). Also can set account created at time from the API request.
+- Optimise TempToken cleanup by only performing the action only once in ten minutes and not on every request. Add debug log message when TempTokens are cleaned up.
+- Project dependencies updated.
+
 
 ## [v0.20.2] - 2021-07-27
 

@@ -2,17 +2,19 @@ package service
 
 import (
 	"errors"
-	"log"
 	"time"
 
+	"github.com/coneno/logger"
 	"github.com/influenzanet/user-management-service/pkg/models"
 )
 
 func (s *userManagementServer) CleanExpiredTemptokens(offset int64) {
 	err := s.globalDBService.DeleteTempTokensExpireBefore("", "", time.Now().Unix()-offset)
 	if err != nil {
-		log.Printf("unexpected error while deleting expired temp tokens: %v", err)
+		logger.Error.Printf("unexpected error while deleting expired temp tokens: %v", err)
+		return
 	}
+	logger.Debug.Println("Expired temp tokens cleaned up.")
 }
 
 func (s *userManagementServer) ValidateTempToken(token string, purposes []string) (tt *models.TempToken, err error) {

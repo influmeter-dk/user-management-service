@@ -12,11 +12,23 @@ import (
 	"google.golang.org/grpc/status"
 )
 
+const deleteTempTokensMinInterval = 10 * 60
+
+var (
+	lastTempTokenDeleteTime int64
+)
+
 func (s *userManagementServer) GetOrCreateTemptoken(ctx context.Context, t *api_types.TempTokenInfo) (*api.TempToken, error) {
 	if t == nil || t.Purpose == "" || t.UserId == "" || t.InstanceId == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
-	go s.CleanExpiredTemptokens(3600)
+
+	// Cleanup temptokens if this was not done recently:
+	now := time.Now().Unix()
+	if lastTempTokenDeleteTime+deleteTempTokensMinInterval < now {
+		go s.CleanExpiredTemptokens(3600)
+		lastTempTokenDeleteTime = now
+	}
 
 	tList, err := s.globalDBService.GetTempTokenForUser(t.InstanceId, t.UserId, t.Purpose)
 	if err != nil {
@@ -53,7 +65,13 @@ func (s *userManagementServer) GenerateTempToken(ctx context.Context, t *api_typ
 	if t == nil || t.Purpose == "" {
 		return nil, status.Error(codes.InvalidArgument, "missing argument")
 	}
-	go s.CleanExpiredTemptokens(3600)
+
+	// Cleanup temptokens if this was not done recently:
+	now := time.Now().Unix()
+	if lastTempTokenDeleteTime+deleteTempTokensMinInterval < now {
+		go s.CleanExpiredTemptokens(3600)
+		lastTempTokenDeleteTime = now
+	}
 
 	tempToken := models.TempToken{
 		UserID:     t.UserId,
