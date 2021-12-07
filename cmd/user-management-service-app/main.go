@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/coneno/logger"
 	"github.com/influenzanet/user-management-service/internal/config"
 	"github.com/influenzanet/user-management-service/pkg/dbs/globaldb"
 	"github.com/influenzanet/user-management-service/pkg/dbs/userdb"
@@ -17,6 +18,8 @@ const userManagementTimerEventFrequency = 90 * 60 // seconds
 
 func main() {
 	conf := config.InitConfig()
+
+	logger.SetLevel(conf.LogLevel)
 
 	clients := &models.APIClients{}
 

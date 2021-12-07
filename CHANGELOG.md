@@ -2,6 +2,7 @@
 
 ## [v0.20.4] - 2021-12-07
 
+- Loglevel can be configured. Use the environment variable `LOG_LEVEL` to select which level should be applied. Possible values are: `debug info warning error`.
 - Updated JWT lib to most recent version on v4 track.
 
 ## [v0.20.3] - 2021-12-07

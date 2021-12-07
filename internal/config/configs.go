@@ -7,11 +7,13 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/coneno/logger"
 	"github.com/influenzanet/user-management-service/pkg/models"
 )
 
 // Config is the structure that holds all global configuration data
 type Config struct {
+	LogLevel    logger.LogLevel
 	Port        string
 	ServiceURLs struct {
 		MessagingService string
@@ -30,6 +32,7 @@ func InitConfig() Config {
 	conf.ServiceURLs.MessagingService = os.Getenv("ADDR_MESSAGING_SERVICE")
 	conf.ServiceURLs.LoggingService = os.Getenv("ADDR_LOGGING_SERVICE")
 
+	conf.LogLevel = getLogLevel()
 	conf.UserDBConfig = getUserDBConfig()
 	conf.GlobalDBConfig = getGlobalDBConfig()
 	conf.Intervals = getIntervalsConfig()
@@ -46,6 +49,21 @@ func InitConfig() Config {
 	}
 	conf.CleanUpUnverifiedUsersAfter = int64(cleanUpThreshold)
 	return conf
+}
+
+func getLogLevel() logger.LogLevel {
+	switch os.Getenv("LOG_LEVEL") {
+	case "debug":
+		return logger.LEVEL_DEBUG
+	case "info":
+		return logger.LEVEL_INFO
+	case "error":
+		return logger.LEVEL_ERROR
+	case "warning":
+		return logger.LEVEL_WARNING
+	default:
+		return logger.LEVEL_INFO
+	}
 }
 
 func getIntervalsConfig() models.Intervals {
