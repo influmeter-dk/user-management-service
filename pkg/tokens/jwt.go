@@ -9,7 +9,7 @@ import (
 
 	b64 "encoding/base64"
 
-	jwt "github.com/golang-jwt/jwt"
+	jwt "github.com/golang-jwt/jwt/v4"
 	"github.com/influenzanet/user-management-service/pkg/models"
 )
 
