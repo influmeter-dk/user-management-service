@@ -6,3 +6,4 @@ vendor
 test.sh
 .envrc
 run.sh
+benchmark.csv
