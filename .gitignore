@@ -5,3 +5,4 @@ secret
 vendor
 test.sh
 .envrc
+run.sh
