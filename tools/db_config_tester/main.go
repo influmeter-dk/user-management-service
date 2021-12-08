@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"os"
 	"strconv"
@@ -14,7 +15,18 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+const INSTANCE_ID = "v1"
+
 var userDB *userdb.UserDBService
+
+func init() {
+	conf := getDBConfig()
+	userDB = userdb.NewUserDBService(conf)
+}
+
+func main() {
+	parseFlags()
+}
 
 func getDBConfig() models.DBConfig {
 	connStr := os.Getenv("USER_DB_CONNECTION_STR")
@@ -55,11 +67,6 @@ func getDBConfig() models.DBConfig {
 	}
 }
 
-func init() {
-	conf := getDBConfig()
-	userDB = userdb.NewUserDBService(conf)
-}
-
 func generateRandomUser() models.User {
 	dummyID, _ := tokens.GenerateUniqueTokenString()
 	return models.User{
@@ -85,14 +92,21 @@ func generateRandomUser() models.User {
 	}
 }
 
-func main() {
-	instanceID := "v1"
-
-	for a := 0; a < 1000; a++ {
-		_, err := userDB.AddUser(instanceID, generateRandomUser())
+func generateUsers(usersToGenerate int) {
+	for a := 0; a < usersToGenerate; a++ {
+		_, err := userDB.AddUser(INSTANCE_ID, generateRandomUser())
 		if err != nil {
 			logger.Error.Fatal(err)
 		}
 	}
-	logger.Info.Println("Users generated")
+	logger.Info.Printf("%v users generated", usersToGenerate)
+}
+
+func parseFlags() {
+	usersToGenerate := flag.Int("generateUsers", -1, "How many users to generate.")
+	flag.Parse()
+
+	if *usersToGenerate > 0 {
+		generateUsers(*usersToGenerate)
+	}
 }
