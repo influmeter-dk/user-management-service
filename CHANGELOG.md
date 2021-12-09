@@ -2,9 +2,15 @@
 
 ## [v0.21.0] - ???
 
+### Added
+
+- `tools/db_config_tester`, a small program that can be used to generate dummy users and benchmark how long it takes to iterate over them using the `PerformActionForUsers` db service method.
+
 ### Changed
 
-- Changed how timeout is used for `PerfomActionForUsers` to avoid longer jobs to time out unnecessarily.
+- `PerfomActionForUsers` improved context handling to avoid unnecessary timeouts for long lasting jobs. Also now returned error of the callback will stop the iteration. Improved logging output of this method.
+
+
 
 ## [v0.20.4] - 2021-12-07
 

@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"context"
 	"flag"
 	"fmt"
 	"os"
@@ -90,7 +91,12 @@ func benchmark() {
 	recordBenchmarkTime()
 
 	start := time.Now()
-	err := userDB.PerfomActionForUsers(INSTANCE_ID, userFilter, benchmarkCallback)
+	/*
+		ctx, cancel := context.WithTimeout(context.Background(), 4*time.Second)
+		defer cancel()
+	*/
+	ctx := context.Background()
+	err := userDB.PerfomActionForUsers(ctx, INSTANCE_ID, userFilter, benchmarkCallback)
 	if err != nil {
 		logger.Error.Printf(err.Error())
 	}

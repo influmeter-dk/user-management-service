@@ -252,7 +252,10 @@ func TestDbPerformActionForUsers(t *testing.T) {
 		return nil
 	}
 
+	ctx := context.TODO()
+
 	err := testDBService.PerfomActionForUsers(
+		ctx,
 		testInstanceID,
 		UserFilter{
 			OnlyConfirmed:   false,

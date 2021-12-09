@@ -3,9 +3,9 @@ package userdb
 import (
 	"context"
 	"errors"
-	"log"
 	"time"
 
+	"github.com/coneno/logger"
 	"github.com/influenzanet/go-utils/pkg/constants"
 	"github.com/influenzanet/user-management-service/pkg/models"
 	"go.mongodb.org/mongo-driver/bson"
@@ -261,18 +261,12 @@ type UserFilter struct {
 }
 
 func (dbService *UserDBService) PerfomActionForUsers(
+	ctx context.Context,
 	instanceID string,
 	filters UserFilter,
 	cbk func(instanceID string, user models.User, args ...interface{}) error,
 	args ...interface{},
 ) (err error) {
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-
-	timeoutDuration := time.Duration(dbService.timeout) * time.Second
-	timoutMethod := time.AfterFunc(timeoutDuration, cancel)
-	defer timoutMethod.Stop()
-
 	filter := bson.M{}
 	if filters.OnlyConfirmed {
 		filter["account.accountConfirmedAt"] = bson.M{"$gt": 0}
@@ -298,17 +292,20 @@ func (dbService *UserDBService) PerfomActionForUsers(
 	defer cur.Close(ctx)
 
 	for cur.Next(ctx) {
+		if ctx.Err() != nil {
+			logger.Debug.Println(ctx.Err())
+			return ctx.Err()
+		}
 		var result models.User
 		err := cur.Decode(&result)
 		if err != nil {
-			log.Printf("wrong user model %v, %v", result, err)
+			logger.Error.Printf("wrong user model %v, %v", result, err)
 			continue
 		}
 
-		timoutMethod.Reset(timeoutDuration)
-
 		if err := cbk(instanceID, result, args...); err != nil {
-			log.Printf("PerfomActionForUsers: %v", err)
+			logger.Debug.Printf("error in callback: %v", err)
+			return err
 		}
 	}
 	if err := cur.Err(); err != nil {

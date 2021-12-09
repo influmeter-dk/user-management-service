@@ -7,6 +7,7 @@ import (
 	"math/rand"
 	"time"
 
+	"github.com/coneno/logger"
 	"github.com/influenzanet/go-utils/pkg/constants"
 	loggingAPI "github.com/influenzanet/logging-service/pkg/api"
 	messageAPI "github.com/influenzanet/messaging-service/pkg/api/messaging_service"
@@ -211,6 +212,8 @@ func (s *userManagementServer) StreamUsers(req *api.StreamUsersMsg, stream api.U
 		return status.Error(codes.InvalidArgument, "missing arguments")
 	}
 
+	ctx := context.Background()
+
 	sendUserOverGrpc := func(instanceID string, user models.User, args ...interface{}) error {
 		if len(args) != 1 {
 			return errors.New("StreamUsers callback: unexpected number of args")
@@ -221,6 +224,7 @@ func (s *userManagementServer) StreamUsers(req *api.StreamUsersMsg, stream api.U
 		}
 
 		if err := stream.Send(user.ToAPI()); err != nil {
+			logger.Error.Printf("unexpected error when sending user object: %v", err)
 			return err
 		}
 		return nil
@@ -237,7 +241,7 @@ func (s *userManagementServer) StreamUsers(req *api.StreamUsersMsg, stream api.U
 		}
 	}
 
-	err := s.userDBservice.PerfomActionForUsers(req.InstanceId, filter, sendUserOverGrpc, stream)
+	err := s.userDBservice.PerfomActionForUsers(ctx, req.InstanceId, filter, sendUserOverGrpc, stream)
 	if err != nil {
 		return status.Error(codes.Internal, err.Error())
 	}
