@@ -142,10 +142,10 @@ func getDBConfig() models.DBConfig {
 	username := os.Getenv("USER_DB_USERNAME")
 	password := os.Getenv("USER_DB_PASSWORD")
 	prefix := os.Getenv("USER_DB_CONNECTION_PREFIX") // Used in test mode
-	if connStr == "" || username == "" || password == "" {
-		logger.Error.Fatal("Couldn't read DB credentials.")
-	}
 	URI := fmt.Sprintf(`mongodb%s://%s:%s@%s`, prefix, username, password, connStr)
+	if username == "" || password == "" {
+		URI = fmt.Sprintf(`mongodb%s://%s`, prefix, connStr)
+	}
 
 	var err error
 	Timeout, err := strconv.Atoi(os.Getenv("DB_TIMEOUT"))
