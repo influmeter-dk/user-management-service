@@ -1,5 +1,11 @@
 # Changelog
 
+## [v0.21.0] - ???
+
+### Changed
+
+- Changed how timeout is used for `PerfomActionForUsers` to avoid longer jobs to time out unnecessarily.
+
 ## [v0.20.4] - 2021-12-07
 
 - Loglevel can be configured. Use the environment variable `LOG_LEVEL` to select which level should be applied. Possible values are: `debug info warning error`.

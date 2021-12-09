@@ -1,6 +1,7 @@
 package userdb
 
 import (
+	"context"
 	"errors"
 	"log"
 	"time"
@@ -265,8 +266,12 @@ func (dbService *UserDBService) PerfomActionForUsers(
 	cbk func(instanceID string, user models.User, args ...interface{}) error,
 	args ...interface{},
 ) (err error) {
-	ctx, cancel := dbService.getContext()
+	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
+
+	timeoutDuration := time.Duration(dbService.timeout) * time.Second
+	timoutMethod := time.AfterFunc(timeoutDuration, cancel)
+	defer timoutMethod.Stop()
 
 	filter := bson.M{}
 	if filters.OnlyConfirmed {
@@ -299,6 +304,8 @@ func (dbService *UserDBService) PerfomActionForUsers(
 			log.Printf("wrong user model %v, %v", result, err)
 			continue
 		}
+
+		timoutMethod.Reset(timeoutDuration)
 
 		if err := cbk(instanceID, result, args...); err != nil {
 			log.Printf("PerfomActionForUsers: %v", err)

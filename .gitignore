@@ -7,3 +7,4 @@ test.sh
 .envrc
 run.sh
 benchmark.csv
+run-with-local.sh
