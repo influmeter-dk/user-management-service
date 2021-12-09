@@ -85,13 +85,16 @@ func generateRandomUser() models.User {
 }
 
 func benchmark() {
+	logger.Info.Println("Starting benchmark.")
 	benchmarkTimes = nil
 	recordBenchmarkTime()
 
+	start := time.Now()
 	err := userDB.PerfomActionForUsers(INSTANCE_ID, userFilter, benchmarkCallback)
 	if err != nil {
 		logger.Error.Printf(err.Error())
 	}
+	logger.Info.Printf("Finished running benchmark in %d seconds", time.Now().Unix()-start.Unix())
 
 	saveBenchmarkTimesCSV()
 }
