@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"time"
 
@@ -33,7 +34,9 @@ func (s *userManagementServer) generateAndSendVerificationCode(instanceID string
 	}
 
 	// ---> Trigger message sending
-	go s.sendVerificationEmail(instanceID, user.Account.AccountID, vc, user.Account.PreferredLanguage)
+	half := len(vc) / 2
+	formattedCode := fmt.Sprintf("%s-%s", vc[:half], vc[half:])
+	go s.sendVerificationEmail(instanceID, user.Account.AccountID, formattedCode, user.Account.PreferredLanguage)
 	return nil
 }
 
