@@ -12,6 +12,7 @@ require (
 	github.com/influenzanet/messaging-service v0.9.3
 	go.mongodb.org/mongo-driver v1.8.0
 	golang.org/x/crypto v0.0.0-20210711020723-a769d52b0f97
+	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
 	google.golang.org/grpc v1.39.0
 	google.golang.org/protobuf v1.26.0
 )

@@ -1,14 +1,19 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
 	"math/rand"
 	"os"
+	"strconv"
+	"syscall"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"golang.org/x/term"
 
+	"github.com/coneno/logger"
 	"github.com/influenzanet/user-management-service/pkg/models"
 
 	"github.com/influenzanet/go-utils/pkg/constants"
@@ -16,7 +21,6 @@ import (
 	"github.com/influenzanet/user-management-service/pkg/pwhash"
 	"github.com/influenzanet/user-management-service/pkg/utils"
 
-	"github.com/influenzanet/user-management-service/internal/config"
 	"github.com/influenzanet/user-management-service/pkg/dbs/userdb"
 )
 
@@ -24,72 +28,66 @@ type UserRequest struct {
 	email      string `yaml:"email"`
 	password   string `yaml:"password"`
 	instanceID string `yaml:"instance"`
+	language   string `yaml:"language"`
 }
 
-func terminate(message string) {
-	fmt.Println(message)
-	os.Exit(1)
-}
+var userDBService *userdb.UserDBService
 
 func reqfromCLI() (UserRequest, error) {
 	req := UserRequest{}
-	emailF := flag.String("email", "", "email")
-	passwordF := flag.String("password", "", "password")
-	instanceF := flag.String("instance", "", "instance")
+	instanceF := flag.String("instance", "", "Defines the instance ID.")
+	language := flag.String("language", "en", "Define the default language for the new user")
 
 	flag.Parse()
 
-	req.email = *emailF
-	req.password = *passwordF
 	req.instanceID = *instanceF
-
-	if req.email == "" {
-		terminate("email must be provided")
-	}
-
-	if req.password == "" {
-		terminate("password must be provided")
-	}
+	req.language = *language
 
 	if req.instanceID == "" {
-		terminate("instance must be provided")
+		return req, fmt.Errorf("instance must be provided")
 	}
 
 	return req, nil
 }
 
-func main() {
+func init() {
+	conf := getDBConfig()
+	userDBService = userdb.NewUserDBService(conf)
+}
 
+func main() {
 	req, err := reqfromCLI()
 	if err != nil {
-		terminate(err.Error())
+		logger.Error.Fatal(err.Error())
 	}
 
-	conf := config.InitConfig()
+	username, password, err := getCredentials()
+	if err != nil {
+		logger.Error.Fatal(err.Error())
+	}
 
-	userDBService := userdb.NewUserDBService(conf.UserDBConfig)
-
-	req.email = utils.SanitizeEmail(req.email)
+	req.email = utils.SanitizeEmail(username)
+	req.password = password
 
 	if !utils.CheckEmailFormat(req.email) {
-		terminate("account id not a valid email")
+		logger.Error.Fatal("account id not a valid email")
 	}
 	if !utils.CheckPasswordFormat(req.password) {
-		terminate("password too weak")
+		logger.Error.Fatal("password too weak")
 	}
 
-	password, err := pwhash.HashPassword(req.password)
+	hashedPassword, err := pwhash.HashPassword(req.password)
 	if err != nil {
-		terminate(err.Error())
+		logger.Error.Fatal(err.Error())
 	}
 
 	newUser := models.User{
 		Account: models.Account{
 			Type:               "email",
 			AccountID:          req.email,
-			AccountConfirmedAt: time.Now().Unix(), // not confirmed yet
-			Password:           password,
-			PreferredLanguage:  "fr",
+			AccountConfirmedAt: time.Now().Unix(),
+			Password:           hashedPassword,
+			PreferredLanguage:  req.language,
 		},
 		Roles: []string{constants.USER_ROLE_ADMIN},
 		Profiles: []models.Profile{
@@ -105,18 +103,86 @@ func main() {
 			CreatedAt: time.Now().Unix(),
 		},
 	}
-	newUser.AddNewEmail(req.email, false)
-	newUser.ContactPreferences.SubscribedToNewsletter = false
+	newUser.AddNewEmail(req.email, true)
+	newUser.ContactPreferences.SubscribedToNewsletter = true
 	newUser.ContactPreferences.SendNewsletterTo = []string{newUser.ContactInfos[0].ID.Hex()}
-	newUser.ContactPreferences.SubscribedToWeekly = false
+	newUser.ContactPreferences.SubscribedToWeekly = true
 	newUser.ContactPreferences.ReceiveWeeklyMessageDayOfWeek = int32(rand.Intn(7))
 
 	instanceID := req.instanceID
 	id, err := userDBService.AddUser(instanceID, newUser)
 	if err != nil {
-		terminate(err.Error())
+		logger.Error.Fatal(err.Error())
 	}
 	newUser.ID, _ = primitive.ObjectIDFromHex(id)
 
 	fmt.Printf("User created with id : %s", id)
+}
+
+func getCredentials() (string, string, error) {
+	reader := bufio.NewReader(os.Stdin)
+
+	fmt.Print("Enter an Email for the username: ")
+	username, err := reader.ReadString('\n')
+	if err != nil {
+		return "", "", err
+	}
+
+	fmt.Print("Enter Password: ")
+	bytePassword, err := term.ReadPassword(int(syscall.Stdin))
+	if err != nil {
+		return "", "", err
+	}
+
+	fmt.Print("\nConfirm Password: ")
+	bytePassword2, err := term.ReadPassword(int(syscall.Stdin))
+	if err != nil {
+		return "", "", err
+	}
+
+	password := string(bytePassword)
+	confirmPassword := string(bytePassword2)
+	if confirmPassword != password {
+		return "", "", fmt.Errorf("Passwords don't match.")
+	}
+	return username, password, nil
+}
+
+func getDBConfig() models.DBConfig {
+	connStr := os.Getenv("USER_DB_CONNECTION_STR")
+	username := os.Getenv("USER_DB_USERNAME")
+	password := os.Getenv("USER_DB_PASSWORD")
+	prefix := os.Getenv("USER_DB_CONNECTION_PREFIX") // Used in test mode
+	URI := fmt.Sprintf(`mongodb%s://%s:%s@%s`, prefix, username, password, connStr)
+	if username == "" || password == "" {
+		URI = fmt.Sprintf(`mongodb%s://%s`, prefix, connStr)
+	}
+
+	var err error
+	Timeout, err := strconv.Atoi(os.Getenv("DB_TIMEOUT"))
+	if err != nil {
+		logger.Error.Fatal("DB_TIMEOUT: " + err.Error())
+	}
+	IdleConnTimeout, err := strconv.Atoi(os.Getenv("DB_IDLE_CONN_TIMEOUT"))
+	if err != nil {
+		logger.Error.Fatal("DB_IDLE_CONN_TIMEOUT" + err.Error())
+	}
+	mps, err := strconv.Atoi(os.Getenv("DB_MAX_POOL_SIZE"))
+	MaxPoolSize := uint64(mps)
+	if err != nil {
+		logger.Error.Fatal("DB_MAX_POOL_SIZE: " + err.Error())
+	}
+
+	noCursorTimeout := os.Getenv("USE_NO_CURSOR_TIMEOUT") == "true"
+
+	DBNamePrefix := os.Getenv("DB_DB_NAME_PREFIX")
+
+	return models.DBConfig{
+		URI:             URI,
+		Timeout:         Timeout,
+		IdleConnTimeout: IdleConnTimeout,
+		NoCursorTimeout: noCursorTimeout,
+		MaxPoolSize:     MaxPoolSize,
+		DBNamePrefix:    DBNamePrefix,
+	}
 }
