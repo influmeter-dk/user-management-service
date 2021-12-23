@@ -27,6 +27,7 @@ import (
 type UserRequest struct {
 	email      string `yaml:"email"`
 	password   string `yaml:"password"`
+	use2FA     bool   `yaml:"use2FA"`
 	instanceID string `yaml:"instance"`
 	language   string `yaml:"language"`
 }
@@ -37,11 +38,13 @@ func reqfromCLI() (UserRequest, error) {
 	req := UserRequest{}
 	instanceF := flag.String("instance", "", "Defines the instance ID.")
 	language := flag.String("language", "en", "Define the default language for the new user")
+	use2FA := flag.Bool("use2FA", false, "If the account should be creating with auth type 2FA.")
 
 	flag.Parse()
 
 	req.instanceID = *instanceF
 	req.language = *language
+	req.use2FA = *use2FA
 
 	if req.instanceID == "" {
 		return req, fmt.Errorf("instance must be provided")
@@ -81,6 +84,10 @@ func main() {
 		logger.Error.Fatal(err.Error())
 	}
 
+	authType := ""
+	if req.use2FA {
+		authType = "2FA"
+	}
 	newUser := models.User{
 		Account: models.Account{
 			Type:               "email",
@@ -88,6 +95,7 @@ func main() {
 			AccountConfirmedAt: time.Now().Unix(),
 			Password:           hashedPassword,
 			PreferredLanguage:  req.language,
+			AuthType:           authType,
 		},
 		Roles: []string{constants.USER_ROLE_ADMIN},
 		Profiles: []models.Profile{

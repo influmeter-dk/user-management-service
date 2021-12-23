@@ -6,7 +6,14 @@ The CLI application accepts the following arguments:
 
 - instance: to define in which instance the admin user should be created in
 - language: to define the default language of the admin user.
+- use2FA: boolean flag to define if auth type should be "2FA".
 
 ```sh
 ./run.sh --instace <INSTANCE_ID> --language <preferredLanguage>
+```
+
+or:
+
+```sh
+./run.sh --instace <INSTANCE_ID> --language <preferredLanguage> --use2FA
 ```
