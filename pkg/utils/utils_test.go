@@ -86,9 +86,6 @@ func TestCheckEmailFormat(t *testing.T) {
 	})
 
 	t.Run("with wrong domain format", func(t *testing.T) {
-		if CheckEmailFormat("t@t") {
-			t.Error("should be false")
-		}
 		if CheckEmailFormat("t@t.") {
 			t.Error("should be false")
 		}
@@ -105,8 +102,21 @@ func TestCheckEmailFormat(t *testing.T) {
 			t.Error("should be false")
 		}
 	})
+
+	t.Run("with ..", func(t *testing.T) {
+		if CheckEmailFormat("t..t@t.t") {
+			t.Error("should be false")
+		}
+	})
+
 	t.Run("with correct format", func(t *testing.T) {
 		if !CheckEmailFormat("t@t.t") {
+			t.Error("should be true")
+		}
+	})
+
+	t.Run("with correct format", func(t *testing.T) {
+		if !CheckEmailFormat("t+1@t.t") {
 			t.Error("should be true")
 		}
 	})

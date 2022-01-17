@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"net/mail"
 	"regexp"
 	"strings"
 
@@ -18,9 +19,8 @@ func CheckEmailFormat(email string) bool {
 	if len(email) > 254 {
 		return false
 	}
-	re := regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$")
-
-	return re.MatchString(email)
+	_, err := mail.ParseAddress(email)
+	return err == nil
 }
 
 // BlurEmailAddress transforms an email address to reduce exposed personal info
