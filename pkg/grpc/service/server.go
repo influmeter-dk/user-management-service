@@ -20,6 +20,7 @@ const (
 )
 
 type userManagementServer struct {
+	api.UnimplementedUserManagementApiServer
 	clients           *models.APIClients
 	userDBservice     *userdb.UserDBService
 	globalDBService   *globaldb.GlobalDBService

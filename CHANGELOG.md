@@ -1,6 +1,6 @@
 # Changelog
 
-## [v0.21.0] - ???
+## [v1.0.0] -
 
 ### Added
 
@@ -10,6 +10,7 @@
 
 - `PerfomActionForUsers` improved context handling to avoid unnecessary timeouts for long lasting jobs. Also now returned error of the callback will stop the iteration. Improved logging output of this method.
 - Modified tool for creating admin users, to accept username and password throught command line input, hiding the password from history.
+- updated gRPC version and proto build tools
 
 
 
