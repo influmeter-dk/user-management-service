@@ -4,6 +4,7 @@
 
 ### Added
 
+- Possibility to send the registration email to unverified user accounts a second time, with a configurable time threshold (defined in seconds). The new environment variable for this (`SEND_REMINDER_TO_UNVERIFIED_USERS_AFTER`) must be set. If the reminder should not be used, simply set this value to a larger number than the value used to clean up unverified users. The check if users should receive a verification reminder, will run with the same frequency as the clean-up task.
 - `tools/db_config_tester`, a small program that can be used to generate dummy users and benchmark how long it takes to iterate over them using the `PerformActionForUsers` db service method.
 
 ### Changed

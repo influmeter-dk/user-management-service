@@ -19,11 +19,12 @@ type Config struct {
 		MessagingService string
 		LoggingService   string
 	}
-	UserDBConfig                models.DBConfig
-	GlobalDBConfig              models.DBConfig
-	Intervals                   models.Intervals
-	NewUserCountLimit           int64
-	CleanUpUnverifiedUsersAfter int64
+	UserDBConfig                      models.DBConfig
+	GlobalDBConfig                    models.DBConfig
+	Intervals                         models.Intervals
+	NewUserCountLimit                 int64
+	CleanUpUnverifiedUsersAfter       int64
+	ReminderToUnverifiedAccountsAfter int64
 }
 
 func InitConfig() Config {
@@ -48,6 +49,12 @@ func InitConfig() Config {
 		log.Fatal("CLEAN_UP_UNVERIFIED_USERS_AFTER: " + err.Error())
 	}
 	conf.CleanUpUnverifiedUsersAfter = int64(cleanUpThreshold)
+
+	reminderToUnverifiedAccountsAfter, err := strconv.Atoi(os.Getenv(ENV_SEND_REMINDER_TO_UNVERIFIED_USERS_AFTER))
+	if err != nil {
+		log.Fatal(ENV_SEND_REMINDER_TO_UNVERIFIED_USERS_AFTER + ": " + err.Error())
+	}
+	conf.ReminderToUnverifiedAccountsAfter = int64(reminderToUnverifiedAccountsAfter)
 	return conf
 }
 

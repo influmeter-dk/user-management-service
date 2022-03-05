@@ -41,6 +41,7 @@ func main() {
 		userDBService,
 		clients,
 		conf.CleanUpUnverifiedUsersAfter,
+		conf.ReminderToUnverifiedAccountsAfter,
 	)
 
 	// Start server thread

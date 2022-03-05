@@ -245,11 +245,12 @@ func (u *User) RemoveRefreshToken(token string) error {
 // risk this account to be deleled if account verification is not done in time (use case of migration when users are invited from previous platfom).
 // The offset applied is defined in pkg/grpc/service/constant.go
 type Timestamps struct {
-	LastTokenRefresh   int64 `bson:"lastTokenRefresh"`
-	LastLogin          int64 `bson:"lastLogin"`
-	CreatedAt          int64 `bson:"createdAt"`
-	UpdatedAt          int64 `bson:"updatedAt"`
-	LastPasswordChange int64 `bson:"lastPasswordChange"`
+	LastTokenRefresh        int64 `bson:"lastTokenRefresh"`
+	LastLogin               int64 `bson:"lastLogin"`
+	CreatedAt               int64 `bson:"createdAt"`
+	UpdatedAt               int64 `bson:"updatedAt"`
+	LastPasswordChange      int64 `bson:"lastPasswordChange"`
+	ReminderToConfirmSentAt int64 `bson:"reminderToConfirmSentAt"`
 }
 
 // ToAPI converts the object from DB to API format

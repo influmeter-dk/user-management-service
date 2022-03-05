@@ -175,6 +175,20 @@ func (dbService *UserDBService) UpdateLoginTime(instanceID string, id string) er
 	return nil
 }
 
+func (dbService *UserDBService) UpdateReminderToConfirmSentAtTime(instanceID string, id string) error {
+	ctx, cancel := dbService.getContext()
+	defer cancel()
+
+	_id, _ := primitive.ObjectIDFromHex(id)
+	filter := bson.M{"_id": _id}
+	update := bson.M{"$set": bson.M{"timestamps.reminderToConfirmSentAt": time.Now().Unix()}}
+	_, err := dbService.collectionRefUsers(instanceID).UpdateOne(ctx, filter, update)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func (dbService *UserDBService) CountRecentlyCreatedUsers(instanceID string, interval int64) (count int64, err error) {
 	ctx, cancel := dbService.getContext()
 	defer cancel()
@@ -306,6 +320,64 @@ func (dbService *UserDBService) PerfomActionForUsers(
 		if err := cbk(instanceID, result, args...); err != nil {
 			logger.Debug.Printf("error in callback: %v", err)
 			return err
+		}
+	}
+	if err := cur.Err(); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (dbService *UserDBService) SendReminderToConfirmAccountLoop(
+	ctx context.Context,
+	instanceID string,
+	createdBefore int64,
+	cbk func(instanceID string, user models.User, args ...interface{}) error,
+	args ...interface{},
+) (err error) {
+	filter := bson.M{}
+	filter["$and"] = bson.A{
+		bson.M{"account.accountConfirmedAt": bson.M{"$lt": 1}},
+		bson.M{"timestamps.reminderToConfirmSentAt": bson.M{"$lt": 1}},
+		bson.M{"timestamps.createdAt": bson.M{"$lt": createdBefore}},
+	}
+
+	batchSize := int32(32)
+	options := options.FindOptions{
+		NoCursorTimeout: &dbService.noCursorTimeout,
+		BatchSize:       &batchSize,
+	}
+
+	cur, err := dbService.collectionRefUsers(instanceID).Find(
+		ctx,
+		filter,
+		&options,
+	)
+	if err != nil {
+		return err
+	}
+	defer cur.Close(ctx)
+
+	for cur.Next(ctx) {
+		if ctx.Err() != nil {
+			logger.Debug.Println(ctx.Err())
+			return ctx.Err()
+		}
+		var result models.User
+		err := cur.Decode(&result)
+		if err != nil {
+			logger.Error.Printf("wrong user model %v, %v", result, err)
+			continue
+		}
+
+		if err := cbk(instanceID, result, args...); err != nil {
+			logger.Debug.Printf("error in callback: %v", err)
+			continue
+		}
+
+		if err := dbService.UpdateReminderToConfirmSentAtTime(instanceID, result.ID.Hex()); err != nil {
+			logger.Error.Printf("unexpected error: %v", err)
+			continue
 		}
 	}
 	if err := cur.Err(); err != nil {
