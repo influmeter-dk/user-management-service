@@ -110,7 +110,7 @@ func (s *userManagementServer) CreateUser(ctx context.Context, req *api.CreateUs
 			"type":  "email",
 			"email": newUser.Account.AccountID,
 		},
-		Expiration: tokens.GetExpirationTime(time.Hour * 24 * 7),
+		Expiration: tokens.GetExpirationTime(time.Hour * 24 * 28),
 	}
 	tempToken, err := s.globalDBService.AddTempToken(tempTokenInfos)
 	if err != nil {
